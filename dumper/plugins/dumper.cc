@@ -92,7 +92,6 @@ public:
   ~dumper();
   
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-  int findEleRef(reco::RecoEcalCandidateRef ref, edm::Handle<reco::ElectronCollection> hltEleH);
   void mcTruth(edm::Handle<reco::GenParticleCollection> genParticleH);
   void phoReco(edm::Handle<reco::PhotonCollection> photonH, edm::Handle<reco::TrackCollection> traH);
 
@@ -103,16 +102,12 @@ private:
   virtual void endJob() ;
 
   edm::InputTag hitEBLabel_, hitEELabel_;
-  edm::InputTag trigResultsTag_;
-  HLTConfigProvider hltConfig_; 
-  std::vector<std::string> pathNames_;
 
   std::string outputFileName;
   TFile* f;
   TTree* t;
   
   Float_t rho;
-  Int_t passSel[3];
   Int_t n, npf, gp_n, reco_n, nuns, gpho_n, gele_n, pho_n;
   Float_t etawidth[MAXPHOTONSTOSAVE], phiwidth[MAXPHOTONSTOSAVE];
   Float_t etawidthpf[MAXPHOTONSTOSAVE], phiwidthpf[MAXPHOTONSTOSAVE];
@@ -243,9 +238,7 @@ private:
 
   bool isData;
   bool saveReco;
-  bool saveUnseeded;
-  bool newClustering;
-  bool oldClustering;
+
 
   TH1F* timeEB, *timeEE;
   TH2F* timeEB2D, *timeEE2D;
@@ -253,21 +246,13 @@ private:
 
 void dumper::beginRun(const edm::Run& run,const edm::EventSetup& setup) {
   std::cout <<"begining run "<<std::endl;
-  bool changed = false;
-  hltConfig_.init(run,setup,trigResultsTag_.process(),changed); //as we need the orginal HLT config...
-  std::cout <<"table name "<<hltConfig_.tableName()<<std::endl;
 }
 
 
 dumper::dumper(const edm::ParameterSet& iConfig) {
   outputFileName  = iConfig.getParameter<std::string>("OutputFileName");
   isData          = iConfig.getParameter<bool>("isData");
-  newClustering   = iConfig.getParameter<bool>("activateNewClustering");
-  oldClustering   = iConfig.getParameter<bool>("activateOldClustering");
   saveReco        = iConfig.getParameter<bool>("saveReco");
-  saveUnseeded    = iConfig.getParameter<bool>("saveUnseeded");
-  pathNames_      = iConfig.getParameter<std::vector<std::string>>("trgSelection");
-  trigResultsTag_ = iConfig.getParameter<edm::InputTag>("trgResults");
   hitEBLabel_     = iConfig.getParameter<edm::InputTag>("hitEBLabel");
   hitEELabel_     = iConfig.getParameter<edm::InputTag>("hitEELabel");
 
@@ -280,17 +265,7 @@ dumper::dumper(const edm::ParameterSet& iConfig) {
 dumper::~dumper() 
 {}
 
-int dumper::findEleRef(reco::RecoEcalCandidateRef ref, edm::Handle<reco::ElectronCollection> hltEleH) {
 
-  int index = -1;
-  for (unsigned int i=0; i<hltEleH->size(); i++) {
-    reco::ElectronRef cand(hltEleH, i);
-    if (cand->superCluster() == ref->superCluster()) 
-      return i;
-  }
-
-  return index;
-}
 
 
 void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco::TrackCollection> tracksH) {
@@ -435,19 +410,7 @@ void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH) {
 }
 
 void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
-//  edm::Handle<edm::TriggerResults> trigResultsHandle;
-//  event.getByLabel(trigResultsTag_,trigResultsHandle);
-//
-//  const edm::TriggerResults& trigResults = *trigResultsHandle;
-//  const edm::TriggerNames& trigNames = event.triggerNames(trigResults);  
-//
-//  for(size_t pathNr=0;pathNr<pathNames_.size();pathNr++){
-//    passSel[pathNr] = 0;
-//    size_t pathIndex = trigNames.triggerIndex(pathNames_[pathNr]);
-//    if(pathIndex<trigResults.size() &&  trigResults.accept(pathIndex)) 
-//      passSel[pathNr] = 1;
-//fra  }
-  
+
   truePU = 9999.;
   for (int i=0; i<16; i++)
     bxPU[i] = 9999;
@@ -505,74 +468,12 @@ void dumper::beginJob() {
   f = new TFile(outputFileName.c_str(), "recreate");
   t = new TTree("tree", "tree");
   
-  if (oldClustering) {
-    t->Branch("n",  &n, "n/I");
-    t->Branch("ewidth", &etawidth, "ewidth[n]/F");
-    t->Branch("pwidth", &phiwidth, "pwidth[n]/F");
-    t->Branch("e", &e, "e[n]/F");
-    t->Branch("et", &et, "et[n]/F");
-    t->Branch("se", &se, "se[n]/F");
-    t->Branch("eraw", &eraw, "eraw[n]/F");
-    t->Branch("eta", &eta, "eta[n]/F");
-    t->Branch("phi", &phi, "phi[n]/F");
-    t->Branch("seta", &seta, "seta[n]/F");
-    t->Branch("sphi", &sphi, "sphi[n]/F");
-    t->Branch("sieie", &sieie, "sieie[n]/F");
-    t->Branch("ecal", &ecal, "ecal[n]/F");
-    //t->Branch("eop", &eop, "eop[n]/F");
-    t->Branch("dphi", &dphi, "dphi[n]/F");
-    t->Branch("deta", &deta, "deta[n]/F");
-    t->Branch("tkpt",    &tkpt,  "tkpt[n]/F");
-    t->Branch("tketa",   &tketa, "tketa[n]/F");
-    t->Branch("tkphi",   &tkphi, "tkphi[n]/F");
-    t->Branch("hoe",   &hoe, "hoe[n]/F");
-    t->Branch("hcal",   &hcal, "hcal[n]/F");
-    t->Branch("tkiso",   &tkiso, "tkiso[n]/F");
-  }
   
-  t->Branch("passHLT", &passSel, "passHLT[3]/I");
   t->Branch("nvtx", &nvtx, "nvtx/I");
   t->Branch("rho",  &rho, "rho/F");
   
-  if (newClustering) {
-    t->Branch("npf",  &npf, "npf/I");
-    //t->Branch("ewidthpf", &etawidthpf, "ewidthpf[npf]/F");
-    //t->Branch("pwidthpf", &phiwidthpf, "pwidthpf[npf]/F");
-    t->Branch("epf", &epf, "epf[npf]/F");
-    t->Branch("etpf", &etpf, "etpf[npf]/F");
-    t->Branch("sepf", &sepf, "sepf[npf]/F");
-    //t->Branch("erawpf", &erawpf, "erawpf[npf]/F");
-    t->Branch("etapf", &etapf, "etapf[npf]/F");
-    t->Branch("phipf", &phipf, "phipf[npf]/F");
-    //t->Branch("setapf", &setapf, "setapf[npf]/F");
-    //t->Branch("sphipf", &sphipf, "sphipf[npf]/F");
-    t->Branch("sieiepf", &sieiepf, "sieiepf[npf]/F");
-    t->Branch("ecalpf", &ecalpf, "ecalpf[npf]/F");
-    //t->Branch("eop", &eoppf, "eoppf[npf]/F");
-    t->Branch("dphipf", &dphipf, "dphipf[npf]/F");
-    t->Branch("detapf", &detapf, "detapf[npf]/F");
-    t->Branch("tkptpf",  &tkptpf, "tkptpf[npf]/F");
-    t->Branch("tketapf", &tketapf, "tketapf[npf]/F");
-    t->Branch("tkphipf", &tkphipf, "tkphipf[npf]/F");
-    t->Branch("hoepf",   &hoepf, "hoepf[npf]/F");
-    t->Branch("hcalpf",   &hcalpf, "hcalpf[npf]/F");
-    t->Branch("tkisopf",   &tkisopf, "tkisopf[npf]/F");
-    t->Branch("chiso",   &chiso, "chiso[npf]/F");
-    t->Branch("phiso",   &phiso, "phiso[npf]/F");
-    t->Branch("neiso",   &neiso, "neiso[npf]/F");
-    t->Branch("eoppf", &eoppf, "eoppf[npf]/F");
-    t->Branch("chi2pf", &chi2pf, "chi2pf[npf]/F");
-    t->Branch("mishitspf", &mishitspf, "mishitspf[npf]/I");
-    t->Branch("hitspf", &hitspf, "hitspf[npf]/I");
-  }
+
   
-  if (saveUnseeded) {   
-    t->Branch("nuns",  &nuns, "nuns/I");
-    t->Branch("euns", &euns, "euns[nuns]/F");
-    t->Branch("etuns", &etuns, "etuns[nuns]/F");
-    t->Branch("etauns", &etauns, "etauns[nuns]/F");
-    t->Branch("phiuns", &phiuns, "phiuns[nuns]/F");
-  }
 
   if (saveReco) {
     t->Branch("recon",   &reco_n,   "recon/I");

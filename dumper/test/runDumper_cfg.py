@@ -29,11 +29,7 @@ process.dumper = cms.EDAnalyzer('dumper',
                                    hitEBLabel = cms.InputTag("hltEcalRecHit","EcalRecHitsEB"),
                                    hitEELabel = cms.InputTag("hltEcalRecHit","EcalRecHitsEE"),
                                    isData = cms.bool(False),
-                                   activateNewClustering = cms.bool(True),
-                                   activateOldClustering = cms.bool(False),
                                    saveReco = cms.bool(True),
-                                   saveUnseeded = cms.bool(True),
-                                   trgResults = cms.InputTag("TriggerResults","","TEST"),
                                    trgSelection = cms.vstring("HLT_Ele27WP85_Gsf_v1", "HLT_Ele20WP60_Ele8_Mass55_v1","HLT_Ele25WP60_SC4_Mass5_v1",)
                                 )
 
