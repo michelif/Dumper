@@ -64,6 +64,8 @@
 #include "DataFormats/RecoCandidate/interface/RecoEcalCandidate.h"
 #include "DataFormats/RecoCandidate/interface/RecoEcalCandidateFwd.h"
 #include "DataFormats/RecoCandidate/interface/RecoEcalCandidateIsolation.h"
+#include "DataFormats/Common/interface/Ptr.h"
+#include "DataFormats/Common/interface/FwdPtr.h"
 
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
@@ -74,6 +76,24 @@
 
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/Common/interface/ValueMap.h"
+
+#include "DataFormats/EcalRecHit/interface/EcalRecHit.h"
+#include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
+#include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h" 
+#include "RecoCaloTools/Selectors/interface/CaloConeSelector.h"
+#include "RecoCaloTools/MetaCollections/interface/CaloRecHitMetaCollections.h"
+
+//#include "RecoEcal/EgammaCoreTools/interface/ClusterShapeAlgo.h"
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterTools.h"
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
+
+#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "Geometry/Records/interface/CaloGeometryRecord.h"
+#include "Geometry/CaloEventSetup/interface/CaloTopologyRecord.h"
+#include "Geometry/CaloGeometry/interface/CaloCellGeometry.h"
+
+#include "FWCore/Framework/interface/ESHandle.h"
 
 #include "TLorentzVector.h"
 #include "TFile.h"
@@ -94,6 +114,7 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
   void mcTruth(edm::Handle<reco::GenParticleCollection> genParticleH);
   void phoReco(edm::Handle<reco::PhotonCollection> photonH, edm::Handle<reco::TrackCollection> traH);
+  void eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle,const EcalRecHitCollection* rhitseb,const EcalRecHitCollection* rhitsee);
 
 private:
   virtual void beginRun(const edm::Run& run,const edm::EventSetup& setup);
@@ -106,60 +127,12 @@ private:
   std::string outputFileName;
   TFile* f;
   TTree* t;
+
+  const CaloTopology *topology;
+  const CaloTopology *geometry;
   
   Float_t rho;
-  Int_t n, npf, gp_n, reco_n, nuns, gpho_n, gele_n, pho_n;
-  Float_t etawidth[MAXPHOTONSTOSAVE], phiwidth[MAXPHOTONSTOSAVE];
-  Float_t etawidthpf[MAXPHOTONSTOSAVE], phiwidthpf[MAXPHOTONSTOSAVE];
-  Float_t eraw[MAXPHOTONSTOSAVE];
-  Float_t e[MAXPHOTONSTOSAVE];
-  Float_t et[MAXPHOTONSTOSAVE];
-  Float_t se[MAXPHOTONSTOSAVE];
-  Float_t erawpf[MAXPHOTONSTOSAVE];
-  Float_t epf[MAXPHOTONSTOSAVE];  
-  Float_t eoppf[MAXPHOTONSTOSAVE];  
-  Float_t etpf[MAXPHOTONSTOSAVE];  
-  Float_t sepf[MAXPHOTONSTOSAVE];  
-  Float_t eta[MAXPHOTONSTOSAVE];
-  Float_t etapf[MAXPHOTONSTOSAVE];  
-  Float_t euns[MAXPHOTONSTOSAVE];
-  Float_t etuns[MAXPHOTONSTOSAVE];
-  Float_t etauns[MAXPHOTONSTOSAVE];  
-  Float_t seta[MAXPHOTONSTOSAVE];
-  Float_t setapf[MAXPHOTONSTOSAVE];  
-  Float_t phi[MAXPHOTONSTOSAVE];
-  Float_t phipf[MAXPHOTONSTOSAVE];  
-  Float_t phiuns[MAXPHOTONSTOSAVE];  
-  Float_t sphi[MAXPHOTONSTOSAVE];
-  Float_t sphipf[MAXPHOTONSTOSAVE];  
-  Float_t ecal[MAXPHOTONSTOSAVE];
-  Float_t ecalpf[MAXPHOTONSTOSAVE];
-  Float_t sieie[MAXPHOTONSTOSAVE];
-  Float_t sieiepf[MAXPHOTONSTOSAVE];
-  //Float_t eop[MAXPHOTONSTOSAVE];
-  //Float_t eoppf[MAXPHOTONSTOSAVE];
-  Float_t deta[MAXPHOTONSTOSAVE];
-  Float_t detapf[MAXPHOTONSTOSAVE];
-  Float_t dphi[MAXPHOTONSTOSAVE];
-  Float_t dphipf[MAXPHOTONSTOSAVE];
-  Float_t tkptpf[MAXPHOTONSTOSAVE];
-  Float_t tketapf[MAXPHOTONSTOSAVE];
-  Float_t tkphipf[MAXPHOTONSTOSAVE];
-  Float_t tkpt[MAXPHOTONSTOSAVE];
-  Float_t tketa[MAXPHOTONSTOSAVE];
-  Float_t tkphi[MAXPHOTONSTOSAVE];
-  Float_t hoe[MAXPHOTONSTOSAVE];
-  Float_t hcal[MAXPHOTONSTOSAVE];
-  Float_t tkiso[MAXPHOTONSTOSAVE];
-  Float_t hoepf[MAXPHOTONSTOSAVE];
-  Float_t hcalpf[MAXPHOTONSTOSAVE];
-  Float_t tkisopf[MAXPHOTONSTOSAVE];
-  Float_t chiso[MAXPHOTONSTOSAVE];
-  Float_t phiso[MAXPHOTONSTOSAVE];
-  Float_t neiso[MAXPHOTONSTOSAVE];
-  Float_t chi2pf[MAXPHOTONSTOSAVE];
-  Int_t mishitspf[MAXPHOTONSTOSAVE];
-  Int_t hitspf[MAXPHOTONSTOSAVE];
+  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n;
 
   Float_t gp_pt[MAXPARTICLESTOSAVE];
   Float_t gp_eta[MAXPARTICLESTOSAVE];
@@ -226,11 +199,47 @@ private:
   Float_t ele_eta[MAXPHOTONSTOSAVE];
   Float_t ele_phi[MAXPHOTONSTOSAVE];
 
+  Float_t    electron_pt[MAXPHOTONSTOSAVE];
+  Float_t    electron_energy[MAXPHOTONSTOSAVE];
+  Float_t    electron_ecalEnergy[MAXPHOTONSTOSAVE];
+  Float_t    electron_trackPatVtx[MAXPHOTONSTOSAVE];
+  Float_t    electron_px[MAXPHOTONSTOSAVE];
+  Float_t    electron_py[MAXPHOTONSTOSAVE];
+  Float_t    electron_pz[MAXPHOTONSTOSAVE];
+  Float_t    electron_vx[MAXPHOTONSTOSAVE];
+  Float_t    electron_vy[MAXPHOTONSTOSAVE];
+  Float_t    electron_vz[MAXPHOTONSTOSAVE];
+  Float_t    electron_phi[MAXPHOTONSTOSAVE];
+  Float_t    electron_eta[MAXPHOTONSTOSAVE];
+  Float_t    electron_charge[MAXPHOTONSTOSAVE];
+  Float_t    electron_fBrem[MAXPHOTONSTOSAVE];
+  Float_t    electron_EoP[MAXPHOTONSTOSAVE];
+  Float_t    electron_OneOverEMinusOneOverP[MAXPHOTONSTOSAVE];
+  Float_t    electron_r9[MAXPHOTONSTOSAVE];
+  Int_t      electron_misHits[MAXPHOTONSTOSAVE];
+  Float_t  electron_dist[MAXPHOTONSTOSAVE];
+  Float_t  electron_dcot[MAXPHOTONSTOSAVE];
 
-  Float_t reco_et[MAXPHOTONSTOSAVE];
-  Float_t reco_pt[MAXPHOTONSTOSAVE];
-  Float_t reco_eta[MAXPHOTONSTOSAVE];
-  Float_t reco_phi[MAXPHOTONSTOSAVE];
+  Int_t  electron_matchedConv[MAXPHOTONSTOSAVE];
+  Int_t  electron_seedType[MAXPHOTONSTOSAVE];
+  Int_t  electron_nSubClusters[MAXPHOTONSTOSAVE];
+  Float_t  electron_HoE[MAXPHOTONSTOSAVE];
+  Float_t  electron_pFlowMVA[MAXPHOTONSTOSAVE];
+  Float_t  electron_SigmaIetaIeta[MAXPHOTONSTOSAVE];
+  Float_t  electron_SigmaIphiIphi[MAXPHOTONSTOSAVE];
+  Float_t  electron_trkIso[MAXPHOTONSTOSAVE];
+  Float_t  electron_ecalIso[MAXPHOTONSTOSAVE];
+  Float_t  electron_hcalIso[MAXPHOTONSTOSAVE];
+  Float_t  electron_trkIso03[MAXPHOTONSTOSAVE];
+  Float_t  electron_ecalIso03[MAXPHOTONSTOSAVE];
+  Float_t  electron_hcalIso03[MAXPHOTONSTOSAVE];
+  Float_t  electron_dEtaIn[MAXPHOTONSTOSAVE];
+  Float_t  electron_dPhiIn[MAXPHOTONSTOSAVE];
+  Float_t  electron_sc_energy[MAXPHOTONSTOSAVE];
+  Float_t  electron_sc_eta[MAXPHOTONSTOSAVE];
+  Float_t  electron_sc_phi[MAXPHOTONSTOSAVE];
+  
+
 
   float truePU;
   int bxPU[16];
@@ -358,6 +367,54 @@ void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco:
 
 }
 
+void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle,const EcalRecHitCollection* rhitseb,const EcalRecHitCollection* rhitsee){
+
+  ele_n=0;  
+
+  unsigned index_gsf = 0;
+  for (reco::GsfElectronCollection::const_iterator itElectron = ElectronHandle->begin();
+       itElectron != ElectronHandle->end(); ++itElectron, ++index_gsf) {
+     
+    reco::GsfElectronRef eleRef = reco::GsfElectronRef(ElectronHandle, index_gsf);
+
+    //metti controllo su pt
+    //vedi perche'non va
+    //    const EcalRecHitCollection* rechits = ( itElectron->isEB()) ? rhitseb : rhitsee;   
+    std::cout<<"itelectron works"<<std::endl;     
+
+    //    const edm::Ptr<reco::CaloCluster> theSeed = itElectron->superCluster()->seed();
+    //    float e9=EcalClusterTools::e3x3( *theSeed, &(*rechits), topology );
+    //    float e9=EcalClusterLazyTools::e3x3( *theSeed);
+    //vedi sotto echiedi se va bene
+    //vedi perche'non va
+    //    float sigIPhiIPhi=sqrt((EcalClusterTools::localCovariances( *theSeed, &(*rechits), topology ))[2]);
+
+    electron_pt[ele_n]          = itElectron->pt();
+    std::cout<<electron_pt[ele_n]<<std::endl;
+    electron_energy[ele_n]      = itElectron->energy();
+    electron_ecalEnergy[ele_n]  = itElectron->ecalEnergy();                 // chiara
+    electron_trackPatVtx[ele_n] = itElectron->trackMomentumAtVtx().R();     // chiara
+    electron_px[ele_n]       = itElectron->px();
+    electron_py[ele_n]       = itElectron->py();
+    electron_pz[ele_n]       = itElectron->pz();
+    electron_vx[ele_n]       = itElectron->vx();
+    electron_vy[ele_n]       = itElectron->vy();
+    electron_vz[ele_n]       = itElectron->vz();
+    electron_phi[ele_n]      = itElectron->phi();
+    electron_eta[ele_n]      = itElectron->eta();
+    electron_charge[ele_n]       = itElectron->charge();
+    electron_fBrem[ele_n]       = itElectron->fbrem();
+    electron_EoP[ele_n]       = itElectron->eSuperClusterOverP();
+    electron_OneOverEMinusOneOverP[ele_n]       = (1/itElectron->caloEnergy())-(1/itElectron->trackMomentumAtVtx().R());
+    //    electron_r9[ele_n]       = e9/itElectron->superCluster()->rawEnergy(); ridefinita sotto non funziona ecalclustertools chiedi
+    electron_r9[ele_n] = itElectron->r9();
+    electron_misHits[ele_n]       = itElectron->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
+
+    ele_n++;
+  }
+
+}
+
 void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH) {
   
   gp_n = 0;
@@ -440,24 +497,28 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
 
       phoReco(phoH,tracks);
 
-      edm::Handle<std::vector<reco::GsfElectron> > elH;
-      event.getByLabel("gsfElectrons", elH);
-      reco_n = 0;
-      for (unsigned int i=0; i<elH->size(); i++) {
-	if (reco_n == 9)
-	  continue;
-	reco_et[reco_n] = 9999.;
-	reco_eta[reco_n] = 9999.;
-	reco_phi[reco_n] = 9999.;
-	reco_pt[reco_n] = 9999.;
-      
-	reco::GsfElectronRef el(elH, i);
-	reco_et[reco_n] = el->superCluster()->energy()*sin(el->superCluster()->position().theta());
-	reco_pt[reco_n] = el->pt();
-	reco_eta[reco_n] = el->superCluster()->eta();
-	reco_phi[reco_n] = el->superCluster()->phi();
-      reco_n++;
-      }
+      edm::Handle<reco::GsfElectronCollection>  ElectronHandle;
+      event.getByLabel("gsfElectrons", ElectronHandle);
+
+      edm::Handle<EcalRecHitCollection> ecalhitseb;
+      const EcalRecHitCollection* rhitseb=0;
+      event.getByLabel("ecalRecHit","EcalRecHitsEB",ecalhitseb);
+      rhitseb = ecalhitseb.product(); // get a ptr to the product
+
+      edm::Handle<EcalRecHitCollection> ecalhitsee;
+      const EcalRecHitCollection* rhitsee=0;
+      event.getByLabel("ecalRecHit","EcalRecHitsEE",ecalhitsee);
+      rhitsee = ecalhitsee.product(); // get a ptr to the product
+
+
+      // get topology
+      //      edm::ESHandle<CaloTopology> pTopology;
+      //      iSetup.get<CaloTopologyRecord>().get(pTopology);
+      //      topology = pTopology.product();
+      //per ora commentto chiedi se va bene
+
+      eleReco(ElectronHandle,rhitseb,rhitsee);
+     
   }
 
 
@@ -476,11 +537,6 @@ void dumper::beginJob() {
   
 
   if (saveReco) {
-    t->Branch("recon",   &reco_n,   "recon/I");
-    t->Branch("recoet",  &reco_et,  "recoet[recon]/F");
-    t->Branch("recopt",  &reco_pt,  "recopt[recon]/F");
-    t->Branch("recoeta", &reco_eta, "recoeta[recon]/F");
-    t->Branch("recophi", &reco_phi, "recophi[recon]/F");
 
     t->Branch("phon",   &pho_n,   "phon/I");
     t->Branch("phopt",  &pho_pt,  "phopt[phon]/F");
@@ -526,6 +582,46 @@ void dumper::beginJob() {
     t->Branch("phoptiso04", &pho_ptiso04, "phoptiso04[phon]/F");
     t->Branch("phontrkiso04", &pho_ntrkiso04, "phontrkiso04[phon]/I");
       
+    t->Branch("elen",&ele_n,"elen/I");
+    t->Branch("elepx",&electron_px,"elepx[elen]/F");
+    t->Branch("elepy",&electron_py,"elepy[elen]/F");
+    t->Branch("elepz",&electron_pz,"elepz[elen]/F");
+    t->Branch("elevx",&electron_vx,"elevx[elen]/F");
+    t->Branch("elevy",&electron_vy,"elevy[elen]/F");
+    t->Branch("elevz",&electron_vz,"elevz[elen]/F");
+    t->Branch("elept",&electron_pt,"elept[elen]/F");
+    t->Branch("eleeta",&electron_eta,"eleeta[elen]/F");
+    t->Branch("elephi",&electron_phi,"elephi[elen]/F");
+    t->Branch("eleenergy",&electron_energy,"eleenergy[elen]/F");
+    t->Branch("eleecalEnergy",&electron_ecalEnergy,"eleecalEnergy[elen]/F");     // chiara
+    t->Branch("eletrackPatVtx",&electron_trackPatVtx,"eletrackPatVtx[elen]/F");  // chiara
+    t->Branch("elecharge",&electron_charge,"elecharge[elen]/F");
+    t->Branch("elefBrem",&electron_fBrem,"elefBrem[elen]/F");
+    t->Branch("eledist",&electron_dist,"eledist[elen]/F");
+    t->Branch("eledcot",&electron_dcot,"eledcot[elen]/F");
+    t->Branch("elemisHits",&electron_misHits,"elemisHits[elen]/I");
+    t->Branch("elematchedConv",&electron_matchedConv,"elematchedConv[elen]/I");  // chiara
+    t->Branch("eleseedType",&electron_seedType,"eleseedType[elen]/I");
+    t->Branch("eleEoP",&electron_EoP,"eleEoP[elen]/F");
+    t->Branch("eleOneOverEMinusOneOverP",&electron_OneOverEMinusOneOverP,"eleOneOverEMinusOneOverP[elen]/F");
+    t->Branch("eler9",&electron_r9,"eler9[elen]/F");
+    t->Branch("elenSubClusters",&electron_nSubClusters,"elenSubClusters[elen]/I");
+    t->Branch("eletrkIso",&electron_trkIso,"eletrkIso[elen]/F");
+    t->Branch("eleecalIso",&electron_ecalIso,"eleecalIso[elen]/F");
+    t->Branch("elehcalIso",&electron_hcalIso,"elehcalIso[elen]/F");
+    t->Branch("eletrkIso03",&electron_trkIso03,"eletrkIso03[elen]/F");
+    t->Branch("eleecalIso03",&electron_ecalIso03,"eleecalIso03[elen]/F");
+    t->Branch("elehcalIso03",&electron_hcalIso03,"elehcalIso03[elen]/F");
+    t->Branch("eleSigmaIetaIeta",&electron_SigmaIetaIeta,"eleSigmaIetaIeta[elen]/F");
+    t->Branch("eleSigmaIphiIphi",&electron_SigmaIphiIphi,"eleSigmaIphiIphi[elen]/F");
+    t->Branch("eledEtaIn",&electron_dEtaIn,"eledEtaIn[elen]/F");
+    t->Branch("eledPhiIn",&electron_dPhiIn,"eledPhiIn[elen]/F");
+    t->Branch("eleHoE",&electron_HoE,"eleHoE[elen]/F");
+    t->Branch("elepFlowMVA",&electron_pFlowMVA,"elepFlowMVA[elen]/F");
+    t->Branch("elesc_energy",&electron_sc_energy,"elesc_energy[elen]/F");
+    t->Branch("elesc_eta",&electron_sc_eta,"elesc_eta[elen]/F");
+    t->Branch("elesc_phi",&electron_sc_phi,"elesc_phi[elen]/F");
+
       
   }   
       
