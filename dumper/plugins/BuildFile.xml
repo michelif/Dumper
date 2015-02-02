@@ -1,3 +1,4 @@
+
 <library   name="DumperDumperPlugins" file="*.cc">
   <use   name="DataFormats/Common"/>
   <use   name="DataFormats/EgammaReco"/>
@@ -9,6 +10,7 @@
   <use   name="FWCore/ParameterSet"/>
   <use   name="RecoParticleFlow/PFProducer"/>
   <use   name="HLTrigger/HLTcore"/>
+  <use   name="RecoEgamma/EgammaTools"/>
   <use   name="clhep"/>
   <use   name="root"/>
   <use   name="roottmva"/>
