@@ -118,6 +118,7 @@ public:
   void mcTruth(edm::Handle<reco::GenParticleCollection> genParticleH);
   void phoReco(edm::Handle<reco::PhotonCollection> photonH, edm::Handle<reco::TrackCollection> traH);
   void eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle,const EcalRecHitCollection* rhitseb,const EcalRecHitCollection* rhitsee,edm::Handle<reco::ConversionCollection> hConversions, edm::Handle<reco::BeamSpot> recoBeamSpotHandle);
+  void scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHandle, edm::Handle<reco::SuperClusterCollection> superClustersEEHandle);
 
 private:
   virtual void beginRun(const edm::Run& run,const edm::EventSetup& setup);
@@ -135,7 +136,7 @@ private:
   const CaloTopology *geometry;
   
   Float_t rho;
-  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n;
+  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n;
 
   Float_t gp_pt[MAXPARTICLESTOSAVE];
   Float_t gp_eta[MAXPARTICLESTOSAVE];
@@ -197,7 +198,12 @@ private:
   Float_t  pho_ptiso04[MAXPHOTONSTOSAVE];
   Int_t  pho_ntrkiso04[MAXPHOTONSTOSAVE];
       
+  Float_t pfSC_eta[MAXPHOTONSTOSAVE];
+  Float_t pfSC_phi[MAXPHOTONSTOSAVE];
+  Float_t   pfSC_e[MAXPHOTONSTOSAVE];
   
+
+
   Float_t ele_pt[MAXPHOTONSTOSAVE];
   Float_t ele_eta[MAXPHOTONSTOSAVE];
   Float_t ele_phi[MAXPHOTONSTOSAVE];
@@ -461,6 +467,42 @@ void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle,con
 
 }
 
+void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHandle, edm::Handle<reco::SuperClusterCollection> superClustersEEHandle){
+
+  pfSC_n=0;
+  for (reco::SuperClusterCollection::const_iterator itSC = superClustersEBHandle->begin();
+       itSC != superClustersEBHandle->end(); ++itSC) {
+
+    if (itSC->energy() > 0.) {
+      
+
+      pfSC_eta[pfSC_n] = itSC->eta();
+      pfSC_phi[pfSC_n] = itSC->phi();
+
+      pfSC_e[pfSC_n] = itSC->energy();
+
+    }
+    pfSC_n++;
+  }
+
+  for (reco::SuperClusterCollection::const_iterator itSC = superClustersEEHandle->begin();
+       itSC != superClustersEEHandle->end(); ++itSC) {
+    if (itSC->energy() > 0.) {
+      
+
+      pfSC_eta[pfSC_n] = itSC->eta();
+      pfSC_phi[pfSC_n] = itSC->phi();
+
+      pfSC_e[pfSC_n] = itSC->energy();
+
+    }
+
+    pfSC_n++;
+  }
+
+
+}
+
 void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH) {
   
   gp_n = 0;
@@ -532,7 +574,7 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
 
   
     if (saveReco) {
-
+      //photons
       edm::Handle<reco::PhotonCollection>  phoH;
       event.getByLabel("photons", phoH);
 
@@ -543,6 +585,7 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
 
       phoReco(phoH,tracks);
 
+      //electrons
       edm::Handle<reco::GsfElectronCollection>  ElectronHandle;
       event.getByLabel("gsfElectrons", ElectronHandle);
 
@@ -565,6 +608,16 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
 
       eleReco(ElectronHandle,rhitseb,rhitsee,hConversions,recoBeamSpotHandle);
      
+      //superclusters
+      edm::Handle<reco::SuperClusterCollection> superClustersEBHandle;
+      event.getByLabel("particleFlowSuperClusterECAL","particleFlowSuperClusterECALBarrel",superClustersEBHandle);
+
+      edm::Handle<reco::SuperClusterCollection> superClustersEEHandle;
+      event.getByLabel("particleFlowSuperClusterECAL","particleFlowSuperClusterECALEndcapWithPreshower",superClustersEEHandle);
+
+      scReco(superClustersEBHandle,superClustersEEHandle);
+
+
   }
 
 
@@ -627,6 +680,13 @@ void dumper::beginJob() {
     t->Branch("phontrkiso035", &pho_ntrkiso035, "phontrkiso035[phon]/I");
     t->Branch("phoptiso04", &pho_ptiso04, "phoptiso04[phon]/F");
     t->Branch("phontrkiso04", &pho_ntrkiso04, "phontrkiso04[phon]/I");
+
+    t->Branch("pfSCn",   &pfSC_n,   "pfSCn/I");
+    t->Branch("pfSCeta", &pfSC_eta, "pfSCeta[pfSCn]/F");
+    t->Branch("pfSCphi", &pfSC_phi, "pfSCphi[pfSCn]/F");
+    t->Branch("pfSCe", &pfSC_e, "pfSCe[pfSCn]/F");
+
+
       
     t->Branch("elen",&ele_n,"elen/I");
     t->Branch("elepx",&ele_px,"elepx[elen]/F");
