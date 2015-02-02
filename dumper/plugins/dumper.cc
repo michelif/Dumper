@@ -201,7 +201,8 @@ private:
   Float_t pfSC_eta[MAXPHOTONSTOSAVE];
   Float_t pfSC_phi[MAXPHOTONSTOSAVE];
   Float_t   pfSC_e[MAXPHOTONSTOSAVE];
-  
+  Float_t pfSC_nBC[MAXPHOTONSTOSAVE];
+  Float_t pfSC_nXtals[MAXPHOTONSTOSAVE];
 
 
   Float_t ele_pt[MAXPHOTONSTOSAVE];
@@ -480,6 +481,8 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
       pfSC_phi[pfSC_n] = itSC->phi();
 
       pfSC_e[pfSC_n] = itSC->energy();
+      pfSC_nBC[pfSC_n] = itSC->clustersSize();
+      pfSC_nXtals[pfSC_n] = itSC->seed()->size();
 
     }
     pfSC_n++;
@@ -494,6 +497,8 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
       pfSC_phi[pfSC_n] = itSC->phi();
 
       pfSC_e[pfSC_n] = itSC->energy();
+      pfSC_nBC[pfSC_n] = itSC->clustersSize();
+      pfSC_nXtals[pfSC_n] = itSC->seed()->size();
 
     }
 
@@ -685,8 +690,8 @@ void dumper::beginJob() {
     t->Branch("pfSCeta", &pfSC_eta, "pfSCeta[pfSCn]/F");
     t->Branch("pfSCphi", &pfSC_phi, "pfSCphi[pfSCn]/F");
     t->Branch("pfSCe", &pfSC_e, "pfSCe[pfSCn]/F");
-
-
+    t->Branch("pfSCnBC", &pfSC_nBC, "pfSCnBC[pfSCn]/F");
+    t->Branch("pfSCnXtals", &pfSC_nXtals, "pfSCnXtals[pfSCn]/F");
       
     t->Branch("elen",&ele_n,"elen/I");
     t->Branch("elepx",&ele_px,"elepx[elen]/F");
