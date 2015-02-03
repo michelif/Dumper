@@ -112,6 +112,7 @@
 #include <iostream>
 #define MAXPARTICLESTOSAVE 100
 #define MAXPHOTONSTOSAVE 20
+#define MAXSCTOSAVE 200
 
 class dumper : public edm::EDAnalyzer {
 public:
@@ -205,11 +206,11 @@ private:
   Float_t  pho_ptiso04[MAXPHOTONSTOSAVE];
   Int_t  pho_ntrkiso04[MAXPHOTONSTOSAVE];
       
-  Float_t pfSC_eta[MAXPHOTONSTOSAVE];
-  Float_t pfSC_phi[MAXPHOTONSTOSAVE];
-  Float_t   pfSC_e[MAXPHOTONSTOSAVE];
-  Float_t pfSC_nBC[MAXPHOTONSTOSAVE];
-  Float_t pfSC_nXtals[MAXPHOTONSTOSAVE];
+  Float_t pfSC_eta[MAXSCTOSAVE];
+  Float_t pfSC_phi[MAXSCTOSAVE];
+  Float_t   pfSC_e[MAXSCTOSAVE];
+  Float_t pfSC_nBC[MAXSCTOSAVE];
+  Float_t pfSC_nXtals[MAXSCTOSAVE];
 
 
   Float_t ele_pt[MAXPHOTONSTOSAVE];
@@ -309,7 +310,7 @@ void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco:
 
     const reco::PhotonRef pho(phoH,i);
 
-    if (pho->pt() > 0.) {
+    if (pho->pt() > 0. && pho_n<MAXPHOTONSTOSAVE) {
       
       pho_pt[pho_n]  = pho->pt();
       pho_eta[pho_n] = pho->eta();
@@ -400,7 +401,7 @@ void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle, ed
      
     reco::GsfElectronRef eleRef = reco::GsfElectronRef(ElectronHandle, index_gsf);
 
-    if (itElectron->pt()<2.5)
+    if (itElectron->pt()<2.5||ele_n>=MAXPHOTONSTOSAVE)
       continue;
 
 
@@ -408,6 +409,7 @@ void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle, ed
     ele_energy[ele_n]      = itElectron->energy();
     ele_ecalEnergy[ele_n]  = itElectron->ecalEnergy();              
     ele_trackPatVtx[ele_n] = itElectron->trackMomentumAtVtx().R();
+
 
     math::XYZVectorF p3Vtx = itElectron ->trackMomentumAtVtx();
     math::XYZVectorF p3Calo = itElectron ->trackMomentumAtCalo();
@@ -468,9 +470,10 @@ void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle, ed
      ele_sc_eta[ele_n]       = itElectron->superCluster()->eta();
      ele_sc_phi[ele_n]       = itElectron->superCluster()->phi();
 
-
-    ele_n++;
+     ele_n++;
   }
+
+
 
 }
 
@@ -480,8 +483,8 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
   for (reco::SuperClusterCollection::const_iterator itSC = superClustersEBHandle->begin();
        itSC != superClustersEBHandle->end(); ++itSC) {
 
-    if (itSC->energy() > 0.) {
-      
+    if (itSC->energy() > 0. && pfSC_n<MAXSCTOSAVE) {
+
 
       pfSC_eta[pfSC_n] = itSC->eta();
       pfSC_phi[pfSC_n] = itSC->phi();
@@ -496,7 +499,7 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 
   for (reco::SuperClusterCollection::const_iterator itSC = superClustersEEHandle->begin();
        itSC != superClustersEEHandle->end(); ++itSC) {
-    if (itSC->energy() > 0.) {
+    if (itSC->energy() > 0. && pfSC_n<MAXSCTOSAVE) {
       
 
       pfSC_eta[pfSC_n] = itSC->eta();
@@ -586,9 +589,14 @@ void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH,std::vector<El
 
 void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
 
-  truePU = 9999.;
-  for (int i=0; i<16; i++)
-    bxPU[i] = 9999;
+
+   // rho from fast jet
+   edm::Handle<double> rhoH;
+   //iEvent.getByLabel(edm::InputTag("kt6PFJets","rho","Iso"),rhoH); 
+   if( event.getByLabel(edm::InputTag("kt6PFJets","rho"),rhoH) )
+     rho = *rhoH;
+   else 
+     rho = 0;
 
   
   if (!isData) {
@@ -613,7 +621,7 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
 
     std::vector<SimTrack>::const_iterator iFirstSimTk = theSimTracks.begin();
     std::vector<ElectronMCTruth> MCElectrons=theElectronMCTruthFinder_->find (theSimTracks,  theSimVertices);
-
+    
     mcTruth(gpH,MCElectrons);
     
     edm::Handle<std::vector<PileupSummaryInfo>> puH;
@@ -622,12 +630,12 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
     for (unsigned int j=0; j<puH->size(); j++)
       bxPU[j] = (*puH)[j].getPU_NumInteractions();
   }
-
   
-    if (saveReco) {
+  
+  if (saveReco) {
       //photons
       edm::Handle<reco::PhotonCollection>  phoH;
-      event.getByLabel("photons", phoH);
+      event.getByLabel("mustachePhotons", phoH);
 
 
       edm::Handle<reco::TrackCollection> tracks;
@@ -657,18 +665,13 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
 
       edm::Handle<reco::SuperClusterCollection> superClustersEEHandle;
       event.getByLabel("particleFlowSuperClusterECAL","particleFlowSuperClusterECALEndcapWithPreshower",superClustersEEHandle);
-
       //SUPERCLUSTERS
       scReco(superClustersEBHandle,superClustersEEHandle);
 
 
-
-
       
       
-    }
-    
-
+  }
   t->Fill();
 }
  
@@ -736,14 +739,14 @@ void dumper::beginJob() {
     t->Branch("pfSCnBC", &pfSC_nBC, "pfSCnBC[pfSCn]/F");
     t->Branch("pfSCnXtals", &pfSC_nXtals, "pfSCnXtals[pfSCn]/F");
       
-    t->Branch("elen",&ele_n,"elen/I");
+    t->Branch("elen", &ele_n, "elen/I");
     t->Branch("elepx",&ele_px,"elepx[elen]/F");
     t->Branch("elepy",&ele_py,"elepy[elen]/F");
     t->Branch("elepz",&ele_pz,"elepz[elen]/F");
     t->Branch("elevx",&ele_vx,"elevx[elen]/F");
     t->Branch("elevy",&ele_vy,"elevy[elen]/F");
     t->Branch("elevz",&ele_vz,"elevz[elen]/F");
-    t->Branch("elept",&ele_pt,"elept[elen]/F");
+    t->Branch("elept",  &ele_pt,  "elept[elen]/F");
     t->Branch("eleeta",&ele_eta,"eleeta[elen]/F");
     t->Branch("elephi",&ele_phi,"elephi[elen]/F");
     t->Branch("eleenergy",&ele_energy,"eleenergy[elen]/F");
