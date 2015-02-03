@@ -98,6 +98,10 @@
 #include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
 #include "DataFormats/PatCandidates/interface/Photon.h"
 
+#include "RecoEgamma/Examples/plugins/MCElectronAnalyzer.h"
+#include "RecoEgamma/EgammaMCTools/interface/ElectronMCTruthFinder.h"
+#include "RecoEgamma/EgammaMCTools/interface/ElectronMCTruth.h"
+
 #include "TLorentzVector.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -115,9 +119,9 @@ public:
   ~dumper();
   
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-  void mcTruth(edm::Handle<reco::GenParticleCollection> genParticleH);
+  void mcTruth(edm::Handle<reco::GenParticleCollection> genParticleH,std::vector<ElectronMCTruth> MCElectrons);
   void phoReco(edm::Handle<reco::PhotonCollection> photonH, edm::Handle<reco::TrackCollection> traH);
-  void eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle,const EcalRecHitCollection* rhitseb,const EcalRecHitCollection* rhitsee,edm::Handle<reco::ConversionCollection> hConversions, edm::Handle<reco::BeamSpot> recoBeamSpotHandle);
+  void eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle,edm::Handle<reco::ConversionCollection> hConversions, edm::Handle<reco::BeamSpot> recoBeamSpotHandle);
   void scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHandle, edm::Handle<reco::SuperClusterCollection> superClustersEEHandle);
 
 private:
@@ -153,7 +157,10 @@ private:
   Float_t gele_pt[MAXPHOTONSTOSAVE];
   Float_t gele_eta[MAXPHOTONSTOSAVE];
   Float_t gele_phi[MAXPHOTONSTOSAVE];
+  Float_t gele_fbrem[MAXPHOTONSTOSAVE];
   Int_t gele_index[MAXPHOTONSTOSAVE];
+
+
 
   Float_t pho_pt[MAXPHOTONSTOSAVE];
   Float_t pho_eta[MAXPHOTONSTOSAVE];
@@ -383,7 +390,7 @@ void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco:
 
 }
 
-void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle,const EcalRecHitCollection* rhitseb,const EcalRecHitCollection* rhitsee, edm::Handle<reco::ConversionCollection> hConversions,edm::Handle<reco::BeamSpot> recoBeamSpotHandle){
+void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle, edm::Handle<reco::ConversionCollection> hConversions,edm::Handle<reco::BeamSpot> recoBeamSpotHandle){
 
   ele_n=0;  
 
@@ -430,12 +437,12 @@ void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle,con
     ele_charge[ele_n]       = itElectron->charge();
     ele_fbrem[ele_n]       = itElectron->fbrem();
     elesc_fbrem[ele_n]       = itElectron->superClusterFbrem();
+    elepfsc_fbrem[ele_n]       = itElectron->pfSuperClusterFbrem();
     ele_eSeedClusterOverPout[ele_n]       = itElectron->eSeedClusterOverPout();
     ele_EoP[ele_n]       = itElectron->eSuperClusterOverP();
     ele_OneOverEMinusOneOverP[ele_n]       = (1/itElectron->caloEnergy())-(1/itElectron ->trackMomentumAtVtx().R());
     ele_r9[ele_n] = itElectron->r9();
     ele_misHits[ele_n]       = itElectron->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
-    //sistemare qua
 
     ele_dist[ele_n] = itElectron->convDist();
     ele_dcot[ele_n] = itElectron->convDcot();
@@ -448,7 +455,6 @@ void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle,con
      ele_HoE[ele_n]          = itElectron->hadronicOverEm();
      ele_pFlowMVA[ele_n]          = itElectron->mvaOutput().mva;
      ele_SigmaIetaIeta[ele_n]= itElectron->sigmaIetaIeta();
-     //sistema
      ele_SigmaIphiIphi[ele_n]= itElectron->sigmaIphiIphi();
      ele_trkIso[ele_n]       = itElectron->dr04TkSumPt() ;
      ele_ecalIso[ele_n]      = itElectron->dr04EcalRecHitSumEt();
@@ -508,7 +514,7 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 
 }
 
-void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH) {
+void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH,std::vector<ElectronMCTruth> MCElectrons) {
   
   gp_n = 0;
   gpho_n = 0;
@@ -539,17 +545,36 @@ void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH) {
 	    gpho_n++;
 	  }
 	}
-
+	
 	if(gele_n<MAXPHOTONSTOSAVE){
 	  if((abs(gp->pdgId()) == 11)){
 	    gele_pt[gele_n]  = gp->pt();
 	    gele_eta[gele_n] = gp->eta();
 	    gele_phi[gele_n] = gp->phi();
 	    gele_index [gele_n] = gp_n-1;
+	    for ( std::vector<ElectronMCTruth>::const_iterator iEl=MCElectrons.begin(); iEl !=MCElectrons.end(); ++iEl ){ 
+
+	      //matching
+	      float eleEta=(*iEl).fourMomentum().eta();
+	      float elePhi=(*iEl).fourMomentum().phi();
+
+	      if(sqrt((gele_eta[gele_n]-eleEta)*(gele_eta[gele_n]-eleEta)+(gele_phi[gele_n]-elePhi)*(gele_phi[gele_n]-elePhi))>0.5) continue;
+
+	      float totBrem=0 ;
+	      unsigned int iBrem ;
+	      for ( iBrem=0; iBrem < (*iEl).bremVertices().size(); ++iBrem ) {
+
+		float rBrem= (*iEl).bremVertices()[iBrem].perp();
+		if ( rBrem < 120 ) {
+		  totBrem +=  (*iEl).bremMomentum()[iBrem].e();   
+		}
+	      }
+	      gele_fbrem[gele_n]=totBrem/((*iEl).fourMomentum().e());
+	    }
 	    gele_n++;
 	  }
 	}
-
+	
       }else{
 	continue;
       }
@@ -565,10 +590,31 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
   for (int i=0; i<16; i++)
     bxPU[i] = 9999;
 
-  edm::Handle<reco::GenParticleCollection> gpH;
+  
   if (!isData) {
+
+    //gen particles
+    edm::Handle<reco::GenParticleCollection> gpH;
     event.getByLabel("genParticles", gpH);
-    mcTruth(gpH);
+    
+    //get simtrack info
+    std::vector<SimTrack> theSimTracks;
+    std::vector<SimVertex> theSimVertices;
+    
+    edm::Handle<edm::SimTrackContainer> SimTk;
+    edm::Handle<edm::SimVertexContainer> SimVtx;
+    
+    event.getByLabel("g4SimHits",SimTk);
+    event.getByLabel("g4SimHits",SimVtx); 
+    theSimTracks.insert(theSimTracks.end(),SimTk->begin(),SimTk->end());
+    theSimVertices.insert(theSimVertices.end(),SimVtx->begin(),SimVtx->end());
+    
+    ElectronMCTruthFinder* theElectronMCTruthFinder_ = new ElectronMCTruthFinder();
+
+    std::vector<SimTrack>::const_iterator iFirstSimTk = theSimTracks.begin();
+    std::vector<ElectronMCTruth> MCElectrons=theElectronMCTruthFinder_->find (theSimTracks,  theSimVertices);
+
+    mcTruth(gpH,MCElectrons);
     
     edm::Handle<std::vector<PileupSummaryInfo>> puH;
     event.getByLabel("addPileupInfo", puH);
@@ -587,22 +633,13 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
       edm::Handle<reco::TrackCollection> tracks;
       event.getByLabel("generalTracks",tracks);
       
-
+      //PHOTONS
       phoReco(phoH,tracks);
 
       //electrons
       edm::Handle<reco::GsfElectronCollection>  ElectronHandle;
       event.getByLabel("gsfElectrons", ElectronHandle);
 
-      edm::Handle<EcalRecHitCollection> ecalhitseb;
-      const EcalRecHitCollection* rhitseb=0;
-      event.getByLabel("ecalRecHit","EcalRecHitsEB",ecalhitseb);
-      rhitseb = ecalhitseb.product(); // get a ptr to the product
-
-      edm::Handle<EcalRecHitCollection> ecalhitsee;
-      const EcalRecHitCollection* rhitsee=0;
-      event.getByLabel("ecalRecHit","EcalRecHitsEE",ecalhitsee);
-      rhitsee = ecalhitsee.product(); // get a ptr to the product
 
       edm::Handle<reco::ConversionCollection> hConversions;
       event.getByLabel("allConversions", hConversions);
@@ -610,8 +647,9 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
       edm::Handle<reco::BeamSpot> recoBeamSpotHandle;
       event.getByLabel("offlineBeamSpot",recoBeamSpotHandle);
 
-
-      eleReco(ElectronHandle,rhitseb,rhitsee,hConversions,recoBeamSpotHandle);
+ 
+      //ELECTRONS
+      eleReco(ElectronHandle,hConversions,recoBeamSpotHandle);
      
       //superclusters
       edm::Handle<reco::SuperClusterCollection> superClustersEBHandle;
@@ -620,11 +658,16 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
       edm::Handle<reco::SuperClusterCollection> superClustersEEHandle;
       event.getByLabel("particleFlowSuperClusterECAL","particleFlowSuperClusterECALEndcapWithPreshower",superClustersEEHandle);
 
+      //SUPERCLUSTERS
       scReco(superClustersEBHandle,superClustersEEHandle);
 
 
-  }
 
+
+      
+      
+    }
+    
 
   t->Fill();
 }
@@ -766,6 +809,7 @@ void dumper::beginJob() {
     t->Branch("gelept",  &gele_pt,  "gelept[gelen]/F");
     t->Branch("geleeta", &gele_eta, "geleeta[gelen]/F");
     t->Branch("gelephi", &gele_phi, "gelephi[gelen]/F");
+    t->Branch("gelefbrem", &gele_fbrem, "gelefbrem[gelen]/F");
     t->Branch("geleindex", &gele_index, "geleindex[gelen]/I");
     
     t->Branch("truePU", &truePU, "truePU/F");
