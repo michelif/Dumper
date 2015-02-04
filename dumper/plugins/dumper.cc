@@ -136,7 +136,6 @@ private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
 
-  edm::InputTag hitEBLabel_, hitEELabel_;
 
   std::string outputFileName;
   TFile* f;
@@ -311,8 +310,6 @@ dumper::dumper(const edm::ParameterSet& iConfig) {
   outputFileName  = iConfig.getParameter<std::string>("OutputFileName");
   isData          = iConfig.getParameter<bool>("isData");
   saveReco        = iConfig.getParameter<bool>("saveReco");
-  hitEBLabel_     = iConfig.getParameter<edm::InputTag>("hitEBLabel");
-  hitEELabel_     = iConfig.getParameter<edm::InputTag>("hitEELabel");
 }
 
 dumper::~dumper() 
