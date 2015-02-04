@@ -102,6 +102,9 @@
 #include "RecoEgamma/EgammaMCTools/interface/ElectronMCTruthFinder.h"
 #include "RecoEgamma/EgammaMCTools/interface/ElectronMCTruth.h"
 
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+
 #include "TLorentzVector.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -124,6 +127,8 @@ public:
   void phoReco(edm::Handle<reco::PhotonCollection> photonH, edm::Handle<reco::TrackCollection> traH);
   void eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle,edm::Handle<reco::ConversionCollection> hConversions, edm::Handle<reco::BeamSpot> recoBeamSpotHandle);
   void scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHandle, edm::Handle<reco::SuperClusterCollection> superClustersEEHandle);
+  void multi5x5scReco(edm::Handle<reco::SuperClusterCollection> multi5x5Handle);
+  void hybridscReco(edm::Handle<reco::SuperClusterCollection> hybridHandle);
 
 private:
   virtual void beginRun(const edm::Run& run,const edm::EventSetup& setup);
@@ -141,7 +146,7 @@ private:
   const CaloTopology *geometry;
   
   Float_t rho;
-  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n;
+  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n, multi5x5SC_n, hybridSC_n;
 
   Float_t gp_pt[MAXPARTICLESTOSAVE];
   Float_t gp_eta[MAXPARTICLESTOSAVE];
@@ -158,7 +163,8 @@ private:
   Float_t gele_pt[MAXPHOTONSTOSAVE];
   Float_t gele_eta[MAXPHOTONSTOSAVE];
   Float_t gele_phi[MAXPHOTONSTOSAVE];
-  Float_t gele_fbrem[MAXPHOTONSTOSAVE];
+  Float_t gele_fbrem80[MAXPHOTONSTOSAVE];
+  Float_t gele_fbrem120[MAXPHOTONSTOSAVE];
   Int_t gele_index[MAXPHOTONSTOSAVE];
 
 
@@ -206,11 +212,28 @@ private:
   Float_t  pho_ptiso04[MAXPHOTONSTOSAVE];
   Int_t  pho_ntrkiso04[MAXPHOTONSTOSAVE];
       
+  Float_t  pho_pfSumChargedHadronPt[MAXPHOTONSTOSAVE];
+  Float_t  pho_pfsumNeutralHadronEt[MAXPHOTONSTOSAVE];
+  Float_t  pho_pfsumPhotonEt[MAXPHOTONSTOSAVE];
+  Float_t  pho_pfsumPUPt[MAXPHOTONSTOSAVE];
+
   Float_t pfSC_eta[MAXSCTOSAVE];
   Float_t pfSC_phi[MAXSCTOSAVE];
   Float_t   pfSC_e[MAXSCTOSAVE];
   Float_t pfSC_nBC[MAXSCTOSAVE];
   Float_t pfSC_nXtals[MAXSCTOSAVE];
+
+  Float_t multi5x5SC_eta[MAXSCTOSAVE];
+  Float_t multi5x5SC_phi[MAXSCTOSAVE];
+  Float_t   multi5x5SC_e[MAXSCTOSAVE];
+  Float_t multi5x5SC_nBC[MAXSCTOSAVE];
+  Float_t multi5x5SC_nXtals[MAXSCTOSAVE];
+
+  Float_t hybridSC_eta[MAXSCTOSAVE];
+  Float_t hybridSC_phi[MAXSCTOSAVE];
+  Float_t   hybridSC_e[MAXSCTOSAVE];
+  Float_t hybridSC_nBC[MAXSCTOSAVE];
+  Float_t hybridSC_nXtals[MAXSCTOSAVE];
 
 
   Float_t ele_pt[MAXPHOTONSTOSAVE];
@@ -262,7 +285,10 @@ private:
   Float_t  ele_sc_energy[MAXPHOTONSTOSAVE];
   Float_t  ele_sc_eta[MAXPHOTONSTOSAVE];
   Float_t  ele_sc_phi[MAXPHOTONSTOSAVE];
-  
+  Float_t  ele_pfSumChargedHadronPt[MAXPHOTONSTOSAVE];
+  Float_t  ele_pfsumNeutralHadronEt[MAXPHOTONSTOSAVE];
+  Float_t  ele_pfsumPhotonEt[MAXPHOTONSTOSAVE];
+  Float_t  ele_pfsumPUPt[MAXPHOTONSTOSAVE];
 
 
   float truePU;
@@ -273,8 +299,7 @@ private:
   bool saveReco;
 
 
-  TH1F* timeEB, *timeEE;
-  TH2F* timeEB2D, *timeEE2D;
+
 };
 
 void dumper::beginRun(const edm::Run& run,const edm::EventSetup& setup) {
@@ -288,11 +313,6 @@ dumper::dumper(const edm::ParameterSet& iConfig) {
   saveReco        = iConfig.getParameter<bool>("saveReco");
   hitEBLabel_     = iConfig.getParameter<edm::InputTag>("hitEBLabel");
   hitEELabel_     = iConfig.getParameter<edm::InputTag>("hitEELabel");
-
-  timeEB   = new TH1F("timeEB",   "", 400, -100, 100);
-  timeEE   = new TH1F("timeEE",   "", 400, -100, 100);
-  timeEB2D = new TH2F("timeEB2D", "", 400, -100, 100, 100, 0, 100);
-  timeEE2D = new TH2F("timeEE2D", "", 400, -100, 100, 100, 0, 100);
 }
 
 dumper::~dumper() 
@@ -381,6 +401,9 @@ void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco:
       pho_ptiso04[pho_n] = ptiso04;
       pho_ntrkiso04[pho_n] = ntrkiso04;
       
+      pho_pfSumChargedHadronPt[pho_n] = pho->chargedHadronIso();
+      pho_pfsumNeutralHadronEt[pho_n] = pho->neutralHadronIso();
+      pho_pfsumPhotonEt[pho_n] = pho->photonIso();
 
 
 
@@ -469,6 +492,12 @@ void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle, ed
      ele_sc_energy[ele_n]    = itElectron->superCluster()->energy();
      ele_sc_eta[ele_n]       = itElectron->superCluster()->eta();
      ele_sc_phi[ele_n]       = itElectron->superCluster()->phi();
+     reco::GsfElectron::PflowIsolationVariables pfIso = itElectron->pfIsolationVariables();
+     ele_pfSumChargedHadronPt[ele_n] = pfIso.chargedHadronIso;
+     ele_pfsumNeutralHadronEt[ele_n] = pfIso.neutralHadronIso;
+     ele_pfsumPhotonEt[ele_n] = pfIso.photonIso;
+     //     ele_pfsumPUPt[ele_n] = pfIso.sumPUPt; //not  in cmssw6
+
 
      ele_n++;
   }
@@ -476,6 +505,55 @@ void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle, ed
 
 
 }
+
+
+void dumper::multi5x5scReco(edm::Handle<reco::SuperClusterCollection> multi5x5Handle){
+  multi5x5SC_n=0;
+  for (reco::SuperClusterCollection::const_iterator itSC = multi5x5Handle->begin();
+       itSC != multi5x5Handle->end(); ++itSC) {
+
+    if (itSC->energy() > 0. && multi5x5SC_n<MAXSCTOSAVE) {
+
+
+      multi5x5SC_eta[multi5x5SC_n] = itSC->eta();
+      multi5x5SC_phi[multi5x5SC_n] = itSC->phi();
+
+      multi5x5SC_e[multi5x5SC_n] = itSC->energy();
+      multi5x5SC_nBC[multi5x5SC_n] = itSC->clustersSize();
+      multi5x5SC_nXtals[multi5x5SC_n] = itSC->seed()->size();
+
+
+    }
+    multi5x5SC_n++;
+
+  }
+
+}
+
+
+void dumper::hybridscReco(edm::Handle<reco::SuperClusterCollection> hybridHandle){
+  hybridSC_n=0;
+  for (reco::SuperClusterCollection::const_iterator itSC = hybridHandle->begin();
+       itSC != hybridHandle->end(); ++itSC) {
+
+    if (itSC->energy() > 0. && hybridSC_n<MAXSCTOSAVE) {
+
+
+      hybridSC_eta[hybridSC_n] = itSC->eta();
+      hybridSC_phi[hybridSC_n] = itSC->phi();
+
+      hybridSC_e[hybridSC_n] = itSC->energy();
+      hybridSC_nBC[hybridSC_n] = itSC->clustersSize();
+      hybridSC_nXtals[hybridSC_n] = itSC->seed()->size();
+
+
+    }
+    hybridSC_n++;
+
+  }
+
+}
+
 
 void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHandle, edm::Handle<reco::SuperClusterCollection> superClustersEEHandle){
 
@@ -563,16 +641,21 @@ void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH,std::vector<El
 
 	      if(sqrt((gele_eta[gele_n]-eleEta)*(gele_eta[gele_n]-eleEta)+(gele_phi[gele_n]-elePhi)*(gele_phi[gele_n]-elePhi))>0.5) continue;
 
-	      float totBrem=0 ;
+	      float totBrem80=0 ;
+	      float totBrem120=0 ;
 	      unsigned int iBrem ;
 	      for ( iBrem=0; iBrem < (*iEl).bremVertices().size(); ++iBrem ) {
 
 		float rBrem= (*iEl).bremVertices()[iBrem].perp();
+		if(rBrem < 80){
+		  totBrem80 +=  (*iEl).bremMomentum()[iBrem].e();   
+		} 
 		if ( rBrem < 120 ) {
-		  totBrem +=  (*iEl).bremMomentum()[iBrem].e();   
+		  totBrem120 +=  (*iEl).bremMomentum()[iBrem].e();   
 		}
 	      }
-	      gele_fbrem[gele_n]=totBrem/((*iEl).fourMomentum().e());
+	      gele_fbrem80[gele_n]=totBrem80/((*iEl).fourMomentum().e());
+	      gele_fbrem120[gele_n]=totBrem120/((*iEl).fourMomentum().e());
 	    }
 	    gele_n++;
 	  }
@@ -589,15 +672,34 @@ void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH,std::vector<El
 
 void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
 
-
-   // rho from fast jet
-   edm::Handle<double> rhoH;
-   //iEvent.getByLabel(edm::InputTag("kt6PFJets","rho","Iso"),rhoH); 
-   if( event.getByLabel(edm::InputTag("kt6PFJets","rho"),rhoH) )
+  ///////////////////////Get PU informations
+  // rho from fast jet
+  edm::Handle<double> rhoH;
+  //iEvent.getByLabel(edm::InputTag("kt6PFJets","rho","Iso"),rhoH); 
+  if( event.getByLabel(edm::InputTag("kt6PFJets","rho"),rhoH) )
      rho = *rhoH;
-   else 
-     rho = 0;
+  else 
+    rho = 0;
+  
+  
+  //PU info    
+  edm::Handle<std::vector<PileupSummaryInfo>> puH;
+  event.getByLabel("addPileupInfo", puH);
+  truePU = (*puH)[0].getTrueNumInteractions();
+  for (unsigned int j=0; j<puH->size(); j++)
+    bxPU[j] = (*puH)[j].getPU_NumInteractions();
+  
+  edm::Handle<reco::VertexCollection> VertexHandle;
+  event.getByLabel("offlinePrimaryVerticesWithBS", VertexHandle);
+  // Get the primary vertex coordinates
+  nvtx=0;
+  for (reco::VertexCollection::const_iterator it = VertexHandle->begin(); 
+       it != VertexHandle->end(); ++it) {
+    nvtx++;
+  }
+  
 
+    
   
   if (!isData) {
 
@@ -623,12 +725,7 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
     std::vector<ElectronMCTruth> MCElectrons=theElectronMCTruthFinder_->find (theSimTracks,  theSimVertices);
     
     mcTruth(gpH,MCElectrons);
-    
-    edm::Handle<std::vector<PileupSummaryInfo>> puH;
-    event.getByLabel("addPileupInfo", puH);
-    truePU = (*puH)[0].getTrueNumInteractions();
-    for (unsigned int j=0; j<puH->size(); j++)
-      bxPU[j] = (*puH)[j].getPU_NumInteractions();
+
   }
   
   
@@ -659,15 +756,28 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
       //ELECTRONS
       eleReco(ElectronHandle,hConversions,recoBeamSpotHandle);
      
-      //superclusters
+      //pfsuperclusters
       edm::Handle<reco::SuperClusterCollection> superClustersEBHandle;
       event.getByLabel("particleFlowSuperClusterECAL","particleFlowSuperClusterECALBarrel",superClustersEBHandle);
 
       edm::Handle<reco::SuperClusterCollection> superClustersEEHandle;
       event.getByLabel("particleFlowSuperClusterECAL","particleFlowSuperClusterECALEndcapWithPreshower",superClustersEEHandle);
-      //SUPERCLUSTERS
+      //PFSUPERCLUSTERS
       scReco(superClustersEBHandle,superClustersEEHandle);
 
+      //multi5x5SuperClusters
+      edm::Handle<reco::SuperClusterCollection> multi5x5Handle;
+      event.getByLabel("multi5x5SuperClustersWithPreshower",multi5x5Handle);
+
+      //PFSUPERCLUSTERS
+      multi5x5scReco(multi5x5Handle);
+
+      //hybridSuperClusters
+      edm::Handle<reco::SuperClusterCollection> hybridHandle;
+      event.getByLabel("hybridSuperClusters",hybridHandle);
+
+      //PFSUPERCLUSTERS
+      hybridscReco(hybridHandle);
 
       
       
@@ -732,12 +842,31 @@ void dumper::beginJob() {
     t->Branch("phoptiso04", &pho_ptiso04, "phoptiso04[phon]/F");
     t->Branch("phontrkiso04", &pho_ntrkiso04, "phontrkiso04[phon]/I");
 
+    t->Branch("phoPfSumChargedHadronPt",&pho_pfSumChargedHadronPt,"phoPfSumChargedHadronPt[phon]/F");
+    t->Branch("phoPfSumNeutralHadronEt",&pho_pfsumNeutralHadronEt,"phoPfSumNeutralHadronEt[phon]/F");
+    t->Branch("phoPfSumPhotonEt",&pho_pfsumPhotonEt,"phoPfSumPhotonEt[phon]/F");
+
     t->Branch("pfSCn",   &pfSC_n,   "pfSCn/I");
     t->Branch("pfSCeta", &pfSC_eta, "pfSCeta[pfSCn]/F");
     t->Branch("pfSCphi", &pfSC_phi, "pfSCphi[pfSCn]/F");
     t->Branch("pfSCe", &pfSC_e, "pfSCe[pfSCn]/F");
     t->Branch("pfSCnBC", &pfSC_nBC, "pfSCnBC[pfSCn]/F");
     t->Branch("pfSCnXtals", &pfSC_nXtals, "pfSCnXtals[pfSCn]/F");
+
+    t->Branch("multi5x5SCn",   &multi5x5SC_n,   "multi5x5SCn/I");
+    t->Branch("multi5x5SCeta", &multi5x5SC_eta, "multi5x5SCeta[multi5x5SCn]/F");
+    t->Branch("multi5x5SCphi", &multi5x5SC_phi, "multi5x5SCphi[multi5x5SCn]/F");
+    t->Branch("multi5x5SCe", &multi5x5SC_e, "multi5x5SCe[multi5x5SCn]/F");
+    t->Branch("multi5x5SCnBC", &multi5x5SC_nBC, "multi5x5SCnBC[multi5x5SCn]/F");
+    t->Branch("multi5x5SCnXtals", &multi5x5SC_nXtals, "multi5x5SCnXtals[multi5x5SCn]/F");
+
+    t->Branch("hybridSCn",   &hybridSC_n,   "hybridSCn/I");
+    t->Branch("hybridSCeta", &hybridSC_eta, "hybridSCeta[hybridSCn]/F");
+    t->Branch("hybridSCphi", &hybridSC_phi, "hybridSCphi[hybridSCn]/F");
+    t->Branch("hybridSCe", &hybridSC_e, "hybridSCe[hybridSCn]/F");
+    t->Branch("hybridSCnBC", &hybridSC_nBC, "hybridSCnBC[hybridSCn]/F");
+    t->Branch("hybridSCnXtals", &hybridSC_nXtals, "hybridSCnXtals[hybridSCn]/F");
+
       
     t->Branch("elen", &ele_n, "elen/I");
     t->Branch("elepx",&ele_px,"elepx[elen]/F");
@@ -789,8 +918,10 @@ void dumper::beginJob() {
     t->Branch("eleScEnergy",&ele_sc_energy,"eleScEnergy[elen]/F");
     t->Branch("eleScEta",&ele_sc_eta,"eleScEta[elen]/F");
     t->Branch("eleScPhi",&ele_sc_phi,"eleScPhi[elen]/F");
+    t->Branch("elePfSumChargedHadronPt",&ele_pfSumChargedHadronPt,"elePfSumChargedHadronPt[elen]/F");
+    t->Branch("elePfSumNeutralHadronEt",&ele_pfsumNeutralHadronEt,"elePfSumNeutralHadronEt[elen]/F");
+    t->Branch("elePfSumPhotonEt",&ele_pfsumPhotonEt,"elePfSumPhotonEt[elen]/F");
 
-      
   }   
       
   if (!isData) {
@@ -812,7 +943,8 @@ void dumper::beginJob() {
     t->Branch("gelept",  &gele_pt,  "gelept[gelen]/F");
     t->Branch("geleeta", &gele_eta, "geleeta[gelen]/F");
     t->Branch("gelephi", &gele_phi, "gelephi[gelen]/F");
-    t->Branch("gelefbrem", &gele_fbrem, "gelefbrem[gelen]/F");
+    t->Branch("gelefbrem80", &gele_fbrem80, "gelefbrem80[gelen]/F");
+    t->Branch("gelefbrem120", &gele_fbrem120, "gelefbrem120[gelen]/F");
     t->Branch("geleindex", &gele_index, "geleindex[gelen]/I");
     
     t->Branch("truePU", &truePU, "truePU/F");
@@ -823,10 +955,6 @@ void dumper::beginJob() {
 void dumper::endJob() {
   f->cd();
   t->Write();
-  timeEB->Write();
-  timeEE->Write();
-  timeEB2D->Write();
-  timeEE2D->Write();
   f->Close();
 }
 
