@@ -116,6 +116,7 @@
 #define MAXPARTICLESTOSAVE 100
 #define MAXPHOTONSTOSAVE 20
 #define MAXSCTOSAVE 200
+#define MAXBCTOSAVE 200
 
 class dumper : public edm::EDAnalyzer {
 public:
@@ -219,8 +220,13 @@ private:
   Float_t pfSC_eta[MAXSCTOSAVE];
   Float_t pfSC_phi[MAXSCTOSAVE];
   Float_t   pfSC_e[MAXSCTOSAVE];
-  Float_t pfSC_nBC[MAXSCTOSAVE];
+  Int_t pfSC_nBC[MAXSCTOSAVE];
   Float_t pfSC_nXtals[MAXSCTOSAVE];
+  //bc info
+  Float_t pfSC_bcEta[MAXBCTOSAVE][MAXSCTOSAVE];
+  Float_t pfSC_bcPhi[MAXBCTOSAVE][MAXSCTOSAVE];
+  Float_t   pfSC_bcE[MAXBCTOSAVE][MAXSCTOSAVE];
+
 
   Float_t multi5x5SC_eta[MAXSCTOSAVE];
   Float_t multi5x5SC_phi[MAXSCTOSAVE];
@@ -398,6 +404,7 @@ void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco:
       pho_ptiso04[pho_n] = ptiso04;
       pho_ntrkiso04[pho_n] = ntrkiso04;
       
+
       pho_pfSumChargedHadronPt[pho_n] = pho->chargedHadronIso();
       pho_pfsumNeutralHadronEt[pho_n] = pho->neutralHadronIso();
       pho_pfsumPhotonEt[pho_n] = pho->photonIso();
@@ -555,6 +562,7 @@ void dumper::hybridscReco(edm::Handle<reco::SuperClusterCollection> hybridHandle
 void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHandle, edm::Handle<reco::SuperClusterCollection> superClustersEEHandle){
 
   pfSC_n=0;
+
   for (reco::SuperClusterCollection::const_iterator itSC = superClustersEBHandle->begin();
        itSC != superClustersEBHandle->end(); ++itSC) {
 
@@ -568,6 +576,16 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
       pfSC_nBC[pfSC_n] = itSC->clustersSize();
       pfSC_nXtals[pfSC_n] = itSC->seed()->size();
 
+      //basicClusters
+      int nBC=0;
+      for (reco::CaloCluster_iterator bclus = (itSC->clustersBegin()); bclus != (itSC->clustersEnd()); ++bclus) {
+	if((*bclus)->energy() > 0 && pfSC_nBC[pfSC_n]<MAXBCTOSAVE){
+	  pfSC_bcPhi[nBC][pfSC_n]=(*bclus)->phi();
+	  pfSC_bcEta[nBC][pfSC_n]=(*bclus)->eta(); 
+	  pfSC_bcE[nBC][pfSC_n]=(*bclus)->energy(); 
+	}
+      }
+      nBC++;
     }
     pfSC_n++;
   }
@@ -847,8 +865,13 @@ void dumper::beginJob() {
     t->Branch("pfSCeta", &pfSC_eta, "pfSCeta[pfSCn]/F");
     t->Branch("pfSCphi", &pfSC_phi, "pfSCphi[pfSCn]/F");
     t->Branch("pfSCe", &pfSC_e, "pfSCe[pfSCn]/F");
-    t->Branch("pfSCnBC", &pfSC_nBC, "pfSCnBC[pfSCn]/F");
+    t->Branch("pfSCnBC", &pfSC_nBC, "pfSCnBC[pfSCn]/I");
     t->Branch("pfSCnXtals", &pfSC_nXtals, "pfSCnXtals[pfSCn]/F");
+
+    t->Branch("pfSCbcEta", &pfSC_bcEta, "pfSCbcEta[200][200]/F");
+    t->Branch("pfSCbcPhi", &pfSC_bcPhi, "pfSCbcPhi[200][200]/F");
+    t->Branch("pfSCbcE", &pfSC_bcE, "pfSCbcE[200][200]/F");
+
 
     t->Branch("multi5x5SCn",   &multi5x5SC_n,   "multi5x5SCn/I");
     t->Branch("multi5x5SCeta", &multi5x5SC_eta, "multi5x5SCeta[multi5x5SCn]/F");
