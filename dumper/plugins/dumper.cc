@@ -105,6 +105,8 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
+#include "Dumper/dumper/interface/EcalClusterTools.h"
+
 #include "TLorentzVector.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -125,7 +127,7 @@ public:
   
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
   void mcTruth(edm::Handle<reco::GenParticleCollection> genParticleH,std::vector<ElectronMCTruth> MCElectrons);
-  void phoReco(edm::Handle<reco::PhotonCollection> photonH, edm::Handle<reco::TrackCollection> traH);
+  void phoReco(edm::Handle<reco::PhotonCollection> photonH, edm::Handle<reco::TrackCollection> traH, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee);
   void eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle,edm::Handle<reco::ConversionCollection> hConversions, edm::Handle<reco::BeamSpot> recoBeamSpotHandle);
   void scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHandle, edm::Handle<reco::SuperClusterCollection> superClustersEEHandle);
   void multi5x5scReco(edm::Handle<reco::SuperClusterCollection> multi5x5Handle);
@@ -142,8 +144,8 @@ private:
   TFile* f;
   TTree* t;
 
+  const CaloGeometry* geometry;
   const CaloTopology *topology;
-  const CaloTopology *geometry;
   
   Float_t rho;
   Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n, multi5x5SC_n, hybridSC_n;
@@ -197,7 +199,18 @@ private:
   Float_t  pho_twrHCAL[MAXPHOTONSTOSAVE];
   Float_t  pho_HoverE[MAXPHOTONSTOSAVE];
   Float_t  pho_hlwTrack[MAXPHOTONSTOSAVE];
-  Float_t  pho_etawid[MAXPHOTONSTOSAVE];
+  Float_t  pho_siEtaiEtaZS[MAXPHOTONSTOSAVE];
+  Float_t  pho_siEtaiEtaNoZS[MAXPHOTONSTOSAVE];
+  Float_t  pho_siEtaiEtaWrong[MAXPHOTONSTOSAVE];
+  Float_t  pho_siPhiiPhiZS[MAXPHOTONSTOSAVE];
+  Float_t  pho_siPhiiPhiNoZS[MAXPHOTONSTOSAVE];
+  Float_t  pho_siPhiiPhiWrong[MAXPHOTONSTOSAVE];
+  Float_t  pho_sMajZS[MAXPHOTONSTOSAVE];
+  Float_t  pho_sMajNoZS[MAXPHOTONSTOSAVE];
+  Float_t  pho_sMinZS[MAXPHOTONSTOSAVE];
+  Float_t  pho_sMinNoZS[MAXPHOTONSTOSAVE];
+  Float_t  pho_alphaZS[MAXPHOTONSTOSAVE];
+  Float_t  pho_alphaNoZS[MAXPHOTONSTOSAVE];
   Float_t  pho_scetawid[MAXPHOTONSTOSAVE];
   Float_t  pho_scphiwid[MAXPHOTONSTOSAVE];
   Float_t  pho_jurECAL03[MAXPHOTONSTOSAVE];
@@ -324,7 +337,7 @@ dumper::~dumper()
 
 
 
-void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco::TrackCollection> tracksH) {
+void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco::TrackCollection> tracksH, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee){
 
   pho_n=0;
 
@@ -359,19 +372,49 @@ void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco:
       pho_E9[pho_n] = pho->e3x3();
       pho_E25[pho_n] = pho->e5x5();
 
-
-      //default photon Variable
+      //default photon Variables
       pho_jurECAL[pho_n] = pho->ecalRecHitSumEtConeDR04();//isolationEcalRecHit
       pho_twrHCAL[pho_n] = pho->hcalTowerSumEtConeDR04();//isolationHcalRecHit
       pho_HoverE[pho_n] = pho->hadronicOverEm();
       pho_hlwTrack[pho_n] = pho->trkSumPtHollowConeDR04();//isolationHollowTrkCone
-      pho_etawid[pho_n] = pho->sigmaIetaIeta();//sqrt(pho->covEtaEta());
+
+      const edm::Ptr<reco::CaloCluster> SCseed = pho->superCluster()->seed(); 
+      const EBRecHitCollection* rechits = (SCseed->seed().subdetId()==EcalBarrel) ? rhitseb : rhitsee;
+
+      myClusterTools::Cluster2ndMoments momentsNoZS = myClusterTools::noZSEcalClusterTools::cluster2ndMoments(*SCseed, *rechits);
+      myClusterTools::Cluster2ndMoments momentsZS = myClusterTools::EcalClusterTools::cluster2ndMoments(*SCseed, *rechits);//this namespace is because in cmssw6 ecalclustertoos was not with ZS, i had to import it from cmmssw7 by ahand and redefine namespaces in Dumper/dumper/interface/EcalClusterTools.h
+
+
+      pho_sMajNoZS[pho_n]=momentsNoZS.sMaj;
+      pho_sMajZS[pho_n]=momentsZS.sMaj;
+
+
+
+      pho_sMinNoZS[pho_n]=momentsNoZS.sMin;
+      pho_sMinZS[pho_n]=momentsZS.sMin;
+
+      pho_alphaNoZS[pho_n]=momentsNoZS.alpha;
+      pho_alphaZS[pho_n]=momentsZS.alpha;
+
+
+      std::vector<float> etaphimomentsnoZS = myClusterTools::noZSEcalClusterTools::localCovariances(*SCseed, &(*rechits), &(*topology));
+      std::vector<float> etaphimomentsZS = myClusterTools::EcalClusterTools::localCovariances(*SCseed, &(*rechits), &(*topology));
+      std::vector<float> etaphimomentsWrong = EcalClusterTools::localCovariances(*SCseed, &(*rechits), &(*topology));
+
+      pho_siEtaiEtaNoZS[pho_n] = sqrt(etaphimomentsnoZS[0]);
+      pho_siEtaiEtaZS[pho_n] = sqrt(etaphimomentsZS[0]);
+      pho_siEtaiEtaWrong[pho_n] = sqrt(etaphimomentsWrong[0]);
+
+      pho_siPhiiPhiNoZS[pho_n] = sqrt(etaphimomentsnoZS[2]);
+      pho_siPhiiPhiZS[pho_n] = sqrt(etaphimomentsZS[2]);
+      pho_siPhiiPhiWrong[pho_n] = sqrt(etaphimomentsWrong[2]);
+
+
       pho_scetawid[pho_n]       = pho->superCluster()->etaWidth();
       pho_scphiwid[pho_n]        = pho->superCluster()->phiWidth();
       pho_jurECAL03[pho_n] = pho->ecalRecHitSumEtConeDR03();//isolationEcalRecHit 
       pho_twrHCAL03[pho_n] = pho->hcalTowerSumEtConeDR03();//isolationHcalRecHit
       pho_hlwTrack03[pho_n] = pho->trkSumPtHollowConeDR03();//isolationHollowTrkCone
-
 
 
 
@@ -483,6 +526,9 @@ void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle, ed
      ele_nSubClusters[ele_n]       = itElectron->numberOfBrems();
      ele_HoE[ele_n]          = itElectron->hadronicOverEm();
      ele_pFlowMVA[ele_n]          = itElectron->mvaOutput().mva;
+
+     
+     //     ele_SigmaIetaIeta[ele_n]= itElectron->sigmaIetaIeta();
      ele_SigmaIetaIeta[ele_n]= itElectron->sigmaIetaIeta();
      ele_SigmaIphiIphi[ele_n]= itElectron->sigmaIphiIphi();
      ele_trkIso[ele_n]       = itElectron->dr04TkSumPt() ;
@@ -687,6 +733,7 @@ void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH,std::vector<El
 
 void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
 
+
   ///////////////////////Get PU informations
   // rho from fast jet
   edm::Handle<double> rhoH;
@@ -752,9 +799,32 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
 
       edm::Handle<reco::TrackCollection> tracks;
       event.getByLabel("generalTracks",tracks);
+
+      //topology
+
+      // get geometry
+      edm::ESHandle<CaloGeometry> geoHandle;
+      //   iSetup.get<IdealGeometryRecord>().get(geoHandle);
+      iSetup.get<CaloGeometryRecord>().get(geoHandle);
+      geometry = geoHandle.product();
+
+
+      edm::ESHandle<CaloTopology> pTopology;
+      iSetup.get<CaloTopologyRecord>().get(pTopology);
+      topology = pTopology.product();
+      
+      edm::Handle<EBRecHitCollection> ecalhitseb;
+      const EBRecHitCollection* rhitseb=0;
+      event.getByLabel("ecalRecHit","EcalRecHitsEB", ecalhitseb);
+      rhitseb = ecalhitseb.product(); // get a ptr to the product
+      
+      edm::Handle<EERecHitCollection> ecalhitsee;
+      const EERecHitCollection* rhitsee=0;
+      event.getByLabel("ecalRecHit","EcalRecHitsEK", ecalhitsee);
+      rhitsee = ecalhitsee.product(); // get a ptr to the product
       
       //PHOTONS
-      phoReco(phoH,tracks);
+      phoReco(phoH,tracks,rhitseb,rhitsee);
 
       //electrons
       edm::Handle<reco::GsfElectronCollection>  ElectronHandle;
@@ -841,7 +911,23 @@ void dumper::beginJob() {
     t->Branch("photwrHCAL", &pho_twrHCAL, "photwrHCAL[phon]/F");	
     t->Branch("phoHoverE", &pho_HoverE, "phoHoverE[phon]/F");
     t->Branch("phohlwTrack", &pho_hlwTrack, "phohlwTrack[phon]/F");
-    t->Branch("phoetawid", &pho_etawid, "phoetawid[phon]/F");
+    t->Branch("phosiEtaiEtaZS", &pho_siEtaiEtaZS, "phosiEtaiEtaZS[phon]/F");
+    t->Branch("phosiEtaiEtaNoZS", &pho_siEtaiEtaNoZS, "phosiEtaiEtaNoZS[phon]/F");
+    t->Branch("phosiEtaiEtaWrong", &pho_siEtaiEtaWrong, "phosiEtaiEtaWrong[phon]/F");
+
+    t->Branch("phosiPhiiPhiZS", &pho_siPhiiPhiZS, "phosiPhiiPhiZS[phon]/F");
+    t->Branch("phosiPhiiPhiNoZS", &pho_siPhiiPhiNoZS, "phosiPhiiPhiNoZS[phon]/F");
+    t->Branch("phosiPhiiPhiWrong", &pho_siPhiiPhiWrong, "phosiPhiiPhiWrong[phon]/F");
+
+
+    t->Branch("phosMajZS", &pho_sMajZS, "phosMajZS[phon]/F");
+    t->Branch("phosMajNoZS", &pho_sMajNoZS, "phosMajNoZS[phon]/F");
+    t->Branch("phosMinZS", &pho_sMinZS, "phosMinZS[phon]/F");
+    t->Branch("phosMinNoZS", &pho_sMinNoZS, "phosMinNoZS[phon]/F");
+    t->Branch("phoAlphaZS", &pho_alphaZS, "phoAlphaZS[phon]/F");
+    t->Branch("phoAlphaNoZS", &pho_alphaNoZS, "phoAlphaNoZS[phon]/F");
+
+
     t->Branch("phoscetawid",&pho_scetawid,"phoscetawid[phon]/F");
     t->Branch("phoscphiwid",&pho_scphiwid,"phoscphiwid[phon]/F");
     t->Branch("phojurECAL03",&pho_jurECAL03,"phojurECAL03[phon]/F");

@@ -2,7 +2,8 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("ExREG")
 process.load("Configuration.StandardSequences.Services_cff")
-process.load('Configuration.Geometry.GeometryDB_cff')
+process.load('Configuration.Geometry.GeometryExtended2023SHCalReco_cff')
+
 process.load('Configuration/StandardSequences/MagneticField_38T_cff')
 process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
 process.load("Configuration.StandardSequences.Reconstruction_cff")
@@ -10,7 +11,7 @@ process.GlobalTag.globaltag = 'PH2_1K_FB_V6::All'
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1),
-#    input = cms.untracked.int32(100),
+#    input = cms.untracked.int32(44),
    )
 
 process.options = cms.untracked.PSet(
