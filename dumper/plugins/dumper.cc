@@ -56,16 +56,17 @@
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/TrackReco/interface/HitPattern.h"
 
-#include "HLTrigger/HLTcore/interface/HLTFilter.h"
+//#include "HLTrigger/HLTcore/interface/HLTFilter.h"
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 #include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
-#include "DataFormats/HLTReco/interface/TriggerEventWithRefs.h"
+//#include "DataFormats/HLTReco/interface/TriggerEventWithRefs.h"
 #include "DataFormats/RecoCandidate/interface/RecoEcalCandidate.h"
 #include "DataFormats/RecoCandidate/interface/RecoEcalCandidateFwd.h"
 #include "DataFormats/RecoCandidate/interface/RecoEcalCandidateIsolation.h"
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/Common/interface/FwdPtr.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
@@ -119,6 +120,8 @@
 #define MAXPHOTONSTOSAVE 20
 #define MAXSCTOSAVE 200
 #define MAXBCTOSAVE 200
+#define MAXPFCANDTOSAVE 200
+//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
 
 class dumper : public edm::EDAnalyzer {
 public:
@@ -126,9 +129,10 @@ public:
   ~dumper();
   
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+  void clearVector();
   void mcTruth(edm::Handle<reco::GenParticleCollection> genParticleH,std::vector<ElectronMCTruth> MCElectrons);
-  void phoReco(edm::Handle<reco::PhotonCollection> photonH, edm::Handle<reco::TrackCollection> traH, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee);
-  void eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle,edm::Handle<reco::ConversionCollection> hConversions, edm::Handle<reco::BeamSpot> recoBeamSpotHandle);
+  void phoReco(edm::Handle<reco::PhotonCollection> photonH, edm::Handle<reco::TrackCollection> traH, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee,edm::Handle<reco::PFCandidateCollection>  PFCandidates);
+  void eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle,edm::Handle<reco::ConversionCollection> hConversions, edm::Handle<reco::BeamSpot> recoBeamSpotHandle, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee,edm::Handle<reco::PFCandidateCollection>  PFCandidates);
   void scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHandle, edm::Handle<reco::SuperClusterCollection> superClustersEEHandle);
   void multi5x5scReco(edm::Handle<reco::SuperClusterCollection> multi5x5Handle);
   void hybridscReco(edm::Handle<reco::SuperClusterCollection> hybridHandle);
@@ -148,7 +152,7 @@ private:
   const CaloTopology *topology;
   
   Float_t rho;
-  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n, multi5x5SC_n, hybridSC_n;
+  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n, multi5x5SC_n, hybridSC_n, pfcandPho_n, pfcandEle_n;
 
   Float_t gp_pt[MAXPARTICLESTOSAVE];
   Float_t gp_eta[MAXPARTICLESTOSAVE];
@@ -236,9 +240,22 @@ private:
   Int_t pfSC_nBC[MAXSCTOSAVE];
   Float_t pfSC_nXtals[MAXSCTOSAVE];
   //bc info
-  Float_t pfSC_bcEta[MAXBCTOSAVE][MAXSCTOSAVE];
+  Float_t pfSC_bcEta[MAXBCTOSAVE][MAXSCTOSAVE];//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
   Float_t pfSC_bcPhi[MAXBCTOSAVE][MAXSCTOSAVE];
   Float_t   pfSC_bcE[MAXBCTOSAVE][MAXSCTOSAVE];
+
+  //pfcand
+  Float_t pho_pfCandPt[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
+  Float_t pho_pfCandEta[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
+  Float_t pho_pfCandPhi[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
+  Float_t pho_pfCandVtx[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
+  Float_t pho_pfCandType[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
+
+  Float_t ele_pfCandPt[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
+  Float_t ele_pfCandEta[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
+  Float_t ele_pfCandPhi[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
+  Float_t ele_pfCandVtx[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
+  Float_t ele_pfCandType[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
 
 
   Float_t multi5x5SC_eta[MAXSCTOSAVE];
@@ -290,8 +307,23 @@ private:
   Int_t  ele_nSubClusters[MAXPHOTONSTOSAVE];
   Float_t  ele_HoE[MAXPHOTONSTOSAVE];
   Float_t  ele_pFlowMVA[MAXPHOTONSTOSAVE];
-  Float_t  ele_SigmaIetaIeta[MAXPHOTONSTOSAVE];
-  Float_t  ele_SigmaIphiIphi[MAXPHOTONSTOSAVE];
+  Float_t  ele_siEtaiEtaZS[MAXPHOTONSTOSAVE];
+  Float_t  ele_siEtaiEtaNoZS[MAXPHOTONSTOSAVE];
+  Float_t  ele_siEtaiEtaWrong[MAXPHOTONSTOSAVE];
+  Float_t  ele_siPhiiPhiZS[MAXPHOTONSTOSAVE];
+  Float_t  ele_siPhiiPhiNoZS[MAXPHOTONSTOSAVE];
+  Float_t  ele_siPhiiPhiWrong[MAXPHOTONSTOSAVE];
+  Float_t  ele_sMajZS[MAXPHOTONSTOSAVE];
+  Float_t  ele_sMajNoZS[MAXPHOTONSTOSAVE];
+  Float_t  ele_sMinZS[MAXPHOTONSTOSAVE];
+  Float_t  ele_sMinNoZS[MAXPHOTONSTOSAVE];
+  Float_t  ele_alphaZS[MAXPHOTONSTOSAVE];
+  Float_t  ele_alphaNoZS[MAXPHOTONSTOSAVE];
+  Float_t  ele_scetawid[MAXPHOTONSTOSAVE];
+  Float_t  ele_scphiwid[MAXPHOTONSTOSAVE];
+  Float_t  ele_jurECAL03[MAXPHOTONSTOSAVE];
+  Float_t  ele_twrHCAL03[MAXPHOTONSTOSAVE];
+  Float_t  ele_hlwTrack03[MAXPHOTONSTOSAVE];
   Float_t  ele_trkIso[MAXPHOTONSTOSAVE];
   Float_t  ele_ecalIso[MAXPHOTONSTOSAVE];
   Float_t  ele_hcalIso[MAXPHOTONSTOSAVE];
@@ -312,6 +344,7 @@ private:
   float truePU;
   int bxPU[16];
   Int_t nvtx;
+  Float_t vertex_z[200];
 
   bool isData;
   bool saveReco;
@@ -335,9 +368,28 @@ dumper::~dumper()
 {}
 
 
+void dumper::clearVector(){
+
+  for(int i=0;i<MAXPFCANDTOSAVE;++i){
+    for(int j=0;j<MAXPHOTONSTOSAVE;++j){
+      pho_pfCandPt[i][j]=0.;//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
+      pho_pfCandEta[i][j]=0.;
+      pho_pfCandPhi[i][j]=0.;
+      pho_pfCandVtx[i][j]=0.;
+      pho_pfCandType[i][j]=0.;
+      
+      ele_pfCandPt[i][j]=0.;//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
+      ele_pfCandEta[i][j]=0.;
+      ele_pfCandPhi[i][j]=0.;
+      ele_pfCandVtx[i][j]=0.;
+      ele_pfCandType[i][j]=0.;
+    }
+  }
+
+}
 
 
-void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco::TrackCollection> tracksH, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee){
+void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco::TrackCollection> tracksH, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee,edm::Handle<reco::PFCandidateCollection>  PFCandidates){
 
   pho_n=0;
 
@@ -446,6 +498,47 @@ void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco:
       pho_ntrkiso035[pho_n] = ntrkiso035;
       pho_ptiso04[pho_n] = ptiso04;
       pho_ntrkiso04[pho_n] = ntrkiso04;
+
+      math::XYZTLorentzVectorD const& p4phot = pho->p4();
+      TLorentzVector p4pho(p4phot.px(), p4phot.py(), p4phot.pz(), p4phot.energy());
+
+      pfcandPho_n=0;
+      for (reco::PFCandidateCollection::const_iterator jt = PFCandidates->begin();
+	   jt != PFCandidates->end(); ++jt) {
+
+	reco::PFCandidate::ParticleType id = jt->particleId();
+	// Convert particle momentum to normal TLorentzVector, wrong type :(
+	math::XYZTLorentzVectorD const& p4t = jt->p4();
+	TLorentzVector p4(p4t.px(), p4t.py(), p4t.pz(), p4t.energy());
+
+
+	if(p4pho.DeltaR(p4)<0.4 && pfcandPho_n<MAXPFCANDTOSAVE){
+	  pho_pfCandPt[pfcandPho_n][pho_n]=p4t.pt();
+	  pho_pfCandEta[pfcandPho_n][pho_n]=p4t.eta();
+	  pho_pfCandPhi[pfcandPho_n][pho_n]=p4t.phi();
+	  pho_pfCandType[pfcandPho_n][pho_n]=id;
+
+	  //	  std::cout<<"index"<<pfcandPho_n<<" "<<pho_n<< " pt:"<<pho_pfCandPt[pfcandPho_n][pho_n]<<" "<<pho_pfCandEta[pfcandPho_n][pho_n]<<" "<<pho_pfCandPhi[pfcandPho_n][pho_n]<<" "<<pho_pfCandType[pfcandPho_n][pho_n]<<std::endl;
+	  // Get the primary vertex coordinates
+	  int closestVertex=0;
+	  float dist_vtx=fabs(vertex_z[0]-jt->vz());
+	  for(int i=0;i<nvtx;++i){
+	    float dist=fabs(vertex_z[i]-jt->vz());
+	    if(dist<dist_vtx){
+	      closestVertex=i;
+	      dist_vtx=dist;
+	    }
+	  }
+
+	  if(dist_vtx<0.5){
+	    pho_pfCandVtx[pfcandPho_n][pho_n]=closestVertex;
+	  }
+	  pfcandPho_n++;
+	}
+
+
+
+      }
       
 
       pho_pfSumChargedHadronPt[pho_n] = pho->chargedHadronIso();
@@ -461,7 +554,7 @@ void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco:
 
 }
 
-void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle, edm::Handle<reco::ConversionCollection> hConversions,edm::Handle<reco::BeamSpot> recoBeamSpotHandle){
+void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle, edm::Handle<reco::ConversionCollection> hConversions,edm::Handle<reco::BeamSpot> recoBeamSpotHandle, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee,edm::Handle<reco::PFCandidateCollection>  PFCandidates){
 
   ele_n=0;  
 
@@ -527,10 +620,86 @@ void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle, ed
      ele_HoE[ele_n]          = itElectron->hadronicOverEm();
      ele_pFlowMVA[ele_n]          = itElectron->mvaOutput().mva;
 
+
+
+      const edm::Ptr<reco::CaloCluster> SCseed = itElectron->superCluster()->seed(); 
+      const EBRecHitCollection* rechits = (SCseed->seed().subdetId()==EcalBarrel) ? rhitseb : rhitsee;
+
+      myClusterTools::Cluster2ndMoments momentsNoZS = myClusterTools::noZSEcalClusterTools::cluster2ndMoments(*SCseed, *rechits);
+      myClusterTools::Cluster2ndMoments momentsZS = myClusterTools::EcalClusterTools::cluster2ndMoments(*SCseed, *rechits);//this namespace is because in cmssw6 ecalclustertoos was not with ZS, i had to import it from cmmssw7 by ahand and redefine namespaces in Dumper/dumper/interface/EcalClusterTools.h
+
+
+      ele_sMajNoZS[ele_n]=momentsNoZS.sMaj;
+      ele_sMajZS[ele_n]=momentsZS.sMaj;
+
+
+
+      ele_sMinNoZS[ele_n]=momentsNoZS.sMin;
+      ele_sMinZS[ele_n]=momentsZS.sMin;
+
+      ele_alphaNoZS[ele_n]=momentsNoZS.alpha;
+      ele_alphaZS[ele_n]=momentsZS.alpha;
+
+
+
+      std::vector<float> etaphimomentsnoZS = myClusterTools::noZSEcalClusterTools::localCovariances(*SCseed, &(*rechits), &(*topology));
+      std::vector<float> etaphimomentsZS = myClusterTools::EcalClusterTools::localCovariances(*SCseed, &(*rechits), &(*topology));
+      std::vector<float> etaphimomentsWrong = EcalClusterTools::localCovariances(*SCseed, &(*rechits), &(*topology));
+
+      ele_siEtaiEtaNoZS[ele_n] = sqrt(etaphimomentsnoZS[0]);
+      ele_siEtaiEtaZS[ele_n] = sqrt(etaphimomentsZS[0]);
+      ele_siEtaiEtaWrong[ele_n] = sqrt(etaphimomentsWrong[0]);
+
+      ele_siPhiiPhiNoZS[ele_n] = sqrt(etaphimomentsnoZS[2]);
+      ele_siPhiiPhiZS[ele_n] = sqrt(etaphimomentsZS[2]);
+      ele_siPhiiPhiWrong[ele_n] = sqrt(etaphimomentsWrong[2]);
+
+
+      math::XYZTLorentzVectorD const& p4elet = itElectron->p4();
+      TLorentzVector p4ele(p4elet.px(), p4elet.py(), p4elet.pz(), p4elet.energy());
+
+      pfcandEle_n=0;
+      for (reco::PFCandidateCollection::const_iterator jt = PFCandidates->begin();
+	   jt != PFCandidates->end(); ++jt) {
+	
+	reco::PFCandidate::ParticleType id = jt->particleId();
+	// Convert particle momentum to normal TLorentzVector, wrong type :(
+	math::XYZTLorentzVectorD const& p4t = jt->p4();
+	TLorentzVector p4(p4t.px(), p4t.py(), p4t.pz(), p4t.energy());
+
+
+	if(p4ele.DeltaR(p4)<0.4 && pfcandEle_n<MAXPFCANDTOSAVE){
+	  ele_pfCandPt[pfcandEle_n][ele_n]=p4t.pt();
+	  ele_pfCandEta[pfcandEle_n][ele_n]=p4t.eta();
+	  ele_pfCandPhi[pfcandEle_n][ele_n]=p4t.phi();
+	  ele_pfCandType[pfcandEle_n][ele_n]=id;
+
+	  //	  std::cout<<"index"<<pfcandEle_n<<" "<<ele_n<< " pt:"<<ele_pfCandPt[pfcandEle_n][ele_n]<<" "<<ele_pfCandEta[pfcandEle_n][ele_n]<<" "<<ele_pfCandPhi[pfcandEle_n][ele_n]<<" "<<ele_pfCandType[pfcandEle_n][ele_n]<<"elen"<<ele_n<<std::endl;
+
+	  // Get the primary vertex coordinates
+	  int closestVertex=0;
+	  float dist_vtx=fabs(vertex_z[0]-jt->vz());
+	  for(int i=0;i<nvtx;++i){
+	    float dist=fabs(vertex_z[i]-jt->vz());
+	    if(dist<dist_vtx){
+	      closestVertex=i;
+	      dist_vtx=dist;
+	    }
+	  }
+
+	  if(dist_vtx<0.5){
+	    ele_pfCandVtx[pfcandEle_n][ele_n]=closestVertex;
+	  }
+	  pfcandEle_n++;
+	}
+
+
+
+      }
+
+
      
-     //     ele_SigmaIetaIeta[ele_n]= itElectron->sigmaIetaIeta();
-     ele_SigmaIetaIeta[ele_n]= itElectron->sigmaIetaIeta();
-     ele_SigmaIphiIphi[ele_n]= itElectron->sigmaIphiIphi();
+
      ele_trkIso[ele_n]       = itElectron->dr04TkSumPt() ;
      ele_ecalIso[ele_n]      = itElectron->dr04EcalRecHitSumEt();
      ele_hcalIso[ele_n]      = itElectron->dr04HcalTowerSumEt();
@@ -633,8 +802,10 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
       }
       nBC++;
     }
+
     pfSC_n++;
   }
+
 
   for (reco::SuperClusterCollection::const_iterator itSC = superClustersEEHandle->begin();
        itSC != superClustersEEHandle->end(); ++itSC) {
@@ -757,6 +928,7 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
   nvtx=0;
   for (reco::VertexCollection::const_iterator it = VertexHandle->begin(); 
        it != VertexHandle->end(); ++it) {
+    vertex_z[nvtx] = (it->isValid()) ? it->z() : 999.;
     nvtx++;
   }
   
@@ -823,8 +995,13 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
       event.getByLabel("ecalRecHit","EcalRecHitsEK", ecalhitsee);
       rhitsee = ecalhitsee.product(); // get a ptr to the product
       
+      edm::Handle<reco::PFCandidateCollection>  PFCandidates;
+      event.getByLabel("particleFlow", PFCandidates);
+
+      clearVector();
+
       //PHOTONS
-      phoReco(phoH,tracks,rhitseb,rhitsee);
+      phoReco(phoH,tracks,rhitseb,rhitsee,PFCandidates);
 
       //electrons
       edm::Handle<reco::GsfElectronCollection>  ElectronHandle;
@@ -839,7 +1016,7 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
 
  
       //ELECTRONS
-      eleReco(ElectronHandle,hConversions,recoBeamSpotHandle);
+      eleReco(ElectronHandle,hConversions,recoBeamSpotHandle,rhitseb,rhitsee,PFCandidates);
      
       //pfsuperclusters
       edm::Handle<reco::SuperClusterCollection> superClustersEBHandle;
@@ -924,8 +1101,8 @@ void dumper::beginJob() {
     t->Branch("phosMajNoZS", &pho_sMajNoZS, "phosMajNoZS[phon]/F");
     t->Branch("phosMinZS", &pho_sMinZS, "phosMinZS[phon]/F");
     t->Branch("phosMinNoZS", &pho_sMinNoZS, "phosMinNoZS[phon]/F");
-    t->Branch("phoAlphaZS", &pho_alphaZS, "phoAlphaZS[phon]/F");
-    t->Branch("phoAlphaNoZS", &pho_alphaNoZS, "phoAlphaNoZS[phon]/F");
+    t->Branch("phoalphaZS", &pho_alphaZS, "phoalphaZS[phon]/F");
+    t->Branch("phoalphaNoZS", &pho_alphaNoZS, "phoalphaNoZS[phon]/F");
 
 
     t->Branch("phoscetawid",&pho_scetawid,"phoscetawid[phon]/F");
@@ -934,7 +1111,11 @@ void dumper::beginJob() {
     t->Branch("photwrHCAL03",&pho_twrHCAL03,"photwrHCAL03[phon]/F");
     t->Branch("phohlwTrack03",&pho_hlwTrack03,"phohlwTrack03[phon]/F");
 
-
+    t->Branch("phopfCandPt",&pho_pfCandPt,"phopfCandPt[200][20]/F");//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
+    t->Branch("phopfCandEta",&pho_pfCandEta,"phopfCandEta[200][20]/F");
+    t->Branch("phopfCandPhi",&pho_pfCandPhi,"phopfCandPhi[200][20]/F");
+    t->Branch("phopfCandVtx",&pho_pfCandVtx,"phopfCandVtx[200][20]/F");
+    t->Branch("phopfCandType",&pho_pfCandType,"phopfCandType[200][20]/F");
 
     t->Branch("phoptiso004", &pho_ptiso004, "phoptiso004[phon]/F");
     t->Branch("phontrkiso004", &pho_ntrkiso004, "phontrkiso004[phon]/I");
@@ -954,9 +1135,10 @@ void dumper::beginJob() {
     t->Branch("pfSCnBC", &pfSC_nBC, "pfSCnBC[pfSCn]/I");
     t->Branch("pfSCnXtals", &pfSC_nXtals, "pfSCnXtals[pfSCn]/F");
 
-    t->Branch("pfSCbcEta", &pfSC_bcEta, "pfSCbcEta[200][200]/F");
+    t->Branch("pfSCbcEta", &pfSC_bcEta, "pfSCbcEta[200][200]/F");//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
     t->Branch("pfSCbcPhi", &pfSC_bcPhi, "pfSCbcPhi[200][200]/F");
     t->Branch("pfSCbcE", &pfSC_bcE, "pfSCbcE[200][200]/F");
+
 
 
     t->Branch("multi5x5SCn",   &multi5x5SC_n,   "multi5x5SCn/I");
@@ -1015,8 +1197,30 @@ void dumper::beginJob() {
     t->Branch("eletrkIso03",&ele_trkIso03,"eletrkIso03[elen]/F");
     t->Branch("eleecalIso03",&ele_ecalIso03,"eleecalIso03[elen]/F");
     t->Branch("elehcalIso03",&ele_hcalIso03,"elehcalIso03[elen]/F");
-    t->Branch("eleSigmaIetaIeta",&ele_SigmaIetaIeta,"eleSigmaIetaIeta[elen]/F");
-    t->Branch("eleSigmaIphiIphi",&ele_SigmaIphiIphi,"eleSigmaIphiIphi[elen]/F");
+    t->Branch("elesiEtaiEtaZS", &ele_siEtaiEtaZS, "elesiEtaiEtaZS[elen]/F");
+    t->Branch("elesiEtaiEtaNoZS", &ele_siEtaiEtaNoZS, "elesiEtaiEtaNoZS[elen]/F");
+    t->Branch("elesiEtaiEtaWrong", &ele_siEtaiEtaWrong, "elesiEtaiEtaWrong[elen]/F");
+
+    t->Branch("elesiPhiiPhiZS", &ele_siPhiiPhiZS, "elesiPhiiPhiZS[elen]/F");
+    t->Branch("elesiPhiiPhiNoZS", &ele_siPhiiPhiNoZS, "elesiPhiiPhiNoZS[elen]/F");
+    t->Branch("elesiPhiiPhiWrong", &ele_siPhiiPhiWrong, "elesiPhiiPhiWrong[elen]/F");
+
+
+    t->Branch("elesMajZS", &ele_sMajZS, "elesMajZS[elen]/F");
+    t->Branch("elesMajNoZS", &ele_sMajNoZS, "elesMajNoZS[elen]/F");
+    t->Branch("elesMinZS", &ele_sMinZS, "elesMinZS[elen]/F");
+    t->Branch("elesMinNoZS", &ele_sMinNoZS, "elesMinNoZS[elen]/F");
+    t->Branch("elealphaZS", &ele_alphaZS, "elealphaZS[elen]/F");
+    t->Branch("elealphaNoZS", &ele_alphaNoZS, "elealphaNoZS[elen]/F");
+
+    t->Branch("elepfCandPt",&ele_pfCandPt,"elepfCandPt[200][20]/F");//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
+    t->Branch("elepfCandEta",&ele_pfCandEta,"elepfCandEta[200][20]/F");
+    t->Branch("elepfCandPhi",&ele_pfCandPhi,"elepfCandPhi[200][20]/F");
+    t->Branch("elepfCandVtx",&ele_pfCandVtx,"elepfCandVtx[200][20]/F");
+    t->Branch("elepfCandType",&ele_pfCandType,"elepfCandType[200][20]/F");
+
+
+
     t->Branch("eledEtaIn",&ele_dEtaIn,"eledEtaIn[elen]/F");
     t->Branch("eledPhiIn",&ele_dPhiIn,"eledPhiIn[elen]/F");
     t->Branch("eleHoE",&ele_HoE,"eleHoE[elen]/F");
