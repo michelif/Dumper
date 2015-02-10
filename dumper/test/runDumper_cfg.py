@@ -1,17 +1,31 @@
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process("ExREG")
-process.load("Configuration.StandardSequences.Services_cff")
-process.load('Configuration.Geometry.GeometryExtended2023SHCalReco_cff')
+# multi5x5 clusters
+#from RecoEcal.EgammaClusterProducers.multi5x5ClusteringSequence_cff import *
+# preshower sequence for multi5x5 clusters
+#from RecoEcal.EgammaClusterProducers.multi5x5PreshowerClusteringSequence_cff import *
 
-process.load('Configuration/StandardSequences/MagneticField_38T_cff')
-process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
-process.load("Configuration.StandardSequences.Reconstruction_cff")
-process.GlobalTag.globaltag = 'PH2_1K_FB_V6::All'
+process = cms.Process("ExREG")
+process.load('Configuration.StandardSequences.Services_cff')
+process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
+process.load('FWCore.MessageService.MessageLogger_cfi')
+process.load('Configuration.EventContent.EventContent_cff')
+process.load('SimGeneral.MixingModule.mix_POISSON_average_cfi')
+process.load('Configuration.Geometry.GeometryExtended2023SHCalNoTaperReco_cff')
+process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
+process.load('Configuration.StandardSequences.RawToDigi_cff')
+process.load('Configuration.StandardSequences.L1Reco_cff')
+process.load('Configuration.StandardSequences.Reconstruction_cff')
+process.load('Configuration.StandardSequences.EndOfProcess_cff')
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'PH2_1K_FB_V4::All', '')
+
+
+process.GlobalTag.globaltag = 'PH2_1K_FB_V4::All'
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1),
-#    input = cms.untracked.int32(44),
+#    input = cms.untracked.int32(500),
    )
 
 process.options = cms.untracked.PSet(
@@ -27,10 +41,11 @@ process.source = cms.Source("PoolSource",
                             )
 
 
+process.multi5x5BasicClustersCleaned.endcapHitCollection = cms.string('EcalRecHitsEK')
 
 
 process.dumper = cms.EDAnalyzer('dumper',
-                                   OutputFileName = cms.string("oot_qcd_multifit.root"),
+                                   OutputFileName = cms.string("outDumper.root"),
                                    isData = cms.bool(False),
                                    saveReco = cms.bool(True),
                                    trgSelection = cms.vstring("HLT_Ele27WP85_Gsf_v1", "HLT_Ele20WP60_Ele8_Mass55_v1","HLT_Ele25WP60_SC4_Mass5_v1",)
@@ -39,4 +54,6 @@ process.dumper = cms.EDAnalyzer('dumper',
 
 
 
+#process.p = cms.Path(process.multi5x5BasicClustersCleaned*process.dumper)
+#process.p = cms.Path(process.multi5x5BasicClustersCleaned)
 process.p = cms.Path(process.dumper)

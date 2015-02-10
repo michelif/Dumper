@@ -275,7 +275,27 @@ private:
   Float_t ele_eta[MAXPHOTONSTOSAVE];
   Float_t ele_phi[MAXPHOTONSTOSAVE];
 
-  Float_t    ele_energy[MAXPHOTONSTOSAVE];
+  Float_t   ele_esc[MAXPHOTONSTOSAVE];
+  Float_t   ele_etasc[MAXPHOTONSTOSAVE];
+  Float_t   ele_phisc[MAXPHOTONSTOSAVE];
+  
+  Float_t   ele_xsc[MAXPHOTONSTOSAVE];
+  Float_t   ele_ysc[MAXPHOTONSTOSAVE];
+  Float_t   ele_zsc[MAXPHOTONSTOSAVE];
+  
+  Float_t   ele_xcalo[MAXPHOTONSTOSAVE];
+  Float_t   ele_ycalo[MAXPHOTONSTOSAVE];
+  Float_t   ele_zcalo[MAXPHOTONSTOSAVE];
+
+  Float_t   ele_isEB[MAXPHOTONSTOSAVE];
+  Float_t   ele_isEE[MAXPHOTONSTOSAVE];
+  Float_t   ele_isEBEEGap[MAXPHOTONSTOSAVE];
+  Float_t   ele_E9[MAXPHOTONSTOSAVE];
+  Float_t   ele_E25[MAXPHOTONSTOSAVE];
+
+
+
+  Float_t    ele_e[MAXPHOTONSTOSAVE];
   Float_t    ele_ecalEnergy[MAXPHOTONSTOSAVE];
   Float_t    ele_trackPatVtx[MAXPHOTONSTOSAVE];
   Float_t    ele_trackAtVtxPt[MAXPHOTONSTOSAVE];
@@ -569,9 +589,29 @@ void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle, ed
 
 
     ele_pt[ele_n]          = itElectron->pt();
-    ele_energy[ele_n]      = itElectron->energy();
+    ele_e[ele_n]      = itElectron->energy();
     ele_ecalEnergy[ele_n]  = itElectron->ecalEnergy();              
     ele_trackPatVtx[ele_n] = itElectron->trackMomentumAtVtx().R();
+
+    ele_esc[ele_n] = itElectron->superCluster()->energy();
+    ele_etasc[ele_n] = itElectron->superCluster()->position().eta();
+    ele_phisc[ele_n] = itElectron->superCluster()->position().phi();
+    
+    ele_xsc[ele_n] = itElectron->superCluster()->position().x();
+    ele_ysc[ele_n] = itElectron->superCluster()->position().y();
+    ele_zsc[ele_n] = itElectron->superCluster()->position().z();
+    
+    ele_xcalo[ele_n] = itElectron->caloPosition().x();
+    ele_ycalo[ele_n] = itElectron->caloPosition().y();
+    ele_zcalo[ele_n] = itElectron->caloPosition().z();
+    
+    ele_isEB[ele_n] = itElectron->isEB();
+    ele_isEE[ele_n] = itElectron->isEE();
+    ele_isEBEEGap[ele_n] = itElectron->isEBEEGap();
+    ele_r9[ele_n] = itElectron->r9();
+    ele_E9[ele_n] = ele_r9[ele_n]*ele_esc[ele_n];
+    ele_E25[ele_n] = itElectron->e5x5();
+
 
 
     math::XYZVectorF p3Vtx = itElectron ->trackMomentumAtVtx();
@@ -606,7 +646,7 @@ void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle, ed
     ele_eSeedClusterOverPout[ele_n]       = itElectron->eSeedClusterOverPout();
     ele_EoP[ele_n]       = itElectron->eSuperClusterOverP();
     ele_OneOverEMinusOneOverP[ele_n]       = (1/itElectron->caloEnergy())-(1/itElectron ->trackMomentumAtVtx().R());
-    ele_r9[ele_n] = itElectron->r9();
+
     ele_misHits[ele_n]       = itElectron->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
 
     ele_dist[ele_n] = itElectron->convDist();
@@ -1166,7 +1206,7 @@ void dumper::beginJob() {
     t->Branch("elept",  &ele_pt,  "elept[elen]/F");
     t->Branch("eleeta",&ele_eta,"eleeta[elen]/F");
     t->Branch("elephi",&ele_phi,"elephi[elen]/F");
-    t->Branch("eleenergy",&ele_energy,"eleenergy[elen]/F");
+    t->Branch("elee",&ele_e,"elee[elen]/F");
     t->Branch("eleecalEnergy",&ele_ecalEnergy,"eleecalEnergy[elen]/F");     
     t->Branch("eletrackPatVtx",&ele_trackPatVtx,"eletrackPatVtx[elen]/F");  
     t->Branch("eletrackAtVtxPt",&ele_trackAtVtxPt,"eletrackAtVtxPt[elen]/F");  
@@ -1175,6 +1215,26 @@ void dumper::beginJob() {
     t->Branch("eletrackAtCaloPt",&ele_trackAtCaloPt,"eletrackAtCaloPt[elen]/F");  
     t->Branch("eletrackAtCaloEta",&ele_trackAtCaloEta,"eletrackAtCaloEta[elen]/F");  
     t->Branch("eletrackAtCaloPhi",&ele_trackAtCaloPhi,"eletrackAtCaloPhi[elen]/F");  
+
+    t->Branch("eleesc", &ele_esc, "eleesc[elen]/F");
+    t->Branch("eleetasc", &ele_etasc, "eleetasc[elen]/F");
+    t->Branch("elephisc", &ele_phisc, "elephisc[elen]/F");
+
+    t->Branch("elexsc", &ele_xsc, "elexsc[elen]/F");
+    t->Branch("eleysc", &ele_ysc, "eleysc[elen]/F");
+    t->Branch("elezsc", &ele_zsc, "elezsc[elen]/F");
+
+    t->Branch("elexcalo", &ele_xcalo, "elexcalo[elen]/F");
+    t->Branch("eleycalo", &ele_ycalo, "eleycalo[elen]/F");
+    t->Branch("elezcalo", &ele_zcalo, "elezcalo[elen]/F");
+
+    t->Branch("eleisEB", &ele_isEB, "eleisEB[elen]/F");
+    t->Branch("eleisEE", &ele_isEE, "eleisEE[elen]/F");
+    t->Branch("eleisEBEEGap", &ele_isEBEEGap, "eleisEBEEGap[elen]/F");
+    t->Branch("eleE9", &ele_E9, "eleE9[elen]/F");
+    t->Branch("eleE25", &ele_E25, "eleE25[elen]/F");
+
+
 
 
     t->Branch("elecharge",&ele_charge,"elecharge[elen]/F");
