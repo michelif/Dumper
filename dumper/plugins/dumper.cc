@@ -364,6 +364,8 @@ private:
   float truePU;
   int bxPU[16];
   Int_t nvtx;
+  Float_t vertex_x[200];
+  Float_t vertex_y[200];
   Float_t vertex_z[200];
 
   bool isData;
@@ -968,7 +970,11 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
   nvtx=0;
   for (reco::VertexCollection::const_iterator it = VertexHandle->begin(); 
        it != VertexHandle->end(); ++it) {
+    vertex_x[nvtx] = (it->isValid()) ? it->x() : 999.;
+    vertex_y[nvtx] = (it->isValid()) ? it->y() : 999.;
     vertex_z[nvtx] = (it->isValid()) ? it->z() : 999.;
+    std::cout<< vertex_x[nvtx]<<std::endl;
+
     nvtx++;
   }
   
@@ -1093,9 +1099,10 @@ void dumper::beginJob() {
   
   
   t->Branch("nvtx", &nvtx, "nvtx/I");
+  t->Branch("vertexx", &vertex_x, "vertexx[nvtx]/F");
+  t->Branch("vertexy", &vertex_y, "vertexy[nvtx]/F");
+  t->Branch("vertexz", &vertex_z, "vertexz[nvtx]/F");
   t->Branch("rho",  &rho, "rho/F");
-  
-
   
 
   if (saveReco) {
@@ -1319,6 +1326,8 @@ void dumper::beginJob() {
     
     t->Branch("truePU", &truePU, "truePU/F");
     t->Branch("bxPU", &bxPU, "bxPU[16]/I");
+
+
   }
 }
 
