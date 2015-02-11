@@ -973,7 +973,6 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
     vertex_x[nvtx] = (it->isValid()) ? it->x() : 999.;
     vertex_y[nvtx] = (it->isValid()) ? it->y() : 999.;
     vertex_z[nvtx] = (it->isValid()) ? it->z() : 999.;
-    std::cout<< vertex_x[nvtx]<<std::endl;
 
     nvtx++;
   }
