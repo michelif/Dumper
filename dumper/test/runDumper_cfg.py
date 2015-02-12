@@ -19,8 +19,8 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'PH2_1K_FB_V4::All', '')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1),
-#    input = cms.untracked.int32(500),
+#    input = cms.untracked.int32(-1),
+    input = cms.untracked.int32(500),
    )
 
 process.options = cms.untracked.PSet(

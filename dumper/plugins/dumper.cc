@@ -240,22 +240,22 @@ private:
   Int_t pfSC_nBC[MAXSCTOSAVE];
   Float_t pfSC_nXtals[MAXSCTOSAVE];
   //bc info
-  Float_t pfSC_bcEta[MAXBCTOSAVE][MAXSCTOSAVE];//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
-  Float_t pfSC_bcPhi[MAXBCTOSAVE][MAXSCTOSAVE];
-  Float_t   pfSC_bcE[MAXBCTOSAVE][MAXSCTOSAVE];
+  Float_t pfSC_bcEta[MAXSCTOSAVE][MAXBCTOSAVE];//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
+  Float_t pfSC_bcPhi[MAXSCTOSAVE][MAXBCTOSAVE];
+  Float_t   pfSC_bcE[MAXSCTOSAVE][MAXBCTOSAVE];
 
   //pfcand
-  Float_t pho_pfCandPt[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
-  Float_t pho_pfCandEta[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
-  Float_t pho_pfCandPhi[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
-  Float_t pho_pfCandVtx[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
-  Float_t pho_pfCandType[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
+  Float_t pho_pfCandPt  [MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE]  ;//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
+  Float_t pho_pfCandEta [MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE] ;
+  Float_t pho_pfCandPhi [MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE] ;
+  Float_t pho_pfCandVtx [MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE] ;
+  Float_t pho_pfCandType[MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE];
 
-  Float_t ele_pfCandPt[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
-  Float_t ele_pfCandEta[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
-  Float_t ele_pfCandPhi[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
-  Float_t ele_pfCandVtx[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
-  Float_t ele_pfCandType[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
+  Float_t ele_pfCandPt  [MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE]  ;//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
+  Float_t ele_pfCandEta [MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE] ;
+  Float_t ele_pfCandPhi [MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE] ;
+  Float_t ele_pfCandVtx [MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE] ;
+  Float_t ele_pfCandType[MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE];
 
 
   Float_t multi5x5SC_eta[MAXSCTOSAVE];
@@ -392,8 +392,17 @@ dumper::~dumper()
 
 void dumper::clearVector(){
 
-  for(int i=0;i<MAXPFCANDTOSAVE;++i){
-    for(int j=0;j<MAXPHOTONSTOSAVE;++j){
+  for(int i=0;i<MAXSCTOSAVE;++i){
+    for(int j=0;j<MAXBCTOSAVE;++j){
+      pfSC_bcEta[i][j]=0.;
+      pfSC_bcPhi[i][j]=0.;
+      pfSC_bcE[i][j]=0.;
+    }
+  }
+
+
+  for(int i=0;i<MAXPHOTONSTOSAVE;++i){
+    for(int j=0;j<MAXPFCANDTOSAVE;++j){ 
       pho_pfCandPt[i][j]=0.;//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
       pho_pfCandEta[i][j]=0.;
       pho_pfCandPhi[i][j]=0.;
@@ -535,10 +544,10 @@ void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco:
 
 
 	if(p4pho.DeltaR(p4)<0.4 && pfcandPho_n<MAXPFCANDTOSAVE){
-	  pho_pfCandPt[pfcandPho_n][pho_n]=p4t.pt();
-	  pho_pfCandEta[pfcandPho_n][pho_n]=p4t.eta();
-	  pho_pfCandPhi[pfcandPho_n][pho_n]=p4t.phi();
-	  pho_pfCandType[pfcandPho_n][pho_n]=id;
+	  pho_pfCandPt  [pho_n][pfcandPho_n]  =p4t.pt();
+	  pho_pfCandEta [pho_n][pfcandPho_n] =p4t.eta();
+	  pho_pfCandPhi [pho_n][pfcandPho_n] =p4t.phi();
+	  pho_pfCandType[pho_n][pfcandPho_n]=id;
 
 	  //	  std::cout<<"index"<<pfcandPho_n<<" "<<pho_n<< " pt:"<<pho_pfCandPt[pfcandPho_n][pho_n]<<" "<<pho_pfCandEta[pfcandPho_n][pho_n]<<" "<<pho_pfCandPhi[pfcandPho_n][pho_n]<<" "<<pho_pfCandType[pfcandPho_n][pho_n]<<std::endl;
 	  // Get the primary vertex coordinates
@@ -711,10 +720,10 @@ void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle, ed
 
 
 	if(p4ele.DeltaR(p4)<0.4 && pfcandEle_n<MAXPFCANDTOSAVE){
-	  ele_pfCandPt[pfcandEle_n][ele_n]=p4t.pt();
-	  ele_pfCandEta[pfcandEle_n][ele_n]=p4t.eta();
-	  ele_pfCandPhi[pfcandEle_n][ele_n]=p4t.phi();
-	  ele_pfCandType[pfcandEle_n][ele_n]=id;
+	  ele_pfCandPt  [ele_n][pfcandEle_n]  =p4t.pt();
+	  ele_pfCandEta [ele_n][pfcandEle_n] =p4t.eta();
+	  ele_pfCandPhi [ele_n][pfcandEle_n] =p4t.phi();
+	  ele_pfCandType[ele_n][pfcandEle_n]=id;
 
 	  //	  std::cout<<"index"<<pfcandEle_n<<" "<<ele_n<< " pt:"<<ele_pfCandPt[pfcandEle_n][ele_n]<<" "<<ele_pfCandEta[pfcandEle_n][ele_n]<<" "<<ele_pfCandPhi[pfcandEle_n][ele_n]<<" "<<ele_pfCandType[pfcandEle_n][ele_n]<<"elen"<<ele_n<<std::endl;
 
@@ -832,14 +841,13 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
       pfSC_e[pfSC_n] = itSC->energy();
       pfSC_nBC[pfSC_n] = itSC->clustersSize();
       pfSC_nXtals[pfSC_n] = itSC->seed()->size();
-
       //basicClusters
       int nBC=0;
       for (reco::CaloCluster_iterator bclus = (itSC->clustersBegin()); bclus != (itSC->clustersEnd()); ++bclus) {
 	if((*bclus)->energy() > 0 && pfSC_nBC[pfSC_n]<MAXBCTOSAVE){
-	  pfSC_bcPhi[nBC][pfSC_n]=(*bclus)->phi();
-	  pfSC_bcEta[nBC][pfSC_n]=(*bclus)->eta(); 
-	  pfSC_bcE[nBC][pfSC_n]=(*bclus)->energy(); 
+	  pfSC_bcPhi[pfSC_n][nBC]=(*bclus)->phi();
+	  pfSC_bcEta[pfSC_n][nBC]=(*bclus)->eta(); 
+	  pfSC_bcE[pfSC_n][nBC]=(*bclus)->energy(); 
 	}
       }
       nBC++;
@@ -861,13 +869,31 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
       pfSC_nBC[pfSC_n] = itSC->clustersSize();
       pfSC_nXtals[pfSC_n] = itSC->seed()->size();
 
+
+      std::cout<<" seed E:"<<itSC->seed()->energy()<<" seed Eta:"<<itSC->seed()->eta()<<std::endl;
+      //basicClusters
+      int nBC=0;
+      for (reco::CaloCluster_iterator bclus = (itSC->clustersBegin()); bclus != (itSC->clustersEnd()); ++bclus) {
+	if((*bclus)->energy() > 0 && pfSC_nBC[pfSC_n]<MAXBCTOSAVE){
+	  pfSC_bcPhi[pfSC_n][nBC]=(*bclus)->phi();
+	  pfSC_bcEta[pfSC_n][nBC]=(*bclus)->eta(); 
+	  pfSC_bcE[pfSC_n][nBC]=(*bclus)->energy(); 
+
+	  std::cout<<"E:"<<pfSC_bcE[pfSC_n][nBC]<<" Eta:"<<pfSC_bcEta[pfSC_n][nBC]<<std::endl;
+	}
+      }
+      nBC++;
+    }
+
+
+
     }
 
     pfSC_n++;
-  }
-
-
 }
+
+
+
 
 void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH,std::vector<ElectronMCTruth> MCElectrons) {
   
@@ -1157,11 +1183,11 @@ void dumper::beginJob() {
     t->Branch("photwrHCAL03",&pho_twrHCAL03,"photwrHCAL03[phon]/F");
     t->Branch("phohlwTrack03",&pho_hlwTrack03,"phohlwTrack03[phon]/F");
 
-    t->Branch("phopfCandPt",&pho_pfCandPt,"phopfCandPt[200][20]/F");//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
-    t->Branch("phopfCandEta",&pho_pfCandEta,"phopfCandEta[200][20]/F");
-    t->Branch("phopfCandPhi",&pho_pfCandPhi,"phopfCandPhi[200][20]/F");
-    t->Branch("phopfCandVtx",&pho_pfCandVtx,"phopfCandVtx[200][20]/F");
-    t->Branch("phopfCandType",&pho_pfCandType,"phopfCandType[200][20]/F");
+    t->Branch("phopfCandPt",&pho_pfCandPt,"phopfCandPt[20][200]/F");//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
+    t->Branch("phopfCandEta",&pho_pfCandEta,"phopfCandEta[20][200]/F");
+    t->Branch("phopfCandPhi",&pho_pfCandPhi,"phopfCandPhi[20][200]/F");
+    t->Branch("phopfCandVtx",&pho_pfCandVtx,"phopfCandVtx[20][200]/F");
+    t->Branch("phopfCandType",&pho_pfCandType,"phopfCandType[20][200]/F");
 
     t->Branch("phoptiso004", &pho_ptiso004, "phoptiso004[phon]/F");
     t->Branch("phontrkiso004", &pho_ntrkiso004, "phontrkiso004[phon]/I");
@@ -1184,8 +1210,6 @@ void dumper::beginJob() {
     t->Branch("pfSCbcEta", &pfSC_bcEta, "pfSCbcEta[200][200]/F");//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
     t->Branch("pfSCbcPhi", &pfSC_bcPhi, "pfSCbcPhi[200][200]/F");
     t->Branch("pfSCbcE", &pfSC_bcE, "pfSCbcE[200][200]/F");
-
-
 
     t->Branch("multi5x5SCn",   &multi5x5SC_n,   "multi5x5SCn/I");
     t->Branch("multi5x5SCeta", &multi5x5SC_eta, "multi5x5SCeta[multi5x5SCn]/F");
@@ -1279,11 +1303,11 @@ void dumper::beginJob() {
     t->Branch("elealphaZS", &ele_alphaZS, "elealphaZS[elen]/F");
     t->Branch("elealphaNoZS", &ele_alphaNoZS, "elealphaNoZS[elen]/F");
 
-    t->Branch("elepfCandPt",&ele_pfCandPt,"elepfCandPt[200][20]/F");//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
-    t->Branch("elepfCandEta",&ele_pfCandEta,"elepfCandEta[200][20]/F");
-    t->Branch("elepfCandPhi",&ele_pfCandPhi,"elepfCandPhi[200][20]/F");
-    t->Branch("elepfCandVtx",&ele_pfCandVtx,"elepfCandVtx[200][20]/F");
-    t->Branch("elepfCandType",&ele_pfCandType,"elepfCandType[200][20]/F");
+    t->Branch("elepfCandPt",&ele_pfCandPt,"elepfCandPt[20][200]/F");//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
+    t->Branch("elepfCandEta",&ele_pfCandEta,"elepfCandEta[20][200]/F");
+    t->Branch("elepfCandPhi",&ele_pfCandPhi,"elepfCandPhi[20][200]/F");
+    t->Branch("elepfCandVtx",&ele_pfCandVtx,"elepfCandVtx[20][200]/F");
+    t->Branch("elepfCandType",&ele_pfCandType,"elepfCandType[20][200]/F");
 
 
 
