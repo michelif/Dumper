@@ -848,9 +848,13 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 	  pfSC_bcPhi[pfSC_n][nBC]=(*bclus)->phi();
 	  pfSC_bcEta[pfSC_n][nBC]=(*bclus)->eta(); 
 	  pfSC_bcE[pfSC_n][nBC]=(*bclus)->energy(); 
+	  //	  std::cout<<pfSC_n<<" : "<<nBC<<" : "<< pfSC_nBC[pfSC_n]<< " en: "<<pfSC_bcE[pfSC_n][nBC]<<std::endl;
+	  nBC++;
 	}
+
       }
-      nBC++;
+
+
     }
 
     pfSC_n++;
@@ -880,9 +884,11 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 	  pfSC_bcE[pfSC_n][nBC]=(*bclus)->energy(); 
 
 	  //	  std::cout<<"E:"<<pfSC_bcE[pfSC_n][nBC]<<" Eta:"<<pfSC_bcEta[pfSC_n][nBC]<<std::endl;
+	  nBC++;
 	}
+
       }
-      nBC++;
+
     }
 
 
