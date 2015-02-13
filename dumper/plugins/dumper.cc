@@ -870,7 +870,7 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
       pfSC_nXtals[pfSC_n] = itSC->seed()->size();
 
 
-      std::cout<<" seed E:"<<itSC->seed()->energy()<<" seed Eta:"<<itSC->seed()->eta()<<std::endl;
+      //      std::cout<<" seed E:"<<itSC->seed()->energy()<<" seed Eta:"<<itSC->seed()->eta()<<std::endl;
       //basicClusters
       int nBC=0;
       for (reco::CaloCluster_iterator bclus = (itSC->clustersBegin()); bclus != (itSC->clustersEnd()); ++bclus) {
@@ -879,7 +879,7 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 	  pfSC_bcEta[pfSC_n][nBC]=(*bclus)->eta(); 
 	  pfSC_bcE[pfSC_n][nBC]=(*bclus)->energy(); 
 
-	  std::cout<<"E:"<<pfSC_bcE[pfSC_n][nBC]<<" Eta:"<<pfSC_bcEta[pfSC_n][nBC]<<std::endl;
+	  //	  std::cout<<"E:"<<pfSC_bcE[pfSC_n][nBC]<<" Eta:"<<pfSC_bcEta[pfSC_n][nBC]<<std::endl;
 	}
       }
       nBC++;
