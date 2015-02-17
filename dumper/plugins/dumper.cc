@@ -196,6 +196,7 @@ private:
   Float_t   pho_isEB[MAXPHOTONSTOSAVE];
   Float_t   pho_isEE[MAXPHOTONSTOSAVE];
   Float_t   pho_isEBEEGap[MAXPHOTONSTOSAVE];
+  Float_t   pho_R9[MAXPHOTONSTOSAVE];
   Float_t   pho_E9[MAXPHOTONSTOSAVE];
   Float_t   pho_E25[MAXPHOTONSTOSAVE];
 
@@ -263,12 +264,21 @@ private:
   Float_t   multi5x5SC_e[MAXSCTOSAVE];
   Float_t multi5x5SC_nBC[MAXSCTOSAVE];
   Float_t multi5x5SC_nXtals[MAXSCTOSAVE];
+  Float_t multi5x5SC_bcEta[MAXSCTOSAVE][MAXBCTOSAVE];//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
+  Float_t multi5x5SC_bcPhi[MAXSCTOSAVE][MAXBCTOSAVE];
+  Float_t   multi5x5SC_bcE[MAXSCTOSAVE][MAXBCTOSAVE];
+
+
 
   Float_t hybridSC_eta[MAXSCTOSAVE];
   Float_t hybridSC_phi[MAXSCTOSAVE];
   Float_t   hybridSC_e[MAXSCTOSAVE];
   Float_t hybridSC_nBC[MAXSCTOSAVE];
   Float_t hybridSC_nXtals[MAXSCTOSAVE];
+  Float_t hybridSC_bcEta[MAXSCTOSAVE][MAXBCTOSAVE];//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
+  Float_t hybridSC_bcPhi[MAXSCTOSAVE][MAXBCTOSAVE];
+  Float_t   hybridSC_bcE[MAXSCTOSAVE][MAXBCTOSAVE];
+
 
 
   Float_t ele_pt[MAXPHOTONSTOSAVE];
@@ -397,23 +407,33 @@ void dumper::clearVector(){
       pfSC_bcEta[i][j]=0.;
       pfSC_bcPhi[i][j]=0.;
       pfSC_bcE[i][j]=0.;
+
+      multi5x5SC_bcEta[i][j]=0.;
+      multi5x5SC_bcPhi[i][j]=0.;
+      multi5x5SC_bcE[i][j]=0.;
+
+      hybridSC_bcEta[i][j]=0.;
+      hybridSC_bcPhi[i][j]=0.;
+      hybridSC_bcE[i][j]=0.;
+
+
     }
   }
 
 
   for(int i=0;i<MAXPHOTONSTOSAVE;++i){
     for(int j=0;j<MAXPFCANDTOSAVE;++j){ 
-      pho_pfCandPt[i][j]=0.;//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
+      pho_pfCandPt[i][j]=-1.;//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
       pho_pfCandEta[i][j]=0.;
       pho_pfCandPhi[i][j]=0.;
-      pho_pfCandVtx[i][j]=0.;
-      pho_pfCandType[i][j]=0.;
+      pho_pfCandVtx[i][j]=-1.;
+      pho_pfCandType[i][j]=-1.;
       
-      ele_pfCandPt[i][j]=0.;//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
+      ele_pfCandPt[i][j]=-1.;//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
       ele_pfCandEta[i][j]=0.;
       ele_pfCandPhi[i][j]=0.;
-      ele_pfCandVtx[i][j]=0.;
-      ele_pfCandType[i][j]=0.;
+      ele_pfCandVtx[i][j]=-1.;
+      ele_pfCandType[i][j]=-1.;
     }
   }
 
@@ -452,6 +472,7 @@ void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco:
       pho_isEB[pho_n] = pho->isEB();
       pho_isEE[pho_n] = pho->isEE();
       pho_isEBEEGap[pho_n] = pho->isEBEEGap();
+      pho_R9[pho_n] = pho->r9();
       pho_E9[pho_n] = pho->e3x3();
       pho_E25[pho_n] = pho->e5x5();
 
@@ -552,7 +573,9 @@ void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco:
 	  //	  std::cout<<"index"<<pfcandPho_n<<" "<<pho_n<< " pt:"<<pho_pfCandPt[pfcandPho_n][pho_n]<<" "<<pho_pfCandEta[pfcandPho_n][pho_n]<<" "<<pho_pfCandPhi[pfcandPho_n][pho_n]<<" "<<pho_pfCandType[pfcandPho_n][pho_n]<<std::endl;
 	  // Get the primary vertex coordinates
 	  int closestVertex=0;
-	  float dist_vtx=fabs(vertex_z[0]-jt->vz());
+	  float dist_vtx=999;
+	  if(nvtx>0){
+	  dist_vtx=fabs(vertex_z[0]-jt->vz());
 	  for(int i=0;i<nvtx;++i){
 	    float dist=fabs(vertex_z[i]-jt->vz());
 	    if(dist<dist_vtx){
@@ -560,9 +583,9 @@ void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco:
 	      dist_vtx=dist;
 	    }
 	  }
-
+	  }
 	  if(dist_vtx<0.5){
-	    pho_pfCandVtx[pfcandPho_n][pho_n]=closestVertex;
+	    pho_pfCandVtx[pho_n][pfcandPho_n]=closestVertex;
 	  }
 	  pfcandPho_n++;
 	}
@@ -729,17 +752,21 @@ void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle, ed
 
 	  // Get the primary vertex coordinates
 	  int closestVertex=0;
-	  float dist_vtx=fabs(vertex_z[0]-jt->vz());
-	  for(int i=0;i<nvtx;++i){
-	    float dist=fabs(vertex_z[i]-jt->vz());
-	    if(dist<dist_vtx){
-	      closestVertex=i;
-	      dist_vtx=dist;
+	  float dist_vtx=999;
+	  if (nvtx>0){
+	    dist_vtx=fabs(vertex_z[0]-jt->vz());
+	    for(int i=0;i<nvtx;++i){
+	      float dist=fabs(vertex_z[i]-jt->vz());
+	      if(dist<dist_vtx){
+		closestVertex=i;
+		dist_vtx=dist;
+	      }
 	    }
 	  }
-
+	  //	  if(pfcandEle_n==0 && ele_n ==200)	    std::cout<<"closestVtx"<<closestVertex<<" "<<ele_pfCandPt[ele_n][pfcandEle_n]<<"'"<<p4t.pt()<<std::endl;
 	  if(dist_vtx<0.5){
-	    ele_pfCandVtx[pfcandEle_n][ele_n]=closestVertex;
+
+	    ele_pfCandVtx[ele_n][pfcandEle_n]=closestVertex;
 	  }
 	  pfcandEle_n++;
 	}
@@ -792,9 +819,24 @@ void dumper::multi5x5scReco(edm::Handle<reco::SuperClusterCollection> multi5x5Ha
       multi5x5SC_nBC[multi5x5SC_n] = itSC->clustersSize();
       multi5x5SC_nXtals[multi5x5SC_n] = itSC->seed()->size();
 
+      //basicClusters
+      int nBC=0;
+      for (reco::CaloCluster_iterator bclus = (itSC->clustersBegin()); bclus != (itSC->clustersEnd()); ++bclus) {
+	if((*bclus)->energy() > 0 && multi5x5SC_nBC[multi5x5SC_n]<MAXBCTOSAVE){
+	  multi5x5SC_bcPhi[multi5x5SC_n][nBC]=(*bclus)->phi();
+	  multi5x5SC_bcEta[multi5x5SC_n][nBC]=(*bclus)->eta(); 
+	  multi5x5SC_bcE[multi5x5SC_n][nBC]=(*bclus)->energy(); 
+	  //	  std::cout<<"multi 5x5 "<<multi5x5SC_n<<" : "<<nBC<<" : "<< multi5x5SC_nBC[multi5x5SC_n]<< " en: "<<multi5x5SC_bcE[multi5x5SC_n][nBC]<<" eta:"<<multi5x5SC_bcEta[multi5x5SC_n][nBC]<<std::endl;
+	  nBC++;
+	}
+
+      }
+
+
+      multi5x5SC_n++;
 
     }
-    multi5x5SC_n++;
+  
 
   }
 
@@ -816,9 +858,25 @@ void dumper::hybridscReco(edm::Handle<reco::SuperClusterCollection> hybridHandle
       hybridSC_nBC[hybridSC_n] = itSC->clustersSize();
       hybridSC_nXtals[hybridSC_n] = itSC->seed()->size();
 
+      //basicClusters
+      int nBC=0;
+      for (reco::CaloCluster_iterator bclus = (itSC->clustersBegin()); bclus != (itSC->clustersEnd()); ++bclus) {
+	if((*bclus)->energy() > 0 && hybridSC_nBC[hybridSC_n]<MAXBCTOSAVE){
+	  hybridSC_bcPhi[hybridSC_n][nBC]=(*bclus)->phi();
+	  hybridSC_bcEta[hybridSC_n][nBC]=(*bclus)->eta(); 
+	  hybridSC_bcE[hybridSC_n][nBC]=(*bclus)->energy(); 
+	  //	  std::cout<<hybridSC_n<<" : "<<nBC<<" : "<< hybridSC_nBC[hybridSC_n]<< " en: "<<hybridSC_bcE[hybridSC_n][nBC]<<std::endl;
+	  nBC++;
+	}
+
+      }
+
+
+
+      hybridSC_n++;
 
     }
-    hybridSC_n++;
+
 
   }
 
@@ -848,16 +906,16 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 	  pfSC_bcPhi[pfSC_n][nBC]=(*bclus)->phi();
 	  pfSC_bcEta[pfSC_n][nBC]=(*bclus)->eta(); 
 	  pfSC_bcE[pfSC_n][nBC]=(*bclus)->energy(); 
-	  //	  std::cout<<pfSC_n<<" : "<<nBC<<" : "<< pfSC_nBC[pfSC_n]<< " en: "<<pfSC_bcE[pfSC_n][nBC]<<std::endl;
+	  //	  std::cout<<"pfSC "<<pfSC_n<<" : "<<nBC<<" : "<< pfSC_nBC[pfSC_n]<< " en: "<<pfSC_bcE[pfSC_n][nBC]<<std::endl;
 	  nBC++;
 	}
 
       }
 
-
+      pfSC_n++;
     }
 
-    pfSC_n++;
+
   }
 
 
@@ -883,19 +941,19 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 	  pfSC_bcEta[pfSC_n][nBC]=(*bclus)->eta(); 
 	  pfSC_bcE[pfSC_n][nBC]=(*bclus)->energy(); 
 
-	  //	  std::cout<<"E:"<<pfSC_bcE[pfSC_n][nBC]<<" Eta:"<<pfSC_bcEta[pfSC_n][nBC]<<std::endl;
+	  //	  std::cout<<"pfsc"<<pfSC_n<<" : "<<nBC<<" : "<< pfSC_nBC[pfSC_n]<< " en: "<<pfSC_bcE[pfSC_n][nBC]<<std::endl;
 	  nBC++;
 	}
 
       }
 
+      pfSC_n++;
     }
 
 
+  }
 
-    }
 
-    pfSC_n++;
 }
 
 
@@ -913,7 +971,7 @@ void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH,std::vector<El
     //    if(gp->status()==3)    std::cout<<gp->status()<<" "<<gp->pdgId()<<std::endl;    
     //    if ((gp->status() >=20 and gp->status() <=29) and abs(gp->pdgId()) == 11) {
     //    if ((gp->status() ==3) ){
-    if (gp->pt() > 5.) {//loose pt cut just to save space
+    if (gp->pt() > 3.) {//loose pt cut just to save space
       if(gp_n<MAXPARTICLESTOSAVE){
 	gp_pt[gp_n]  = gp->pt();
 	gp_eta[gp_n] = gp->eta();
@@ -1095,6 +1153,7 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
       //ELECTRONS
       eleReco(ElectronHandle,hConversions,recoBeamSpotHandle,rhitseb,rhitsee,PFCandidates);
      
+
       //pfsuperclusters
       edm::Handle<reco::SuperClusterCollection> superClustersEBHandle;
       event.getByLabel("particleFlowSuperClusterECAL","particleFlowSuperClusterECALBarrel",superClustersEBHandle);
@@ -1104,12 +1163,14 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
       //PFSUPERCLUSTERS
       scReco(superClustersEBHandle,superClustersEEHandle);
 
+
       //multi5x5SuperClusters
       edm::Handle<reco::SuperClusterCollection> multi5x5Handle;
       event.getByLabel("multi5x5SuperClustersWithPreshower",multi5x5Handle);
 
       //PFSUPERCLUSTERS
       multi5x5scReco(multi5x5Handle);
+
 
       //hybridSuperClusters
       edm::Handle<reco::SuperClusterCollection> hybridHandle;
@@ -1118,7 +1179,6 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
       //PFSUPERCLUSTERS
       hybridscReco(hybridHandle);
 
-      
       
   }
   t->Fill();
@@ -1159,6 +1219,7 @@ void dumper::beginJob() {
     t->Branch("phoisEB", &pho_isEB, "phoisEB[phon]/F");
     t->Branch("phoisEE", &pho_isEE, "phoisEE[phon]/F");
     t->Branch("phoisEBEEGap", &pho_isEBEEGap, "phoisEBEEGap[phon]/F");
+    t->Branch("phoR9", &pho_R9, "phoR9[phon]/F");
     t->Branch("phoE9", &pho_E9, "phoE9[phon]/F");
     t->Branch("phoE25", &pho_E25, "phoE25[phon]/F");
 
@@ -1224,12 +1285,21 @@ void dumper::beginJob() {
     t->Branch("multi5x5SCnBC", &multi5x5SC_nBC, "multi5x5SCnBC[multi5x5SCn]/F");
     t->Branch("multi5x5SCnXtals", &multi5x5SC_nXtals, "multi5x5SCnXtals[multi5x5SCn]/F");
 
+    t->Branch("multi5x5SCbcEta", &multi5x5SC_bcEta, "multi5x5SCbcEta[200][200]/F");//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
+    t->Branch("multi5x5SCbcPhi", &multi5x5SC_bcPhi, "multi5x5SCbcPhi[200][200]/F");
+    t->Branch("multi5x5SCbcE", &multi5x5SC_bcE, "multi5x5SCbcE[200][200]/F");
+
+
     t->Branch("hybridSCn",   &hybridSC_n,   "hybridSCn/I");
     t->Branch("hybridSCeta", &hybridSC_eta, "hybridSCeta[hybridSCn]/F");
     t->Branch("hybridSCphi", &hybridSC_phi, "hybridSCphi[hybridSCn]/F");
     t->Branch("hybridSCe", &hybridSC_e, "hybridSCe[hybridSCn]/F");
     t->Branch("hybridSCnBC", &hybridSC_nBC, "hybridSCnBC[hybridSCn]/F");
     t->Branch("hybridSCnXtals", &hybridSC_nXtals, "hybridSCnXtals[hybridSCn]/F");
+
+    t->Branch("hybridbcEta", &hybridSC_bcEta, "hybridbcEta[200][200]/F");//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
+    t->Branch("hybridbcPhi", &hybridSC_bcPhi, "hybridbcPhi[200][200]/F");
+    t->Branch("hybridbcE", &hybridSC_bcE, "hybridbcE[200][200]/F");
 
       
     t->Branch("elen", &ele_n, "elen/I");
