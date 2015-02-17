@@ -121,6 +121,8 @@
 #define MAXSCTOSAVE 200
 #define MAXBCTOSAVE 200
 #define MAXPFCANDTOSAVE 200
+#define MAXRECHITTOSAVE 20000
+
 //note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
 
 class dumper : public edm::EDAnalyzer {
@@ -136,7 +138,7 @@ public:
   void scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHandle, edm::Handle<reco::SuperClusterCollection> superClustersEEHandle);
   void multi5x5scReco(edm::Handle<reco::SuperClusterCollection> multi5x5Handle);
   void hybridscReco(edm::Handle<reco::SuperClusterCollection> hybridHandle);
-
+  void recHitReco(const EERecHitCollection* rhitsee);
 private:
   virtual void beginRun(const edm::Run& run,const edm::EventSetup& setup);
   virtual void beginJob() ;
@@ -152,7 +154,7 @@ private:
   const CaloTopology *topology;
   
   Float_t rho;
-  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n, multi5x5SC_n, hybridSC_n, pfcandPho_n, pfcandEle_n;
+  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n, multi5x5SC_n, hybridSC_n, pfcandPho_n, pfcandEle_n, rechit_n;
 
   Float_t gp_pt[MAXPARTICLESTOSAVE];
   Float_t gp_eta[MAXPARTICLESTOSAVE];
@@ -173,6 +175,9 @@ private:
   Float_t gele_fbrem120[MAXPHOTONSTOSAVE];
   Int_t gele_index[MAXPHOTONSTOSAVE];
 
+  Float_t rechit_e[MAXRECHITTOSAVE];
+  Float_t rechit_ix[MAXRECHITTOSAVE];
+  Float_t rechit_iy[MAXRECHITTOSAVE];
 
 
   Float_t pho_pt[MAXPHOTONSTOSAVE];
@@ -381,12 +386,13 @@ private:
   bool isData;
   bool saveReco;
 
-
+  int entryNumber;
 
 };
 
 void dumper::beginRun(const edm::Run& run,const edm::EventSetup& setup) {
   std::cout <<"begining run "<<std::endl;
+  entryNumber=0;
 }
 
 
@@ -439,6 +445,25 @@ void dumper::clearVector(){
 
 }
 
+
+void dumper::recHitReco(const EERecHitCollection* rhitsee){
+  
+  //save rechits only for first 100 evts
+  rechit_n=0;
+  
+  for (EcalRecHitCollection::const_iterator itRecHit = rhitsee->begin();
+       itRecHit != rhitsee->end(); ++itRecHit) {
+    if(itRecHit->energy()>0){
+      rechit_e[rechit_n]=itRecHit->energy();
+      EKDetId ekId(itRecHit->id());
+      rechit_ix[rechit_n]=ekId.ix();
+      rechit_iy[rechit_n]=ekId.iy();
+      rechit_n++;
+    }
+  }
+  
+  
+}
 
 void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco::TrackCollection> tracksH, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee,edm::Handle<reco::PFCandidateCollection>  PFCandidates){
 
@@ -1036,6 +1061,7 @@ void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH,std::vector<El
 
 void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
 
+  entryNumber++;
 
   ///////////////////////Get PU informations
   // rho from fast jet
@@ -1124,16 +1150,20 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
       const EBRecHitCollection* rhitseb=0;
       event.getByLabel("ecalRecHit","EcalRecHitsEB", ecalhitseb);
       rhitseb = ecalhitseb.product(); // get a ptr to the product
-      
+
       edm::Handle<EERecHitCollection> ecalhitsee;
       const EERecHitCollection* rhitsee=0;
       event.getByLabel("ecalRecHit","EcalRecHitsEK", ecalhitsee);
       rhitsee = ecalhitsee.product(); // get a ptr to the product
+
       
       edm::Handle<reco::PFCandidateCollection>  PFCandidates;
       event.getByLabel("particleFlow", PFCandidates);
 
       clearVector();
+
+      //rechit are too much, just save them for the first 100 events
+      if(entryNumber<101)recHitReco(rhitsee);
 
       //PHOTONS
       phoReco(phoH,tracks,rhitseb,rhitsee,PFCandidates);
@@ -1397,6 +1427,12 @@ void dumper::beginJob() {
     t->Branch("elePfSumChargedHadronPt",&ele_pfSumChargedHadronPt,"elePfSumChargedHadronPt[elen]/F");
     t->Branch("elePfSumNeutralHadronEt",&ele_pfsumNeutralHadronEt,"elePfSumNeutralHadronEt[elen]/F");
     t->Branch("elePfSumPhotonEt",&ele_pfsumPhotonEt,"elePfSumPhotonEt[elen]/F");
+
+    t->Branch("rechitn",   &rechit_n,   "rechitn/I");
+    t->Branch("rechite",  &rechit_e,  "rechite[rechitn]/F");
+    t->Branch("rechitix", &rechit_ix, "rechitix[rechitn]/F");
+    t->Branch("rechitiy", &rechit_iy, "rechitiy[rechitn]/F");
+
 
   }   
       
