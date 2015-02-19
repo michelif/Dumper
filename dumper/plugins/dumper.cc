@@ -244,11 +244,12 @@ private:
   Float_t pfSC_phi[MAXSCTOSAVE];
   Float_t   pfSC_e[MAXSCTOSAVE];
   Int_t pfSC_nBC[MAXSCTOSAVE];
-  Float_t pfSC_nXtals[MAXSCTOSAVE];
+  Int_t pfSC_nXtalsSeed[MAXSCTOSAVE];
   //bc info
   Float_t pfSC_bcEta[MAXSCTOSAVE][MAXBCTOSAVE];//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
   Float_t pfSC_bcPhi[MAXSCTOSAVE][MAXBCTOSAVE];
   Float_t   pfSC_bcE[MAXSCTOSAVE][MAXBCTOSAVE];
+  Int_t pfSC_bcNXtals[MAXSCTOSAVE][MAXBCTOSAVE];
 
   //pfcand
   Float_t pho_pfCandPt  [MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE]  ;//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
@@ -268,22 +269,22 @@ private:
   Float_t multi5x5SC_phi[MAXSCTOSAVE];
   Float_t   multi5x5SC_e[MAXSCTOSAVE];
   Float_t multi5x5SC_nBC[MAXSCTOSAVE];
-  Float_t multi5x5SC_nXtals[MAXSCTOSAVE];
+  Int_t multi5x5SC_nXtalsSeed[MAXSCTOSAVE];
   Float_t multi5x5SC_bcEta[MAXSCTOSAVE][MAXBCTOSAVE];//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
   Float_t multi5x5SC_bcPhi[MAXSCTOSAVE][MAXBCTOSAVE];
   Float_t   multi5x5SC_bcE[MAXSCTOSAVE][MAXBCTOSAVE];
-
+  Int_t   multi5x5SC_bcNXtals[MAXSCTOSAVE][MAXBCTOSAVE];
 
 
   Float_t hybridSC_eta[MAXSCTOSAVE];
   Float_t hybridSC_phi[MAXSCTOSAVE];
   Float_t   hybridSC_e[MAXSCTOSAVE];
   Float_t hybridSC_nBC[MAXSCTOSAVE];
-  Float_t hybridSC_nXtals[MAXSCTOSAVE];
+  Int_t hybridSC_nXtalsSeed[MAXSCTOSAVE];
   Float_t hybridSC_bcEta[MAXSCTOSAVE][MAXBCTOSAVE];//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
   Float_t hybridSC_bcPhi[MAXSCTOSAVE][MAXBCTOSAVE];
   Float_t   hybridSC_bcE[MAXSCTOSAVE][MAXBCTOSAVE];
-
+  Int_t   hybridSC_bcNXtals[MAXSCTOSAVE][MAXBCTOSAVE];
 
 
   Float_t ele_pt[MAXPHOTONSTOSAVE];
@@ -413,15 +414,17 @@ void dumper::clearVector(){
       pfSC_bcEta[i][j]=0.;
       pfSC_bcPhi[i][j]=0.;
       pfSC_bcE[i][j]=0.;
+      pfSC_bcNXtals[i][j]=0;
 
       multi5x5SC_bcEta[i][j]=0.;
       multi5x5SC_bcPhi[i][j]=0.;
       multi5x5SC_bcE[i][j]=0.;
+      multi5x5SC_bcNXtals[i][j]=0;
 
       hybridSC_bcEta[i][j]=0.;
       hybridSC_bcPhi[i][j]=0.;
       hybridSC_bcE[i][j]=0.;
-
+      hybridSC_bcNXtals[i][j]=0;
 
     }
   }
@@ -842,7 +845,7 @@ void dumper::multi5x5scReco(edm::Handle<reco::SuperClusterCollection> multi5x5Ha
 
       multi5x5SC_e[multi5x5SC_n] = itSC->energy();
       multi5x5SC_nBC[multi5x5SC_n] = itSC->clustersSize();
-      multi5x5SC_nXtals[multi5x5SC_n] = itSC->seed()->size();
+      multi5x5SC_nXtalsSeed[multi5x5SC_n] = itSC->seed()->size();
 
       //basicClusters
       int nBC=0;
@@ -851,6 +854,7 @@ void dumper::multi5x5scReco(edm::Handle<reco::SuperClusterCollection> multi5x5Ha
 	  multi5x5SC_bcPhi[multi5x5SC_n][nBC]=(*bclus)->phi();
 	  multi5x5SC_bcEta[multi5x5SC_n][nBC]=(*bclus)->eta(); 
 	  multi5x5SC_bcE[multi5x5SC_n][nBC]=(*bclus)->energy(); 
+	  multi5x5SC_bcNXtals[multi5x5SC_n][nBC]=(*bclus)->size(); 
 	  //	  std::cout<<"multi 5x5 "<<multi5x5SC_n<<" : "<<nBC<<" : "<< multi5x5SC_nBC[multi5x5SC_n]<< " en: "<<multi5x5SC_bcE[multi5x5SC_n][nBC]<<" eta:"<<multi5x5SC_bcEta[multi5x5SC_n][nBC]<<std::endl;
 	  nBC++;
 	}
@@ -881,7 +885,7 @@ void dumper::hybridscReco(edm::Handle<reco::SuperClusterCollection> hybridHandle
 
       hybridSC_e[hybridSC_n] = itSC->energy();
       hybridSC_nBC[hybridSC_n] = itSC->clustersSize();
-      hybridSC_nXtals[hybridSC_n] = itSC->seed()->size();
+      hybridSC_nXtalsSeed[hybridSC_n] = itSC->seed()->size();
 
       //basicClusters
       int nBC=0;
@@ -890,6 +894,7 @@ void dumper::hybridscReco(edm::Handle<reco::SuperClusterCollection> hybridHandle
 	  hybridSC_bcPhi[hybridSC_n][nBC]=(*bclus)->phi();
 	  hybridSC_bcEta[hybridSC_n][nBC]=(*bclus)->eta(); 
 	  hybridSC_bcE[hybridSC_n][nBC]=(*bclus)->energy(); 
+	  hybridSC_bcNXtals[hybridSC_n][nBC]=(*bclus)->size(); 
 	  //	  std::cout<<hybridSC_n<<" : "<<nBC<<" : "<< hybridSC_nBC[hybridSC_n]<< " en: "<<hybridSC_bcE[hybridSC_n][nBC]<<std::endl;
 	  nBC++;
 	}
@@ -923,7 +928,7 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 
       pfSC_e[pfSC_n] = itSC->energy();
       pfSC_nBC[pfSC_n] = itSC->clustersSize();
-      pfSC_nXtals[pfSC_n] = itSC->seed()->size();
+      pfSC_nXtalsSeed[pfSC_n] = itSC->seed()->size();
       //basicClusters
       int nBC=0;
       for (reco::CaloCluster_iterator bclus = (itSC->clustersBegin()); bclus != (itSC->clustersEnd()); ++bclus) {
@@ -931,6 +936,7 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 	  pfSC_bcPhi[pfSC_n][nBC]=(*bclus)->phi();
 	  pfSC_bcEta[pfSC_n][nBC]=(*bclus)->eta(); 
 	  pfSC_bcE[pfSC_n][nBC]=(*bclus)->energy(); 
+	  pfSC_bcNXtals[pfSC_n][nBC]=(*bclus)->size(); 
 	  //	  std::cout<<"pfSC "<<pfSC_n<<" : "<<nBC<<" : "<< pfSC_nBC[pfSC_n]<< " en: "<<pfSC_bcE[pfSC_n][nBC]<<std::endl;
 	  nBC++;
 	}
@@ -954,7 +960,7 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 
       pfSC_e[pfSC_n] = itSC->energy();
       pfSC_nBC[pfSC_n] = itSC->clustersSize();
-      pfSC_nXtals[pfSC_n] = itSC->seed()->size();
+      pfSC_nXtalsSeed[pfSC_n] = itSC->seed()->size();
 
 
       //      std::cout<<" seed E:"<<itSC->seed()->energy()<<" seed Eta:"<<itSC->seed()->eta()<<std::endl;
@@ -965,7 +971,7 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 	  pfSC_bcPhi[pfSC_n][nBC]=(*bclus)->phi();
 	  pfSC_bcEta[pfSC_n][nBC]=(*bclus)->eta(); 
 	  pfSC_bcE[pfSC_n][nBC]=(*bclus)->energy(); 
-
+	  pfSC_bcNXtals[pfSC_n][nBC]=(*bclus)->size(); 
 	  //	  std::cout<<"pfsc"<<pfSC_n<<" : "<<nBC<<" : "<< pfSC_nBC[pfSC_n]<< " en: "<<pfSC_bcE[pfSC_n][nBC]<<std::endl;
 	  nBC++;
 	}
@@ -1302,35 +1308,36 @@ void dumper::beginJob() {
     t->Branch("pfSCphi", &pfSC_phi, "pfSCphi[pfSCn]/F");
     t->Branch("pfSCe", &pfSC_e, "pfSCe[pfSCn]/F");
     t->Branch("pfSCnBC", &pfSC_nBC, "pfSCnBC[pfSCn]/I");
-    t->Branch("pfSCnXtals", &pfSC_nXtals, "pfSCnXtals[pfSCn]/F");
+    t->Branch("pfSCnXtalsSeed", &pfSC_nXtalsSeed, "pfSCnXtalsSeed[pfSCn]/I");
 
     t->Branch("pfSCbcEta", &pfSC_bcEta, "pfSCbcEta[200][200]/F");//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
     t->Branch("pfSCbcPhi", &pfSC_bcPhi, "pfSCbcPhi[200][200]/F");
     t->Branch("pfSCbcE", &pfSC_bcE, "pfSCbcE[200][200]/F");
+    t->Branch("pfSCbcNXtals", &pfSC_bcNXtals, "pfSCbcNXtals[200][200]/I");
 
     t->Branch("multi5x5SCn",   &multi5x5SC_n,   "multi5x5SCn/I");
     t->Branch("multi5x5SCeta", &multi5x5SC_eta, "multi5x5SCeta[multi5x5SCn]/F");
     t->Branch("multi5x5SCphi", &multi5x5SC_phi, "multi5x5SCphi[multi5x5SCn]/F");
     t->Branch("multi5x5SCe", &multi5x5SC_e, "multi5x5SCe[multi5x5SCn]/F");
     t->Branch("multi5x5SCnBC", &multi5x5SC_nBC, "multi5x5SCnBC[multi5x5SCn]/F");
-    t->Branch("multi5x5SCnXtals", &multi5x5SC_nXtals, "multi5x5SCnXtals[multi5x5SCn]/F");
+    t->Branch("multi5x5SCnXtalsSeed", &multi5x5SC_nXtalsSeed, "multi5x5SCnXtalsSeed[multi5x5SCn]/I");
 
     t->Branch("multi5x5SCbcEta", &multi5x5SC_bcEta, "multi5x5SCbcEta[200][200]/F");//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
     t->Branch("multi5x5SCbcPhi", &multi5x5SC_bcPhi, "multi5x5SCbcPhi[200][200]/F");
     t->Branch("multi5x5SCbcE", &multi5x5SC_bcE, "multi5x5SCbcE[200][200]/F");
-
+    t->Branch("multi5x5SCbcNXtals", &multi5x5SC_bcNXtals, "multi5x5SCbcNXtals[200][200]/I");
 
     t->Branch("hybridSCn",   &hybridSC_n,   "hybridSCn/I");
     t->Branch("hybridSCeta", &hybridSC_eta, "hybridSCeta[hybridSCn]/F");
     t->Branch("hybridSCphi", &hybridSC_phi, "hybridSCphi[hybridSCn]/F");
     t->Branch("hybridSCe", &hybridSC_e, "hybridSCe[hybridSCn]/F");
     t->Branch("hybridSCnBC", &hybridSC_nBC, "hybridSCnBC[hybridSCn]/F");
-    t->Branch("hybridSCnXtals", &hybridSC_nXtals, "hybridSCnXtals[hybridSCn]/F");
+    t->Branch("hybridSCnXtalsSeed", &hybridSC_nXtalsSeed, "hybridSCnXtalsSeed[hybridSCn]/I");
 
-    t->Branch("hybridbcEta", &hybridSC_bcEta, "hybridbcEta[200][200]/F");//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
-    t->Branch("hybridbcPhi", &hybridSC_bcPhi, "hybridbcPhi[200][200]/F");
-    t->Branch("hybridbcE", &hybridSC_bcE, "hybridbcE[200][200]/F");
-
+    t->Branch("hybridSCbcEta", &hybridSC_bcEta, "hybridSCbcEta[200][200]/F");//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
+    t->Branch("hybridSCbcPhi", &hybridSC_bcPhi, "hybridSCbcPhi[200][200]/F");
+    t->Branch("hybridSCbcE", &hybridSC_bcE, "hybridSCbcE[200][200]/F");
+    t->Branch("hybridSCbcNXtals", &hybridSC_bcNXtals, "hybridSCbcNXtals[200][200]/I");
       
     t->Branch("elen", &ele_n, "elen/I");
     t->Branch("elepx",&ele_px,"elepx[elen]/F");
