@@ -87,6 +87,7 @@
 
 //#include "RecoEcal/EgammaCoreTools/interface/ClusterShapeAlgo.h"
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterTools.h"
+#include "RecoEcal/EgammaCoreTools/interface/MyClusterTools.h"
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
 
 #include "Geometry/Records/interface/IdealGeometryRecord.h"
@@ -106,7 +107,7 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
-#include "Dumper/dumper/interface/EcalClusterTools.h"
+//#include "Dumper/dumper/interface/EcalClusterTools.h"
 
 #include "TLorentzVector.h"
 #include "TFile.h"
