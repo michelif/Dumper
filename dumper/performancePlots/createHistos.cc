@@ -6,151 +6,100 @@
 
 void createHistos::bookHistos(){
 
-  bookHisto("phoErecoOverETrueFirstEtaBin",200,0,2,"E_{reco}/E_{true}");
-  bookHisto("phoErecoOverETrueSecondEtaBin",200,0,2,"E_{reco}/E_{true}");
-  bookHisto("phoErecoOverETrueThirdEtaBin",200,0,2,"E_{reco}/E_{true}");
-  
-  bookHisto("eleErecoOverETrueFirstEtaBin",200,0,2,"E_{reco}/E_{true}");
-  bookHisto("eleErecoOverETrueSecondEtaBin",200,0,2,"E_{reco}/E_{true}");
-  bookHisto("eleErecoOverETrueThirdEtaBin",200,0,2,"E_{reco}/E_{true}");
+  //pf sc variables
+  std::cout<<"booking"<<std::endl;
+  bookHisto("pfSC_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}");
+  bookHisto("pfSC_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}");
+  bookHisto("pfSC_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC");
+  bookHisto("pfSC_maxDistFromSeedinRinSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
+  bookHisto("pfSC_maxDistFromSeedinEtainSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
+  bookHisto("pfSC_maxDistFromSeedinPhiinSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
+  bookHisto2D("pfSC_EBCseedVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
+  bookHisto2D("pfSC_EBCseedVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
 
-  bookHisto("eleErecoOverETrueFirstEtaBinFbrem02",200,0,2,"E_{reco}/E_{true}");
-  bookHisto("eleErecoOverETrueSecondEtaBinFbrem02",200,0,2,"E_{reco}/E_{true}");
-  bookHisto("eleErecoOverETrueThirdEtaBinFbrem02",200,0,2,"E_{reco}/E_{true}");
-
-  //pf bc variables
-  bookHisto("pfSC_ErecoOverETrueFirstEtaBin",200,0,2,"E_{reco}/E_{true}");
-  bookHisto("pfSC_ErecoOverETrueSecondEtaBin",200,0,2,"E_{reco}/E_{true}");
-  bookHisto("pfSC_ErecoOverETrueThirdEtaBin",200,0,2,"E_{reco}/E_{true}");
-
-
-  bookHisto("pfSC_FirstEtaBin_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC");
-  bookHisto("pfSC_FirstEtaBin_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}");
-  bookHisto("pfSC_FirstEtaBin_maxDistFromSeedinRinSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
-  bookHisto("pfSC_FirstEtaBin_maxDistFromSeedinEtainSCEle",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("pfSC_FirstEtaBin_maxDistFromSeedinPhiinSCEle",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
-  bookHisto("pfSC_FirstEtaBin_maxDistFromSeedinRinSCPhoUnconv",300,0,0.8,"max#Delta R_{BC}^{seed}");
-  bookHisto("pfSC_FirstEtaBin_maxDistFromSeedinEtainSCPhoUnconv",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("pfSC_FirstEtaBin_maxDistFromSeedinPhiinSCPhoUnconv",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
-  bookHisto("pfSC_FirstEtaBin_maxDistFromSeedinRinSCPhoConv",300,0,0.8,"max#Delta R_{BC}^{seed}");
-  bookHisto("pfSC_FirstEtaBin_maxDistFromSeedinEtainSCPhoConv",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("pfSC_FirstEtaBin_maxDistFromSeedinPhiinSCPhoConv",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
-
-  bookHisto("pfSC_SecondEtaBin_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC");
-  bookHisto("pfSC_SecondEtaBin_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}");
-  bookHisto("pfSC_SecondEtaBin_maxDistFromSeedinRinSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
-  bookHisto("pfSC_SecondEtaBin_maxDistFromSeedinEtainSCEle",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("pfSC_SecondEtaBin_maxDistFromSeedinPhiinSCEle",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
-  bookHisto("pfSC_SecondEtaBin_maxDistFromSeedinRinSCPhoUnconv",300,0,0.8,"max#Delta R_{BC}^{seed}");
-  bookHisto("pfSC_SecondEtaBin_maxDistFromSeedinEtainSCPhoUnconv",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("pfSC_SecondEtaBin_maxDistFromSeedinPhiinSCPhoUnconv",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
-  bookHisto("pfSC_SecondEtaBin_maxDistFromSeedinRinSCPhoConv",300,0,0.8,"max#Delta R_{BC}^{seed}");
-  bookHisto("pfSC_SecondEtaBin_maxDistFromSeedinEtainSCPhoConv",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("pfSC_SecondEtaBin_maxDistFromSeedinPhiinSCPhoConv",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
-
-  bookHisto("pfSC_ThirdEtaBin_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC");
-  bookHisto("pfSC_ThirdEtaBin_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}");
-  bookHisto("pfSC_ThirdEtaBin_maxDistFromSeedinRinSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
-  bookHisto("pfSC_ThirdEtaBin_maxDistFromSeedinEtainSCEle",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("pfSC_ThirdEtaBin_maxDistFromSeedinPhiinSCEle",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
-  bookHisto("pfSC_ThirdEtaBin_maxDistFromSeedinRinSCPhoUnconv",300,0,0.8,"max#Delta R_{BC}^{seed}");
-  bookHisto("pfSC_ThirdEtaBin_maxDistFromSeedinEtainSCPhoUnconv",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("pfSC_ThirdEtaBin_maxDistFromSeedinPhiinSCPhoUnconv",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
-  bookHisto("pfSC_ThirdEtaBin_maxDistFromSeedinRinSCPhoConv",300,0,0.8,"max#Delta R_{BC}^{seed}");
-  bookHisto("pfSC_ThirdEtaBin_maxDistFromSeedinEtainSCPhoConv",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("pfSC_ThirdEtaBin_maxDistFromSeedinPhiinSCPhoConv",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
-
-  //multi5x5 bc variables
-  bookHisto("multi5x5SC_ErecoOverETrueFirstEtaBin",200,0,2,"E_{reco}/E_{true}");
-  bookHisto("multi5x5SC_ErecoOverETrueSecondEtaBin",200,0,2,"E_{reco}/E_{true}");
-  bookHisto("multi5x5SC_ErecoOverETrueThirdEtaBin",200,0,2,"E_{reco}/E_{true}");
+  //multi5x5 sc variables 
+  bookHisto("multi5x5SC_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}");
+  bookHisto("multi5x5SC_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}");
+  bookHisto("multi5x5SC_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC");
+  bookHisto("multi5x5SC_maxDistFromSeedinRinSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
+  bookHisto("multi5x5SC_maxDistFromSeedinEtainSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
+  bookHisto("multi5x5SC_maxDistFromSeedinPhiinSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
+  bookHisto2D("multi5x5SC_EBCseedVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
+  bookHisto2D("multi5x5SC_EBCseedVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
 
 
-  bookHisto("multi5x5SC_FirstEtaBin_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC");
-  bookHisto("multi5x5SC_FirstEtaBin_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}");
-  bookHisto("multi5x5SC_FirstEtaBin_maxDistFromSeedinRinSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
-  bookHisto("multi5x5SC_FirstEtaBin_maxDistFromSeedinEtainSCEle",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("multi5x5SC_FirstEtaBin_maxDistFromSeedinPhiinSCEle",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
-  bookHisto("multi5x5SC_FirstEtaBin_maxDistFromSeedinRinSCPhoUnconv",300,0,0.8,"max#Delta R_{BC}^{seed}");
-  bookHisto("multi5x5SC_FirstEtaBin_maxDistFromSeedinEtainSCPhoUnconv",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("multi5x5SC_FirstEtaBin_maxDistFromSeedinPhiinSCPhoUnconv",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
-  bookHisto("multi5x5SC_FirstEtaBin_maxDistFromSeedinRinSCPhoConv",300,0,0.8,"max#Delta R_{BC}^{seed}");
-  bookHisto("multi5x5SC_FirstEtaBin_maxDistFromSeedinEtainSCPhoConv",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("multi5x5SC_FirstEtaBin_maxDistFromSeedinPhiinSCPhoConv",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
+//  bookHisto("pfSC_FirstEtaBin_maxDistFromSeedinRinSCPhoUnconv",300,0,0.8,"max#Delta R_{BC}^{seed}");
+//  bookHisto("pfSC_FirstEtaBin_maxDistFromSeedinEtainSCPhoUnconv",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
+//  bookHisto("pfSC_FirstEtaBin_maxDistFromSeedinPhiinSCPhoUnconv",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
+//  bookHisto("pfSC_FirstEtaBin_maxDistFromSeedinRinSCPhoConv",300,0,0.8,"max#Delta R_{BC}^{seed}");
+//  bookHisto("pfSC_FirstEtaBin_maxDistFromSeedinEtainSCPhoConv",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
+//  bookHisto("pfSC_FirstEtaBin_maxDistFromSeedinPhiinSCPhoConv",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
+//
 
-  bookHisto("multi5x5SC_SecondEtaBin_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC");
-  bookHisto("multi5x5SC_SecondEtaBin_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}");
-  bookHisto("multi5x5SC_SecondEtaBin_maxDistFromSeedinRinSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
-  bookHisto("multi5x5SC_SecondEtaBin_maxDistFromSeedinEtainSCEle",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("multi5x5SC_SecondEtaBin_maxDistFromSeedinPhiinSCEle",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
-  bookHisto("multi5x5SC_SecondEtaBin_maxDistFromSeedinRinSCPhoUnconv",300,0,0.8,"max#Delta R_{BC}^{seed}");
-  bookHisto("multi5x5SC_SecondEtaBin_maxDistFromSeedinEtainSCPhoUnconv",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("multi5x5SC_SecondEtaBin_maxDistFromSeedinPhiinSCPhoUnconv",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
-  bookHisto("multi5x5SC_SecondEtaBin_maxDistFromSeedinRinSCPhoConv",300,0,0.8,"max#Delta R_{BC}^{seed}");
-  bookHisto("multi5x5SC_SecondEtaBin_maxDistFromSeedinEtainSCPhoConv",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("multi5x5SC_SecondEtaBin_maxDistFromSeedinPhiinSCPhoConv",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
+//  bookHisto("pfSC_SecondEtaBin_maxDistFromSeedinRinSCPhoUnconv",300,0,0.8,"max#Delta R_{BC}^{seed}");
+//  bookHisto("pfSC_SecondEtaBin_maxDistFromSeedinEtainSCPhoUnconv",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
+//  bookHisto("pfSC_SecondEtaBin_maxDistFromSeedinPhiinSCPhoUnconv",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
+//  bookHisto("pfSC_SecondEtaBin_maxDistFromSeedinRinSCPhoConv",300,0,0.8,"max#Delta R_{BC}^{seed}");
+//  bookHisto("pfSC_SecondEtaBin_maxDistFromSeedinEtainSCPhoConv",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
+//  bookHisto("pfSC_SecondEtaBin_maxDistFromSeedinPhiinSCPhoConv",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
+//
+//  bookHisto("pfSC_ThirdEtaBin_maxDistFromSeedinRinSCPhoUnconv",300,0,0.8,"max#Delta R_{BC}^{seed}");
+//  bookHisto("pfSC_ThirdEtaBin_maxDistFromSeedinEtainSCPhoUnconv",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
+//  bookHisto("pfSC_ThirdEtaBin_maxDistFromSeedinPhiinSCPhoUnconv",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
+//  bookHisto("pfSC_ThirdEtaBin_maxDistFromSeedinRinSCPhoConv",300,0,0.8,"max#Delta R_{BC}^{seed}");
+//  bookHisto("pfSC_ThirdEtaBin_maxDistFromSeedinEtainSCPhoConv",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
+//  bookHisto("pfSC_ThirdEtaBin_maxDistFromSeedinPhiinSCPhoConv",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
+//
+//  //multi5x5 bc variables
+//  bookHisto("multi5x5SC_ErecoOverETrueFirstEtaBin",200,0,2,"E_{reco}/E_{true}");
+//  bookHisto("multi5x5SC_ErecoOverETrueSecondEtaBin",200,0,2,"E_{reco}/E_{true}");
+//  bookHisto("multi5x5SC_ErecoOverETrueThirdEtaBin",200,0,2,"E_{reco}/E_{true}");
+//
+//
+//
+//
+//
+//  bookHisto2D("sieieVsPhi",50,-3.,3.,50,0.,0.1,"#phi","#sigma_{i#etai#eta}");
+//  bookHisto2D("sieieVsPhiFirstEtaBin",50,-3.,3.,50,0.,0.1,"#phi","#sigma_{i#etai#eta}");
+//  bookHisto2D("sieieVsPhiSecondEtaBin",50,-3.,3.,50,0.,0.1,"#phi","#sigma_{i#etai#eta}");
+//  bookHisto2D("sieieVsPhiThirdEtaBin",50,-3.,3.,50,0.,0.1,"#phi","#sigma_{i#etai#eta}");
+//
 
-  bookHisto("multi5x5SC_ThirdEtaBin_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC");
-  bookHisto("multi5x5SC_ThirdEtaBin_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}");
-  bookHisto("multi5x5SC_ThirdEtaBin_maxDistFromSeedinRinSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
-  bookHisto("multi5x5SC_ThirdEtaBin_maxDistFromSeedinEtainSCEle",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("multi5x5SC_ThirdEtaBin_maxDistFromSeedinPhiinSCEle",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
-  bookHisto("multi5x5SC_ThirdEtaBin_maxDistFromSeedinRinSCPhoUnconv",300,0,0.8,"max#Delta R_{BC}^{seed}");
-  bookHisto("multi5x5SC_ThirdEtaBin_maxDistFromSeedinEtainSCPhoUnconv",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("multi5x5SC_ThirdEtaBin_maxDistFromSeedinPhiinSCPhoUnconv",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
-  bookHisto("multi5x5SC_ThirdEtaBin_maxDistFromSeedinRinSCPhoConv",300,0,0.8,"max#Delta R_{BC}^{seed}");
-  bookHisto("multi5x5SC_ThirdEtaBin_maxDistFromSeedinEtainSCPhoConv",300,0,0.8,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("multi5x5SC_ThirdEtaBin_maxDistFromSeedinPhiinSCPhoConv",300,0,0.8,"max#Delta #phi_{BC}^{seed}");
+//  bookHisto2D("pfSC_FirstEtaBin_EBCseedVsDeltaPhiBCSeedPhoUnconv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("pfSC_FirstEtaBin_EBCseedVsDeltaPhiBCSeedPhoConv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("pfSC_FirstEtaBin_EBCseedVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("pfSC_FirstEtaBin_EBCseedVsDeltaEtaBCSeedPhoUnconv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("pfSC_FirstEtaBin_EBCseedVsDeltaEtaBCSeedPhoConv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
+//
+//  bookHisto2D("pfSC_SecondEtaBin_EBCseedVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("pfSC_SecondEtaBin_EBCseedVsDeltaPhiBCSeedPhoUnconv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("pfSC_SecondEtaBin_EBCseedVsDeltaPhiBCSeedPhoConv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("pfSC_SecondEtaBin_EBCseedVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("pfSC_SecondEtaBin_EBCseedVsDeltaEtaBCSeedPhoUnconv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("pfSC_SecondEtaBin_EBCseedVsDeltaEtaBCSeedPhoConv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
+//
 
+//  bookHisto2D("pfSC_ThirdEtaBin_EBCseedVsDeltaPhiBCSeedPhoUnconv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("pfSC_ThirdEtaBin_EBCseedVsDeltaPhiBCSeedPhoConv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("pfSC_ThirdEtaBin_EBCseedVsDeltaEtaBCSeedPhoUnconv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("pfSC_ThirdEtaBin_EBCseedVsDeltaEtaBCSeedPhoConv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
+//
+//
 
-
-  bookHisto2D("sieieVsPhi",50,-3.,3.,50,0.,0.1,"#phi","#sigma_{i#etai#eta}");
-  bookHisto2D("sieieVsPhiFirstEtaBin",50,-3.,3.,50,0.,0.1,"#phi","#sigma_{i#etai#eta}");
-  bookHisto2D("sieieVsPhiSecondEtaBin",50,-3.,3.,50,0.,0.1,"#phi","#sigma_{i#etai#eta}");
-  bookHisto2D("sieieVsPhiThirdEtaBin",50,-3.,3.,50,0.,0.1,"#phi","#sigma_{i#etai#eta}");
-
-  bookHisto2D("pfSC_FirstEtaBin_EBCseedVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_FirstEtaBin_EBCseedVsDeltaPhiBCSeedPhoUnconv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_FirstEtaBin_EBCseedVsDeltaPhiBCSeedPhoConv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_FirstEtaBin_EBCseedVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_FirstEtaBin_EBCseedVsDeltaEtaBCSeedPhoUnconv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_FirstEtaBin_EBCseedVsDeltaEtaBCSeedPhoConv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-
-  bookHisto2D("pfSC_SecondEtaBin_EBCseedVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_SecondEtaBin_EBCseedVsDeltaPhiBCSeedPhoUnconv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_SecondEtaBin_EBCseedVsDeltaPhiBCSeedPhoConv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_SecondEtaBin_EBCseedVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_SecondEtaBin_EBCseedVsDeltaEtaBCSeedPhoUnconv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_SecondEtaBin_EBCseedVsDeltaEtaBCSeedPhoConv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-
-  bookHisto2D("pfSC_ThirdEtaBin_EBCseedVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_ThirdEtaBin_EBCseedVsDeltaPhiBCSeedPhoUnconv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_ThirdEtaBin_EBCseedVsDeltaPhiBCSeedPhoConv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_ThirdEtaBin_EBCseedVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_ThirdEtaBin_EBCseedVsDeltaEtaBCSeedPhoUnconv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_ThirdEtaBin_EBCseedVsDeltaEtaBCSeedPhoConv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-
-
-  bookHisto2D("multi5x5SC_FirstEtaBin_EBCseedVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("multi5x5SC_FirstEtaBin_EBCseedVsDeltaPhiBCSeedPhoUnconv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("multi5x5SC_FirstEtaBin_EBCseedVsDeltaPhiBCSeedPhoConv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("multi5x5SC_FirstEtaBin_EBCseedVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-  bookHisto2D("multi5x5SC_FirstEtaBin_EBCseedVsDeltaEtaBCSeedPhoUnconv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-  bookHisto2D("multi5x5SC_FirstEtaBin_EBCseedVsDeltaEtaBCSeedPhoConv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-
-  bookHisto2D("multi5x5SC_SecondEtaBin_EBCseedVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("multi5x5SC_SecondEtaBin_EBCseedVsDeltaPhiBCSeedPhoUnconv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("multi5x5SC_SecondEtaBin_EBCseedVsDeltaPhiBCSeedPhoConv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("multi5x5SC_SecondEtaBin_EBCseedVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-  bookHisto2D("multi5x5SC_SecondEtaBin_EBCseedVsDeltaEtaBCSeedPhoUnconv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-  bookHisto2D("multi5x5SC_SecondEtaBin_EBCseedVsDeltaEtaBCSeedPhoConv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-
-  bookHisto2D("multi5x5SC_ThirdEtaBin_EBCseedVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("multi5x5SC_ThirdEtaBin_EBCseedVsDeltaPhiBCSeedPhoUnconv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("multi5x5SC_ThirdEtaBin_EBCseedVsDeltaPhiBCSeedPhoConv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("multi5x5SC_ThirdEtaBin_EBCseedVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-  bookHisto2D("multi5x5SC_ThirdEtaBin_EBCseedVsDeltaEtaBCSeedPhoUnconv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-  bookHisto2D("multi5x5SC_ThirdEtaBin_EBCseedVsDeltaEtaBCSeedPhoConv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("multi5x5SC_FirstEtaBin_EBCseedVsDeltaPhiBCSeedPhoUnconv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("multi5x5SC_FirstEtaBin_EBCseedVsDeltaPhiBCSeedPhoConv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("multi5x5SC_FirstEtaBin_EBCseedVsDeltaEtaBCSeedPhoUnconv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("multi5x5SC_FirstEtaBin_EBCseedVsDeltaEtaBCSeedPhoConv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
+//
+//  bookHisto2D("multi5x5SC_SecondEtaBin_EBCseedVsDeltaPhiBCSeedPhoUnconv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("multi5x5SC_SecondEtaBin_EBCseedVsDeltaPhiBCSeedPhoConv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("multi5x5SC_SecondEtaBin_EBCseedVsDeltaEtaBCSeedPhoUnconv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("multi5x5SC_SecondEtaBin_EBCseedVsDeltaEtaBCSeedPhoConv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
+//
+//  bookHisto2D("multi5x5SC_ThirdEtaBin_EBCseedVsDeltaPhiBCSeedPhoUnconv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("multi5x5SC_ThirdEtaBin_EBCseedVsDeltaPhiBCSeedPhoConv",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("multi5x5SC_ThirdEtaBin_EBCseedVsDeltaEtaBCSeedPhoUnconv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
+//  bookHisto2D("multi5x5SC_ThirdEtaBin_EBCseedVsDeltaEtaBCSeedPhoConv",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
 
 
 }
@@ -162,10 +111,66 @@ void createHistos::bookHisto(TString name, int nbins, float xLow, float xUp){
 }
 
 void createHistos::bookHisto(TString name, int nbins, float xLow, float xUp,TString xAxisName){
-  histos_[name]=new TH1F(name, name, nbins,xLow,xUp);
-  setAxisTitle(name,xAxisName);
+  
+  for (std::map<TString,std::vector<float> >::const_iterator itCatCuts=categoriesAndCuts_.begin();itCatCuts!=categoriesAndCuts_.end();++itCatCuts){
+    for(int i=0;i<itCatCuts->second.size();++i){
+      TString bin;
+      bin.Form("%d",i);
+      TString histoname=name+"_"+itCatCuts->first+"bin"+bin;
+      histos_[histoname]=new TH1F(histoname, histoname, nbins,xLow,xUp);    
+      setAxisTitle(histoname,xAxisName);
+    }
+    
+  }
+  
 }
 
+//farla double float int
+void createHistos::fillHisto2D(TString name, double valueX, double valueY, TLorentzVector* p4){
+  for (std::map<TString,std::vector<float> >::const_iterator itCatCuts=categoriesAndCuts_.begin();itCatCuts!=categoriesAndCuts_.end();++itCatCuts){
+
+    if(itCatCuts->first.EqualTo("eta")){
+      for(int i=0;i<itCatCuts->second.size();++i){
+	TString bin;
+	bin.Form("%d",i);
+	TString histoname=name+"_"+itCatCuts->first+"bin"+bin;
+	if(i<itCatCuts->second.size()-1){
+	  if(p4->Eta() > itCatCuts->second[i] && p4->Eta() < itCatCuts->second[i+1] ){
+	    histos2D_[histoname]->Fill(valueX, valueY);
+	  }
+	}else {
+	  if(p4->Eta() > itCatCuts->second[i])
+	    histos2D_[histoname]->Fill(valueX,valueY);
+	}
+      }
+    }
+  }
+  
+}
+
+
+//farla double float int
+void createHistos::fillHisto(TString name, double value,TLorentzVector* p4){
+  for (std::map<TString,std::vector<float> >::const_iterator itCatCuts=categoriesAndCuts_.begin();itCatCuts!=categoriesAndCuts_.end();++itCatCuts){
+
+    if(itCatCuts->first.EqualTo("eta")){
+      for(int i=0;i<itCatCuts->second.size();++i){
+	TString bin;
+	bin.Form("%d",i);
+	TString histoname=name+"_"+itCatCuts->first+"bin"+bin;
+	if(i<itCatCuts->second.size()-1){
+	  if(p4->Eta() > itCatCuts->second[i] && p4->Eta() < itCatCuts->second[i+1] ){
+	    histos_[histoname]->Fill(value);
+	  }
+	}else {
+	  if(p4->Eta() > itCatCuts->second[i])
+	    histos_[histoname]->Fill(value);
+	}
+      }
+    }
+  }
+  
+}
 
 void createHistos::bookHisto2D(TString name, int nbins, float xLow, float xUp,int nbinsY, float yLow, float yUp){
   histos2D_[name]=new TH2F(name, name, nbins,xLow,xUp,nbins, yLow,yUp);
@@ -173,8 +178,16 @@ void createHistos::bookHisto2D(TString name, int nbins, float xLow, float xUp,in
 }
 
 void createHistos::bookHisto2D(TString name, int nbins, float xLow, float xUp,int nbinsY, float yLow, float yUp,TString xAxisName, TString yAxisName){
-  histos2D_[name]=new TH2F(name, name, nbins,xLow,xUp,nbins, yLow,yUp);
-  setAxisTitle(name,xAxisName,yAxisName);
+
+  for (std::map<TString,std::vector<float> >::const_iterator itCatCuts=categoriesAndCuts_.begin();itCatCuts!=categoriesAndCuts_.end();++itCatCuts){
+    for(int i=0;i<itCatCuts->second.size();++i){
+      TString bin;
+      bin.Form("%d",i);
+      TString histoname=name+"_"+itCatCuts->first+"bin"+bin;
+      histos2D_[histoname]=new TH2F(histoname, histoname, nbins,xLow,xUp,nbins, yLow,yUp);
+      setAxisTitle(histoname,xAxisName,yAxisName);
+    }
+  }
 }
 
 
@@ -200,6 +213,156 @@ void createHistos::writeHistos(){
  
 }
 
+
+void createHistos::defineCategories(){
+
+  categoriesAndCuts_["eta"].push_back(1.5);
+  categoriesAndCuts_["eta"].push_back(1.8);
+  categoriesAndCuts_["eta"].push_back(2.4);
+
+  //  categoriesAndCuts_["fbrem"].push_back(0.2);
+}
+
+TLorentzVector* createHistos::createTLorentzVector(float pt, float eta, float phi, float e){
+  TLorentzVector* theVector=new TLorentzVector();
+  theVector->SetPtEtaPhiE(pt,eta,phi,e);
+  return theVector;
+
+}
+
+void createHistos::buildGenEle(){
+
+  for(int j=0;j<gelen;j++){
+    if(gpstatusMC[geleindex[j]]!=3)continue;
+    if(gelept[j]<0.5)continue;
+    
+    TLorentzVector* gelep4 = createTLorentzVector(gelept[j],geleeta[j],gelephi[j],gelept[j]*cosh(geleeta[j]));
+    theGenElectrons_.push_back(gelep4);	
+    //    std::cout<<"build:"<<gelep4->E()<<" "<<gelep4->Eta()<<" "<<gelep4->Phi()<<std::endl;  
+  }
+}
+
+void createHistos::buildGenPho(){
+
+  for(int j=0;j<gphon;j++){
+    if(gpstatusMC[gphoindex[j]]!=3)continue;
+    if(gphopt[j]<5)continue;
+
+    TLorentzVector* gphop4 = createTLorentzVector(gphopt[j],gphoeta[j],gphophi[j],gphopt[j]*cosh(gphoeta[j]));
+    theGenPhotons_.push_back(gphop4);	
+  }
+}
+
+int createHistos::matchesGenEle(TLorentzVector* objectToMatch, float DeltaR ){
+  bool matches=false;
+  int indexMatch=-1;  
+  if(objectToMatch->Pt()<0.0000001)return indexMatch;
+  
+  float drMatch=999;
+
+  for(int i=0;i<theGenElectrons_.size();i++){
+    if(theGenElectrons_[i]->Pt()<0.0000001)continue;
+    float dr = objectToMatch->DeltaR(*theGenElectrons_[i]);
+    if(dr<DeltaR && dr<drMatch){
+      drMatch=dr;
+      indexMatch=i;
+    }
+  }
+
+  return indexMatch;
+}
+
+
+int createHistos::matchesGenPho(TLorentzVector* objectToMatch, float DeltaR ){
+  bool matches=false;
+  int indexMatch=-1;  
+  if(objectToMatch->Pt()<0.0000001)return indexMatch;
+  
+  float drMatch=999;
+
+  for(int i=0;i<theGenPhotons_.size();i++){
+    if(theGenPhotons_[i]->Pt()<0.0000001)continue;
+    float dr = objectToMatch->DeltaR(*theGenPhotons_[i]);
+    if(dr<DeltaR && dr<drMatch){
+      drMatch=dr;
+      indexMatch=i;
+    }
+  }
+  return indexMatch;
+}
+
+
+
+
+void createHistos::Loop2(){
+
+  if (fChain == 0) return;
+  
+  Long64_t nentries = fChain->GetEntries();
+  std::cout<<"nentries:"<<nentries<<std::endl;
+  Long64_t nbytes = 0, nb = 0;
+    for (Long64_t jentry=0; jentry<nentries;jentry++) {
+  //  for (Long64_t jentry=0; jentry<20;jentry++) {
+    Long64_t ientry = LoadTree(jentry);
+    if (ientry < 0) break;
+    nb = fChain->GetEntry(jentry);   nbytes += nb;
+    // if (Cut(ientry) < 0) continue;           
+    
+    if(jentry%500==0)std::cout<<"jentry:"<<jentry<<"/"<<nentries<<std::endl;
+ 
+    buildGenEle();
+    buildGenPho();
+
+    //loop on pfSC
+    if(pfSCn>0){
+      for (int i=0;i<pfSCn;i++){
+
+	TLorentzVector* pfscp4 = createTLorentzVector(pfSCe[i]/cosh(pfSCeta[i]),pfSCeta[i],pfSCphi[i],pfSCe[i]);
+	
+	int indexMatchEle=matchesGenEle(pfscp4);
+	if(indexMatchEle<0)continue;
+	//	if(indexMatchEle>-1)    std::cout<<"gen:"<<theGenElectrons_[indexMatchEle]->E()<<" "<<theGenElectrons_[indexMatchEle]->Eta()<<" "<<theGenElectrons_[indexMatchEle]->Phi()<<std::endl;  
+	//	std::cout<<"pfsc:"<<pfscp4->E()<<" "<<pfscp4->Eta()<<" "<<pfscp4->Phi()<<std::endl;
+
+	fillHisto("pfSC_ErecoOverETrue",pfSCe[i]/theGenElectrons_[indexMatchEle]->E(),pfscp4);
+	fillHisto("pfSC_nXtalsSeed",pfSCnXtals[i],pfscp4);
+	fillHisto("pfSC_nBCForSC",pfSCnBC[i],pfscp4);
+
+	TLorentzVector seed;
+	seed.SetPtEtaPhiE(pfSCbcE[i][0]/cosh(pfSCbcEta[i][0]),pfSCbcEta[i][0],pfSCbcPhi[i][0],pfSCbcE[i][0]);
+
+	float maxDistR=0;
+	float maxDistEta=0;
+	float maxDistPhi=0;
+
+	for (int j=0;j< pfSCnBC[i];j++){
+	  //	  std::cout<<pfSCnBC[i]<< " i,j:"<<i<<","<<j<<" "<<pfSCbcE[i][j]<<std::endl;
+	  if(pfSCbcE[i][j]<0.01)continue;
+
+
+	  if(j>0){
+	    TLorentzVector* bc = createTLorentzVector(pfSCbcE[i][j]/cosh(pfSCbcEta[i][j]),pfSCbcEta[i][j],pfSCbcPhi[i][j],pfSCbcE[i][j]);
+	    float distR=bc->DeltaR(seed);
+	    if(distR>maxDistR)maxDistR=distR;
+	    float distPhi=bc->DeltaPhi(seed);
+	    if(distPhi>maxDistPhi)maxDistPhi=distPhi;
+	    float distEta=sqrt(distR*distR-distPhi*distPhi);
+	    if(distEta>maxDistEta)maxDistEta=distEta;
+	    fillHisto2D("pfSC_EBCseedVsDeltaPhiBCSeedEle",fabs(distPhi),pfSCbcE[i][j],bc);
+	    fillHisto2D("pfSC_EBCseedVsDeltaEtaBCSeedEle",fabs(distEta),pfSCbcE[i][j],bc);
+	  }
+	}//pfscnBC
+	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinRinSCEle", maxDistR, pfscp4);
+	if(maxDistEta>0)fillHisto("pfSC_maxDistFromSeedinEtainSCEle", maxDistEta, pfscp4);
+	if(maxDistPhi>0)fillHisto("pfSC_maxDistFromSeedinPhiinSCEle", maxDistPhi, pfscp4);
+
+	
+      }
+    }
+    
+  }
+  
+}
 
 void createHistos::Loop(){
 

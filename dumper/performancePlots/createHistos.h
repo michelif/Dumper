@@ -47,6 +47,10 @@ public :
    //   TFile* inputFile_;
    TFile* outputFile_;
 
+   std::map<TString,std::vector<float> > categoriesAndCuts_;
+   std::vector<TLorentzVector*> theGenElectrons_;
+   std::vector<TLorentzVector*> theGenPhotons_;
+
    // Declaration of leaf types
    Int_t           nvtx;
    Float_t         vertexx[200];   //[nvtx]
@@ -428,6 +432,7 @@ public :
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
    virtual void     Loop();
+   virtual void     Loop2();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    void bookHisto(TString name, int nbins, float xLow, float xUp);
@@ -440,7 +445,14 @@ public :
    void writeHistos();
    //   void setInputFile(TString name);
    void setOutputFile(TString nameFile);
-
+   TLorentzVector* createTLorentzVector(float pt, float eta, float phi, float m);
+   void buildGenEle();
+   void buildGenPho();
+   int matchesGenEle(TLorentzVector* objectToMatch, float DeltaR=0.1);
+   int matchesGenPho(TLorentzVector* objectToMatch, float DeltaR=0.1);
+   void fillHisto(TString name, double value,TLorentzVector* p4);
+   void fillHisto2D(TString name, double valueX, double valueY,TLorentzVector* p4);
+   void defineCategories();
 };
 
 
