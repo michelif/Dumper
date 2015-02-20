@@ -6,26 +6,36 @@
 
 void createHistos::bookHistos(){
 
-  //pf sc variables
+  //electrons
+  bookHisto("ele_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}",false);
+  bookHisto("ele_sMaj",200,0,3,"sMaj",false);
+  bookHisto("ele_sMin",200,0,2,"sMin",false);
+  bookHisto("ele_alpha",200,-2,2,"alpha",false);
+
+  //sc variables
   std::cout<<"booking"<<std::endl;
   bookHisto("pfSC_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}");
+  bookHisto("pfSC_EnergyWrong",150,0,300,"E_{reco}");
+  bookHisto("pfSC_EnergyRight",150,0,300,"E_{reco}");
+  bookHisto("pfSC_nXtalsTotalWrong",250,-0.5,249.5,"N_{xtals}");
+  bookHisto("pfSC_nXtalsTotalRight",250,-0.5,249.5,"N_{xtals}");
+  bookHisto("pfSC_nXtalsSeedWrong",250,-0.5,249.5,"N_{xtals}");
+  bookHisto("pfSC_nXtalsSeedRight",250,-0.5,249.5,"N_{xtals}");
   bookHisto("pfSC_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}");
+  bookHisto("pfSC_nXtalsTotal",250,-0.5,249.5,"N_{xtals}");
+  bookHisto("pfSC_nXtalsBC",100,-0.5,99.5,"N_{xtals}^{BC}");
   bookHisto("pfSC_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC");
   bookHisto("pfSC_maxDistFromSeedinRinSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
   bookHisto("pfSC_maxDistFromSeedinEtainSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
   bookHisto("pfSC_maxDistFromSeedinPhiinSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
+  bookHisto("pfSC_bcNXtals",100,-0.5,99.5,"N_{xtals}^{BC}");
   bookHisto2D("pfSC_EBCseedVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
   bookHisto2D("pfSC_EBCseedVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-
-  //multi5x5 sc variables 
-  bookHisto("multi5x5SC_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}");
-  bookHisto("multi5x5SC_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}");
-  bookHisto("multi5x5SC_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC");
-  bookHisto("multi5x5SC_maxDistFromSeedinRinSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
-  bookHisto("multi5x5SC_maxDistFromSeedinEtainSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
-  bookHisto("multi5x5SC_maxDistFromSeedinPhiinSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
-  bookHisto2D("multi5x5SC_EBCseedVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("multi5x5SC_EBCseedVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
+  bookHisto2D("pfSC_EnergyVsnXtalsTotalWrong",250,-0.5,249.5,150,0,300,"N_{xtals}","E_{reco}");
+  bookHisto2D("pfSC_EnergyVsnXtalsTotalRight",250,-0.5,249.5,150,0,300,"N_{xtals}","E_{reco}");
+  bookHisto2D("pfSC_EnergyVsnXtalsSeedWrong",250,-0.5,249.5,150,0,300,"N_{xtals}^{seed}","E_{reco}");
+  bookHisto2D("pfSC_EnergyVsnXtalsSeedRight",250,-0.5,249.5,150,0,300,"N_{xtals}^{seed}","E_{reco}");
+  bookHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",250,0,400,150,-1.,1,"#rhoxN_{xtals}","#frac{E_{reco}-E_{true}}{E_{reco}}");
 
 
 //  bookHisto("pfSC_FirstEtaBin_maxDistFromSeedinRinSCPhoUnconv",300,0,0.8,"max#Delta R_{BC}^{seed}");
@@ -110,15 +120,31 @@ void createHistos::bookHisto(TString name, int nbins, float xLow, float xUp){
 
 }
 
-void createHistos::bookHisto(TString name, int nbins, float xLow, float xUp,TString xAxisName){
+void createHistos::bookHisto(TString name, int nbins, float xLow, float xUp,TString xAxisName, bool bookMulti5x5){
+
+    TString histonameIncl=name+"_inclusive";
+    histos_[histonameIncl]=new TH1F(histonameIncl, histonameIncl, nbins,xLow,xUp);    
+    setAxisTitle(histonameIncl,xAxisName);
+    if(bookMulti5x5){
+      histonameIncl.Replace(0,2,"multi5x5");
+      histos_[histonameIncl]=new TH1F(histonameIncl, histonameIncl, nbins,xLow,xUp);    
+      setAxisTitle(histonameIncl,xAxisName);
+    }
   
   for (std::map<TString,std::vector<float> >::const_iterator itCatCuts=categoriesAndCuts_.begin();itCatCuts!=categoriesAndCuts_.end();++itCatCuts){
+
+
     for(int i=0;i<itCatCuts->second.size();++i){
       TString bin;
       bin.Form("%d",i);
       TString histoname=name+"_"+itCatCuts->first+"bin"+bin;
       histos_[histoname]=new TH1F(histoname, histoname, nbins,xLow,xUp);    
       setAxisTitle(histoname,xAxisName);
+      if(bookMulti5x5){
+	histoname.Replace(0,2,"multi5x5");
+	histos_[histoname]=new TH1F(histoname, histoname, nbins,xLow,xUp);    
+	setAxisTitle(histoname,xAxisName);
+      }
     }
     
   }
@@ -128,6 +154,9 @@ void createHistos::bookHisto(TString name, int nbins, float xLow, float xUp,TStr
 //farla double float int
 void createHistos::fillHisto2D(TString name, double valueX, double valueY, TLorentzVector* p4){
   for (std::map<TString,std::vector<float> >::const_iterator itCatCuts=categoriesAndCuts_.begin();itCatCuts!=categoriesAndCuts_.end();++itCatCuts){
+
+    TString histonameIncl=name+"_inclusive";
+    if(p4->Eta() > itCatCuts->second[0]) histos2D_[histonameIncl]->Fill(valueX, valueY);
 
     if(itCatCuts->first.EqualTo("eta")){
       for(int i=0;i<itCatCuts->second.size();++i){
@@ -152,6 +181,9 @@ void createHistos::fillHisto2D(TString name, double valueX, double valueY, TLore
 //farla double float int
 void createHistos::fillHisto(TString name, double value,TLorentzVector* p4){
   for (std::map<TString,std::vector<float> >::const_iterator itCatCuts=categoriesAndCuts_.begin();itCatCuts!=categoriesAndCuts_.end();++itCatCuts){
+    TString histonameIncl=name+"_inclusive";
+    if(p4->Eta() > itCatCuts->second[0])    histos_[histonameIncl]->Fill(value);
+    
 
     if(itCatCuts->first.EqualTo("eta")){
       for(int i=0;i<itCatCuts->second.size();++i){
@@ -177,7 +209,16 @@ void createHistos::bookHisto2D(TString name, int nbins, float xLow, float xUp,in
 
 }
 
-void createHistos::bookHisto2D(TString name, int nbins, float xLow, float xUp,int nbinsY, float yLow, float yUp,TString xAxisName, TString yAxisName){
+void createHistos::bookHisto2D(TString name, int nbins, float xLow, float xUp,int nbinsY, float yLow, float yUp,TString xAxisName, TString yAxisName, bool bookMulti5x5){
+
+    TString histonameIncl=name+"_inclusive";
+    histos2D_[histonameIncl]=new TH2F(histonameIncl, histonameIncl, nbins,xLow,xUp,nbins, yLow,yUp);
+    setAxisTitle(histonameIncl,xAxisName,yAxisName);
+     if(bookMulti5x5){
+       histonameIncl.Replace(0,2,"multi5x5");
+       histos2D_[histonameIncl]=new TH2F(histonameIncl, histonameIncl, nbins,xLow,xUp,nbins, yLow,yUp);
+       setAxisTitle(histonameIncl,xAxisName,yAxisName);
+     }
 
   for (std::map<TString,std::vector<float> >::const_iterator itCatCuts=categoriesAndCuts_.begin();itCatCuts!=categoriesAndCuts_.end();++itCatCuts){
     for(int i=0;i<itCatCuts->second.size();++i){
@@ -186,6 +227,11 @@ void createHistos::bookHisto2D(TString name, int nbins, float xLow, float xUp,in
       TString histoname=name+"_"+itCatCuts->first+"bin"+bin;
       histos2D_[histoname]=new TH2F(histoname, histoname, nbins,xLow,xUp,nbins, yLow,yUp);
       setAxisTitle(histoname,xAxisName,yAxisName);
+      if(bookMulti5x5){
+	histoname.Replace(0,2,"multi5x5");
+	histos2D_[histoname]=new TH2F(histoname, histoname, nbins,xLow,xUp,nbins, yLow,yUp);
+	setAxisTitle(histoname,xAxisName,yAxisName);
+      }
     }
   }
 }
@@ -313,10 +359,24 @@ void createHistos::Loop2(){
     buildGenEle();
     buildGenPho();
 
+    //loop on ele
+    for(int i=0;i<elen;i++){
+      if(elept[i]<0.1)continue;
+
+      TLorentzVector* elep4=createTLorentzVector(elept[i],eleeta[i],elephi[i],elee[i]);
+      int indexMatchEle=matchesGenEle(elep4);
+      if(indexMatchEle<0)continue;
+      fillHisto("ele_ErecoOverETrue",elee[i]/theGenElectrons_[indexMatchEle]->E(),elep4);
+      fillHisto("ele_sMaj",elesMajZS[i],elep4);
+      fillHisto("ele_sMin",elesMinZS[i],elep4);
+      fillHisto("ele_alpha",elealphaZS[i],elep4);
+   }
+
+
     //loop on pfSC
     if(pfSCn>0){
       for (int i=0;i<pfSCn;i++){
-
+	
 	TLorentzVector* pfscp4 = createTLorentzVector(pfSCe[i]/cosh(pfSCeta[i]),pfSCeta[i],pfSCphi[i],pfSCe[i]);
 	
 	int indexMatchEle=matchesGenEle(pfscp4);
@@ -325,8 +385,24 @@ void createHistos::Loop2(){
 	//	std::cout<<"pfsc:"<<pfscp4->E()<<" "<<pfscp4->Eta()<<" "<<pfscp4->Phi()<<std::endl;
 
 	fillHisto("pfSC_ErecoOverETrue",pfSCe[i]/theGenElectrons_[indexMatchEle]->E(),pfscp4);
-	fillHisto("pfSC_nXtalsSeed",pfSCnXtals[i],pfscp4);
+	if(pfSCe[i]/theGenElectrons_[indexMatchEle]->E()<0.5){
+	  fillHisto("pfSC_EnergyWrong",pfSCe[i],pfscp4);
+	  fillHisto("pfSC_nXtalsSeedWrong",pfSCnXtalsSeed[i],pfscp4);
+	  fillHisto("pfSC_nXtalsTotalWrong",pfSCnXtalsTotal[i],pfscp4);
+	  fillHisto2D("pfSC_EnergyVsnXtalsSeedWrong",pfSCnXtalsSeed[i],pfSCe[i],pfscp4);
+	  fillHisto2D("pfSC_EnergyVsnXtalsTotalWrong",pfSCnXtalsTotal[i],pfSCe[i],pfscp4);
+	}else{
+	  fillHisto("pfSC_EnergyRight",pfSCe[i],pfscp4);
+	  fillHisto("pfSC_nXtalsSeedWrong",pfSCnXtalsSeed[i],pfscp4);
+	  fillHisto("pfSC_nXtalsTotalRight",pfSCnXtalsTotal[i],pfscp4);
+	  fillHisto2D("pfSC_EnergyVsnXtalsSeedRight",pfSCnXtalsSeed[i],pfSCe[i],pfscp4);
+	  fillHisto2D("pfSC_EnergyVsnXtalsTotalRight",pfSCnXtalsTotal[i],pfSCe[i],pfscp4);
+	} 
+
+	fillHisto("pfSC_nXtalsSeed",pfSCnXtalsSeed[i],pfscp4);
+	fillHisto("pfSC_nXtalsTotal",pfSCnXtalsTotal[i],pfscp4);
 	fillHisto("pfSC_nBCForSC",pfSCnBC[i],pfscp4);
+	fillHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",rho*pfSCnXtalsTotal[i],(pfSCe[i]-theGenElectrons_[indexMatchEle]->E())/pfSCe[i],pfscp4);
 
 	TLorentzVector seed;
 	seed.SetPtEtaPhiE(pfSCbcE[i][0]/cosh(pfSCbcEta[i][0]),pfSCbcEta[i][0],pfSCbcPhi[i][0],pfSCbcE[i][0]);
@@ -338,10 +414,10 @@ void createHistos::Loop2(){
 	for (int j=0;j< pfSCnBC[i];j++){
 	  //	  std::cout<<pfSCnBC[i]<< " i,j:"<<i<<","<<j<<" "<<pfSCbcE[i][j]<<std::endl;
 	  if(pfSCbcE[i][j]<0.01)continue;
-
+	  TLorentzVector* bc = createTLorentzVector(pfSCbcE[i][j]/cosh(pfSCbcEta[i][j]),pfSCbcEta[i][j],pfSCbcPhi[i][j],pfSCbcE[i][j]);
+	  fillHisto("pfSC_bcNXtals",pfSCbcNXtals[i][j],bc);
 
 	  if(j>0){
-	    TLorentzVector* bc = createTLorentzVector(pfSCbcE[i][j]/cosh(pfSCbcEta[i][j]),pfSCbcEta[i][j],pfSCbcPhi[i][j],pfSCbcE[i][j]);
 	    float distR=bc->DeltaR(seed);
 	    if(distR>maxDistR)maxDistR=distR;
 	    float distPhi=bc->DeltaPhi(seed);
@@ -355,12 +431,72 @@ void createHistos::Loop2(){
 	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinRinSCEle", maxDistR, pfscp4);
 	if(maxDistEta>0)fillHisto("pfSC_maxDistFromSeedinEtainSCEle", maxDistEta, pfscp4);
 	if(maxDistPhi>0)fillHisto("pfSC_maxDistFromSeedinPhiinSCEle", maxDistPhi, pfscp4);
-
-	
-      }
-    }
+      }//pfscn
+    }//if pfscn>0
     
-  }
+
+    //loop on multi5x5SC
+    if(multi5x5SCn>0){
+      for (int i=0;i<multi5x5SCn;i++){
+	
+	TLorentzVector* multi5x5scp4 = createTLorentzVector(multi5x5SCe[i]/cosh(multi5x5SCeta[i]),multi5x5SCeta[i],multi5x5SCphi[i],multi5x5SCe[i]);
+	
+	int indexMatchEle=matchesGenEle(multi5x5scp4);
+	if(indexMatchEle<0)continue;
+
+	fillHisto("multi5x5SC_ErecoOverETrue",multi5x5SCe[i]/theGenElectrons_[indexMatchEle]->E(),multi5x5scp4);
+
+	if(multi5x5SCe[i]/theGenElectrons_[indexMatchEle]->E()<0.5){
+	  fillHisto("multi5x5SC_EnergyWrong",multi5x5SCe[i],multi5x5scp4);
+	  fillHisto("multi5x5SC_nXtalsSeedWrong",multi5x5SCnXtalsSeed[i],multi5x5scp4);
+	  fillHisto("multi5x5SC_nXtalsTotalWrong",multi5x5SCnXtalsTotal[i],multi5x5scp4);
+	  fillHisto2D("multi5x5SC_EnergyVsnXtalsSeedWrong",multi5x5SCnXtalsSeed[i],multi5x5SCe[i],multi5x5scp4);
+	  fillHisto2D("multi5x5SC_EnergyVsnXtalsTotalWrong",multi5x5SCnXtalsTotal[i],multi5x5SCe[i],multi5x5scp4);
+	}else{
+	  fillHisto("multi5x5SC_EnergyRight",multi5x5SCe[i],multi5x5scp4);
+	  fillHisto("multi5x5SC_nXtalsSeedRight",multi5x5SCnXtalsSeed[i],multi5x5scp4);
+	  fillHisto("multi5x5SC_nXtalsTotalRight",multi5x5SCnXtalsTotal[i],multi5x5scp4);
+	  fillHisto2D("multi5x5SC_EnergyVsnXtalsSeedRight",multi5x5SCnXtalsSeed[i],multi5x5SCe[i],multi5x5scp4);
+	  fillHisto2D("multi5x5SC_EnergyVsnXtalsTotalRight",multi5x5SCnXtalsTotal[i],multi5x5SCe[i],multi5x5scp4);
+	}
+
+	fillHisto("multi5x5SC_nXtalsSeed",multi5x5SCnXtalsSeed[i],multi5x5scp4);
+	fillHisto("multi5x5SC_nXtalsTotal",multi5x5SCnXtalsTotal[i],multi5x5scp4);
+	fillHisto("multi5x5SC_nBCForSC",multi5x5SCnBC[i],multi5x5scp4);
+	fillHisto2D("multi5x5SC_ErecoMinusEtrueVsEffectiveArea",rho*multi5x5SCnXtalsTotal[i],(multi5x5SCe[i]-theGenElectrons_[indexMatchEle]->E())/multi5x5SCe[i],multi5x5scp4);
+
+	TLorentzVector seed;
+	seed.SetPtEtaPhiE(multi5x5SCbcE[i][0]/cosh(multi5x5SCbcEta[i][0]),multi5x5SCbcEta[i][0],multi5x5SCbcPhi[i][0],multi5x5SCbcE[i][0]);
+
+	float maxDistR=0;
+	float maxDistEta=0;
+	float maxDistPhi=0;
+
+	for (int j=0;j< multi5x5SCnBC[i];j++){
+	  //	  std::cout<<multi5x5SCnBC[i]<< " i,j:"<<i<<","<<j<<" "<<multi5x5SCbcE[i][j]<<std::endl;
+	  if(multi5x5SCbcE[i][j]<0.01)continue;
+	  
+
+	  if(j>0){
+	    TLorentzVector* bc = createTLorentzVector(multi5x5SCbcE[i][j]/cosh(multi5x5SCbcEta[i][j]),multi5x5SCbcEta[i][j],multi5x5SCbcPhi[i][j],multi5x5SCbcE[i][j]);
+	    float distR=bc->DeltaR(seed);
+	    if(distR>maxDistR)maxDistR=distR;
+	    float distPhi=bc->DeltaPhi(seed);
+	    if(distPhi>maxDistPhi)maxDistPhi=distPhi;
+	    float distEta=sqrt(distR*distR-distPhi*distPhi);
+	    if(distEta>maxDistEta)maxDistEta=distEta;
+	    fillHisto2D("multi5x5SC_EBCseedVsDeltaPhiBCSeedEle",fabs(distPhi),multi5x5SCbcE[i][j],bc);
+	    fillHisto2D("multi5x5SC_EBCseedVsDeltaEtaBCSeedEle",fabs(distEta),multi5x5SCbcE[i][j],bc);
+	  }
+	}//multi5x5scnBC
+	if(maxDistR>0)fillHisto("multi5x5SC_maxDistFromSeedinRinSCEle", maxDistR, multi5x5scp4);
+	if(maxDistEta>0)fillHisto("multi5x5SC_maxDistFromSeedinEtainSCEle", maxDistEta, multi5x5scp4);
+	if(maxDistPhi>0)fillHisto("multi5x5SC_maxDistFromSeedinPhiinSCEle", maxDistPhi, multi5x5scp4);
+      }//multi5x5scn
+    }//if multi5x5scn>0
+
+
+    }
   
 }
 
@@ -542,15 +678,15 @@ void createHistos::Loop(){
 
 	  if(TMath::Abs(pfSCeta[i])<firstEtaBinUp){
 	    histos_["pfSC_ErecoOverETrueFirstEtaBin"]->Fill(pfSCe[i]/geleMatchedE);
-	    histos_["pfSC_FirstEtaBin_nXtalsSeed"]->Fill(pfSCnXtals[i]);
+	    histos_["pfSC_FirstEtaBin_nXtalsSeed"]->Fill(pfSCnXtalsSeed[i]);
 	    histos_["pfSC_FirstEtaBin_nBCForSC"]->Fill(pfSCnBC[i]);
 	  }else if(TMath::Abs(pfSCeta[i])>secondEtaBinDown && TMath::Abs(pfSCeta[i])<secondEtaBinUp){
 	    histos_["pfSC_ErecoOverETrueSecondEtaBin"]->Fill(pfSCe[i]/geleMatchedE);
-	    histos_["pfSC_SecondEtaBin_nXtalsSeed"]->Fill(pfSCnXtals[i]);
+	    histos_["pfSC_SecondEtaBin_nXtalsSeed"]->Fill(pfSCnXtalsSeed[i]);
 	    histos_["pfSC_SecondEtaBin_nBCForSC"]->Fill(pfSCnBC[i]);
 	  }else if(TMath::Abs(pfSCeta[i])>thirdEtaBinDown){
 	    histos_["pfSC_ErecoOverETrueThirdEtaBin"]->Fill(pfSCe[i]/geleMatchedE);
-	    histos_["pfSC_ThirdEtaBin_nXtalsSeed"]->Fill(pfSCnXtals[i]);
+	    histos_["pfSC_ThirdEtaBin_nXtalsSeed"]->Fill(pfSCnXtalsSeed[i]);
 	    histos_["pfSC_ThirdEtaBin_nBCForSC"]->Fill(pfSCnBC[i]);
 	  }      
 
@@ -791,15 +927,15 @@ void createHistos::Loop(){
 
 	  if(TMath::Abs(multi5x5SCeta[i])<firstEtaBinUp){
 	    histos_["multi5x5SC_ErecoOverETrueFirstEtaBin"]->Fill(multi5x5SCe[i]/geleMatchedE);
-	    histos_["multi5x5SC_FirstEtaBin_nXtalsSeed"]->Fill(multi5x5SCnXtals[i]);
+	    histos_["multi5x5SC_FirstEtaBin_nXtalsSeed"]->Fill(multi5x5SCnXtalsSeed[i]);
 	    histos_["multi5x5SC_FirstEtaBin_nBCForSC"]->Fill(multi5x5SCnBC[i]);
 	  }else if(TMath::Abs(multi5x5SCeta[i])>secondEtaBinDown && TMath::Abs(multi5x5SCeta[i])<secondEtaBinUp){
 	    histos_["multi5x5SC_ErecoOverETrueSecondEtaBin"]->Fill(multi5x5SCe[i]/geleMatchedE);
-	    histos_["multi5x5SC_SecondEtaBin_nXtalsSeed"]->Fill(multi5x5SCnXtals[i]);
+	    histos_["multi5x5SC_SecondEtaBin_nXtalsSeed"]->Fill(multi5x5SCnXtalsSeed[i]);
 	    histos_["multi5x5SC_SecondEtaBin_nBCForSC"]->Fill(multi5x5SCnBC[i]);
 	  }else if(TMath::Abs(multi5x5SCeta[i])>thirdEtaBinDown){
 	    histos_["multi5x5SC_ErecoOverETrueThirdEtaBin"]->Fill(multi5x5SCe[i]/geleMatchedE);
-	    histos_["multi5x5SC_ThirdEtaBin_nXtalsSeed"]->Fill(multi5x5SCnXtals[i]);
+	    histos_["multi5x5SC_ThirdEtaBin_nXtalsSeed"]->Fill(multi5x5SCnXtalsSeed[i]);
 	    histos_["multi5x5SC_ThirdEtaBin_nBCForSC"]->Fill(multi5x5SCnBC[i]);
 	  }      
 
@@ -1099,25 +1235,34 @@ void createHistos::Init(TTree *tree)
    fChain->SetBranchAddress("pfSCphi", pfSCphi, &b_pfSCphi);
    fChain->SetBranchAddress("pfSCe", pfSCe, &b_pfSCe);
    fChain->SetBranchAddress("pfSCnBC", pfSCnBC, &b_pfSCnBC);
-   fChain->SetBranchAddress("pfSCnXtals", pfSCnXtals, &b_pfSCnXtals);
+   fChain->SetBranchAddress("pfSCnXtalsSeed", pfSCnXtalsSeed, &b_pfSCnXtalsSeed);
+   fChain->SetBranchAddress("pfSCnXtalsTotal", pfSCnXtalsTotal, &b_pfSCnXtalsTotal);
    fChain->SetBranchAddress("pfSCbcEta", pfSCbcEta, &b_pfSCbcEta);
    fChain->SetBranchAddress("pfSCbcPhi", pfSCbcPhi, &b_pfSCbcPhi);
    fChain->SetBranchAddress("pfSCbcE", pfSCbcE, &b_pfSCbcE);
+   fChain->SetBranchAddress("pfSCbcNXtals", pfSCbcNXtals, &b_pfSCbcNXtals);
    fChain->SetBranchAddress("multi5x5SCn", &multi5x5SCn, &b_multi5x5SCn);
    fChain->SetBranchAddress("multi5x5SCeta", &multi5x5SCeta, &b_multi5x5SCeta);
    fChain->SetBranchAddress("multi5x5SCphi", &multi5x5SCphi, &b_multi5x5SCphi);
    fChain->SetBranchAddress("multi5x5SCe", &multi5x5SCe, &b_multi5x5SCe);
    fChain->SetBranchAddress("multi5x5SCnBC", &multi5x5SCnBC, &b_multi5x5SCnBC);
-   fChain->SetBranchAddress("multi5x5SCnXtals", &multi5x5SCnXtals, &b_multi5x5SCnXtals);
+   fChain->SetBranchAddress("multi5x5SCnXtalsSeed", &multi5x5SCnXtalsSeed, &b_multi5x5SCnXtalsSeed);
+   fChain->SetBranchAddress("multi5x5SCnXtalsTotal", &multi5x5SCnXtalsTotal, &b_multi5x5SCnXtalsTotal);
    fChain->SetBranchAddress("multi5x5SCbcEta", multi5x5SCbcEta, &b_multi5x5SCbcEta);
    fChain->SetBranchAddress("multi5x5SCbcPhi", multi5x5SCbcPhi, &b_multi5x5SCbcPhi);
    fChain->SetBranchAddress("multi5x5SCbcE", multi5x5SCbcE, &b_multi5x5SCbcE);
+   fChain->SetBranchAddress("multi5x5SCbcNXtals", multi5x5SCbcNXtals, &b_multi5x5SCbcNXtals);
    fChain->SetBranchAddress("hybridSCn", &hybridSCn, &b_hybridSCn);
    fChain->SetBranchAddress("hybridSCeta", hybridSCeta, &b_hybridSCeta);
    fChain->SetBranchAddress("hybridSCphi", hybridSCphi, &b_hybridSCphi);
    fChain->SetBranchAddress("hybridSCe", hybridSCe, &b_hybridSCe);
    fChain->SetBranchAddress("hybridSCnBC", hybridSCnBC, &b_hybridSCnBC);
-   fChain->SetBranchAddress("hybridSCnXtals", hybridSCnXtals, &b_hybridSCnXtals);
+   fChain->SetBranchAddress("hybridSCnXtalsSeed", hybridSCnXtalsSeed, &b_hybridSCnXtalsSeed);
+   fChain->SetBranchAddress("hybridSCnXtalsTotal", hybridSCnXtalsTotal, &b_hybridSCnXtalsTotal);
+   fChain->SetBranchAddress("hybridSCbcEta", hybridSCbcEta, &b_hybridSCbcEta);
+   fChain->SetBranchAddress("hybridSCbcPhi", hybridSCbcPhi, &b_hybridSCbcPhi);
+   fChain->SetBranchAddress("hybridSCbcE", hybridSCbcE, &b_hybridSCbcE);
+   fChain->SetBranchAddress("hybridSCbcNXtals", hybridSCbcNXtals, &b_hybridSCbcNXtals);
    fChain->SetBranchAddress("elen", &elen, &b_elen);
    fChain->SetBranchAddress("elepx", elepx, &b_elepx);
    fChain->SetBranchAddress("elepy", elepy, &b_elepy);

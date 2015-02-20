@@ -98,11 +98,11 @@ public :
    Float_t         phojurECAL03[MAXPHOTONSTOSAVE];   //[phon]
    Float_t         photwrHCAL03[MAXPHOTONSTOSAVE];   //[phon]
    Float_t         phohlwTrack03[MAXPHOTONSTOSAVE];   //[phon]
-   Float_t         phopfCandPt[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
-   Float_t         phopfCandEta[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
-   Float_t         phopfCandPhi[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
-   Float_t         phopfCandVtx[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
-   Float_t         phopfCandType[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
+   Float_t         phopfCandPt[MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE];
+   Float_t         phopfCandEta[MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE];
+   Float_t         phopfCandPhi[MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE];
+   Float_t         phopfCandVtx[MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE];
+   Float_t         phopfCandType[MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE];
    Float_t         phoptiso004[MAXPHOTONSTOSAVE];   //[phon]
    Int_t           phontrkiso004[MAXPHOTONSTOSAVE];   //[phon]
    Float_t         phoptiso035[MAXPHOTONSTOSAVE];   //[phon]
@@ -117,25 +117,34 @@ public :
    Float_t         pfSCphi[MAXSCTOSAVE];   //[pfSCn]
    Float_t         pfSCe[MAXSCTOSAVE];   //[pfSCn]
    Int_t           pfSCnBC[MAXSCTOSAVE];   //[pfSCn]
-   Float_t         pfSCnXtals[MAXSCTOSAVE];   //[pfSCn]
-   Float_t         pfSCbcEta[MAXBCTOSAVE][MAXSCTOSAVE];
-   Float_t         pfSCbcPhi[MAXBCTOSAVE][MAXSCTOSAVE];
-   Float_t         pfSCbcE[MAXBCTOSAVE][MAXSCTOSAVE];
+   Int_t           pfSCnXtalsSeed[MAXSCTOSAVE];   //[pfSCn]
+   Int_t           pfSCnXtalsTotal[MAXSCTOSAVE];   //[pfSCn]
+   Float_t         pfSCbcEta[MAXSCTOSAVE][MAXBCTOSAVE];
+   Float_t         pfSCbcPhi[MAXSCTOSAVE][MAXBCTOSAVE];
+   Int_t           pfSCbcE[MAXSCTOSAVE][MAXBCTOSAVE];
+   Int_t           pfSCbcNXtals[MAXSCTOSAVE][MAXBCTOSAVE];
    Int_t           multi5x5SCn;
    Float_t         multi5x5SCeta[MAXSCTOSAVE];   //[multi5x5SCn]
    Float_t         multi5x5SCphi[MAXSCTOSAVE];   //[multi5x5SCn]
    Float_t         multi5x5SCe[MAXSCTOSAVE];   //[multi5x5SCn]
    Float_t         multi5x5SCnBC[MAXSCTOSAVE];   //[multi5x5SCn]
-   Float_t         multi5x5SCnXtals[MAXSCTOSAVE];   //[multi5x5SCn]
-   Float_t         multi5x5SCbcEta[MAXBCTOSAVE][MAXSCTOSAVE];
-   Float_t         multi5x5SCbcPhi[MAXBCTOSAVE][MAXSCTOSAVE];
-   Float_t         multi5x5SCbcE[MAXBCTOSAVE][MAXSCTOSAVE];
+   Int_t           multi5x5SCnXtalsSeed[MAXSCTOSAVE];   //[multi5x5SCn]
+   Int_t           multi5x5SCnXtalsTotal[MAXSCTOSAVE];   //[multi5x5SCn]
+   Float_t         multi5x5SCbcEta[MAXSCTOSAVE][MAXBCTOSAVE];
+   Float_t         multi5x5SCbcPhi[MAXSCTOSAVE][MAXBCTOSAVE];
+   Float_t         multi5x5SCbcE[MAXSCTOSAVE][MAXBCTOSAVE];
+   Int_t           multi5x5SCbcNXtals[MAXSCTOSAVE][MAXBCTOSAVE];
    Int_t           hybridSCn;
    Float_t         hybridSCeta[MAXSCTOSAVE];   //[hybridSCn]
    Float_t         hybridSCphi[MAXSCTOSAVE];   //[hybridSCn]
    Float_t         hybridSCe[MAXSCTOSAVE];   //[hybridSCn]
+   Int_t           hybridSCnXtalsSeed[MAXSCTOSAVE];   //[hybridSCn]
+   Int_t           hybridSCnXtalsTotal[MAXSCTOSAVE];   //[hybridSCn]
    Float_t         hybridSCnBC[MAXSCTOSAVE];   //[hybridSCn]
-   Float_t         hybridSCnXtals[MAXSCTOSAVE];   //[hybridSCn]
+   Float_t         hybridSCbcEta[MAXSCTOSAVE][MAXBCTOSAVE];
+   Float_t         hybridSCbcPhi[MAXSCTOSAVE][MAXBCTOSAVE];
+   Float_t         hybridSCbcE[MAXSCTOSAVE][MAXBCTOSAVE];
+   Int_t           hybridSCbcNXtals[MAXSCTOSAVE][MAXBCTOSAVE];
    Int_t           elen;
    Float_t         elepx[MAXPHOTONSTOSAVE];   //[elen]
    Float_t         elepy[MAXPHOTONSTOSAVE];   //[elen]
@@ -201,11 +210,11 @@ public :
    Float_t         elesMinNoZS[MAXPHOTONSTOSAVE];   //[elen]
    Float_t         elealphaZS[MAXPHOTONSTOSAVE];   //[elen]
    Float_t         elealphaNoZS[MAXPHOTONSTOSAVE];   //[elen]
-   Float_t         elepfCandPt[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
-   Float_t         elepfCandEta[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
-   Float_t         elepfCandPhi[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
-   Float_t         elepfCandVtx[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
-   Float_t         elepfCandType[MAXPFCANDTOSAVE][MAXPHOTONSTOSAVE];
+   Float_t         elepfCandPt[MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE];
+   Float_t         elepfCandEta[MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE];
+   Float_t         elepfCandPhi[MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE];
+   Float_t         elepfCandVtx[MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE];
+   Float_t         elepfCandType[MAXPHOTONSTOSAVE][MAXPFCANDTOSAVE];
    Float_t         eledEtaIn[MAXPHOTONSTOSAVE];   //[elen]
    Float_t         eledPhiIn[MAXPHOTONSTOSAVE];   //[elen]
    Float_t         eleHoE[MAXPHOTONSTOSAVE];   //[elen]
@@ -304,25 +313,34 @@ public :
    TBranch        *b_pfSCphi;   //!
    TBranch        *b_pfSCe;   //!
    TBranch        *b_pfSCnBC;   //!
-   TBranch        *b_pfSCnXtals;   //!
+   TBranch        *b_pfSCnXtalsSeed;   //!
+   TBranch        *b_pfSCnXtalsTotal;   //!
    TBranch        *b_pfSCbcEta;   //!
    TBranch        *b_pfSCbcPhi;   //!
    TBranch        *b_pfSCbcE;   //!
+   TBranch        *b_pfSCbcNXtals;   //!
    TBranch        *b_multi5x5SCn;   //!
    TBranch        *b_multi5x5SCeta;   //!
    TBranch        *b_multi5x5SCphi;   //!
    TBranch        *b_multi5x5SCe;   //!
    TBranch        *b_multi5x5SCnBC;   //!
-   TBranch        *b_multi5x5SCnXtals;   //!
+   TBranch        *b_multi5x5SCnXtalsSeed;   //!
+   TBranch        *b_multi5x5SCnXtalsTotal;   //!
    TBranch        *b_multi5x5SCbcEta;   //!
    TBranch        *b_multi5x5SCbcPhi;   //!
    TBranch        *b_multi5x5SCbcE;   //!
+   TBranch        *b_multi5x5SCbcNXtals;   //!
    TBranch        *b_hybridSCn;   //!
    TBranch        *b_hybridSCeta;   //!
    TBranch        *b_hybridSCphi;   //!
    TBranch        *b_hybridSCe;   //!
    TBranch        *b_hybridSCnBC;   //!
-   TBranch        *b_hybridSCnXtals;   //!
+   TBranch        *b_hybridSCnXtalsSeed;   //!
+   TBranch        *b_hybridSCnXtalsTotal;   //!
+   TBranch        *b_hybridSCbcEta;   //!
+   TBranch        *b_hybridSCbcPhi;   //!
+   TBranch        *b_hybridSCbcE;   //!
+   TBranch        *b_hybridSCbcNXtals;   //!
    TBranch        *b_elen;   //!
    TBranch        *b_elepx;   //!
    TBranch        *b_elepy;   //!
@@ -436,9 +454,9 @@ public :
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    void bookHisto(TString name, int nbins, float xLow, float xUp);
-   void bookHisto(TString name, int nbins, float xLow, float xUp,TString xAxisName); 
+   void bookHisto(TString name, int nbins, float xLow, float xUp,TString xAxisName, bool bookMulti5x5=true); 
    void bookHisto2D(TString name, int nbins, float xLow, float xUp,int nbinsY, float yLow, float yUp);
-   void bookHisto2D(TString name, int nbins, float xLow, float xUp,int nbinsY, float yLow, float yUp,TString xAxisTitle, TString yAxisTitle);
+   void bookHisto2D(TString name, int nbins, float xLow, float xUp,int nbinsY, float yLow, float yUp,TString xAxisTitle, TString yAxisTitle, bool bookMulti5x5=true);
    void setAxisTitle(TString name,TString xAxisName);
    void setAxisTitle(TString name,TString xAxisName, TString yAxisName);
    void bookHistos();
