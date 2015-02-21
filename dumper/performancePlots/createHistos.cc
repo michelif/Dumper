@@ -17,25 +17,25 @@ void createHistos::bookHistos(){
   bookHisto("pfSC_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}");
   bookHisto("pfSC_EnergyWrong",150,0,300,"E_{reco}");
   bookHisto("pfSC_EnergyRight",150,0,300,"E_{reco}");
+  bookHisto("pfSC_EBC",150,0,300,"E_{reco}^{BC}");
   bookHisto("pfSC_nXtalsTotalWrong",250,-0.5,249.5,"N_{xtals}");
   bookHisto("pfSC_nXtalsTotalRight",250,-0.5,249.5,"N_{xtals}");
   bookHisto("pfSC_nXtalsSeedWrong",250,-0.5,249.5,"N_{xtals}");
   bookHisto("pfSC_nXtalsSeedRight",250,-0.5,249.5,"N_{xtals}");
   bookHisto("pfSC_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}");
   bookHisto("pfSC_nXtalsTotal",250,-0.5,249.5,"N_{xtals}");
-  bookHisto("pfSC_nXtalsBC",100,-0.5,99.5,"N_{xtals}^{BC}");
   bookHisto("pfSC_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC");
   bookHisto("pfSC_maxDistFromSeedinRinSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
   bookHisto("pfSC_maxDistFromSeedinEtainSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
   bookHisto("pfSC_maxDistFromSeedinPhiinSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
   bookHisto("pfSC_bcNXtals",100,-0.5,99.5,"N_{xtals}^{BC}");
-  bookHisto2D("pfSC_EBCseedVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_EBCseedVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
+  bookHisto2D("pfSC_EBCVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
+  bookHisto2D("pfSC_EBCVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
   bookHisto2D("pfSC_EnergyVsnXtalsTotalWrong",250,-0.5,249.5,150,0,300,"N_{xtals}","E_{reco}");
   bookHisto2D("pfSC_EnergyVsnXtalsTotalRight",250,-0.5,249.5,150,0,300,"N_{xtals}","E_{reco}");
   bookHisto2D("pfSC_EnergyVsnXtalsSeedWrong",250,-0.5,249.5,150,0,300,"N_{xtals}^{seed}","E_{reco}");
   bookHisto2D("pfSC_EnergyVsnXtalsSeedRight",250,-0.5,249.5,150,0,300,"N_{xtals}^{seed}","E_{reco}");
-  bookHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",250,0,400,150,-1.,1,"#rhoxN_{xtals}","#frac{E_{reco}-E_{true}}{E_{reco}}");
+  bookHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",500,0,20000,150,-1.,1,"#rhoxN_{xtals}","#frac{E_{reco}-E_{true}}{E_{reco}}");
 
 
 //  bookHisto("pfSC_FirstEtaBin_maxDistFromSeedinRinSCPhoUnconv",300,0,0.8,"max#Delta R_{BC}^{seed}");
@@ -393,6 +393,7 @@ void createHistos::Loop2(){
 	  fillHisto2D("pfSC_EnergyVsnXtalsTotalWrong",pfSCnXtalsTotal[i],pfSCe[i],pfscp4);
 	}else{
 	  fillHisto("pfSC_EnergyRight",pfSCe[i],pfscp4);
+	  fillHisto("pfSC_nXtalsSeedRight",pfSCnXtalsSeed[i],pfscp4);
 	  fillHisto("pfSC_nXtalsSeedWrong",pfSCnXtalsSeed[i],pfscp4);
 	  fillHisto("pfSC_nXtalsTotalRight",pfSCnXtalsTotal[i],pfscp4);
 	  fillHisto2D("pfSC_EnergyVsnXtalsSeedRight",pfSCnXtalsSeed[i],pfSCe[i],pfscp4);
@@ -414,18 +415,19 @@ void createHistos::Loop2(){
 	for (int j=0;j< pfSCnBC[i];j++){
 	  //	  std::cout<<pfSCnBC[i]<< " i,j:"<<i<<","<<j<<" "<<pfSCbcE[i][j]<<std::endl;
 	  if(pfSCbcE[i][j]<0.01)continue;
-	  TLorentzVector* bc = createTLorentzVector(pfSCbcE[i][j]/cosh(pfSCbcEta[i][j]),pfSCbcEta[i][j],pfSCbcPhi[i][j],pfSCbcE[i][j]);
-	  fillHisto("pfSC_bcNXtals",pfSCbcNXtals[i][j],bc);
 
 	  if(j>0){
+	    TLorentzVector* bc = createTLorentzVector(pfSCbcE[i][j]/cosh(pfSCbcEta[i][j]),pfSCbcEta[i][j],pfSCbcPhi[i][j],pfSCbcE[i][j]);
+	    fillHisto("pfSC_bcNXtals",pfSCbcNXtals[i][j],bc);
+	    fillHisto("pfSC_EBC",pfSCbcE[i][j],bc);
 	    float distR=bc->DeltaR(seed);
 	    if(distR>maxDistR)maxDistR=distR;
 	    float distPhi=bc->DeltaPhi(seed);
 	    if(distPhi>maxDistPhi)maxDistPhi=distPhi;
 	    float distEta=sqrt(distR*distR-distPhi*distPhi);
 	    if(distEta>maxDistEta)maxDistEta=distEta;
-	    fillHisto2D("pfSC_EBCseedVsDeltaPhiBCSeedEle",fabs(distPhi),pfSCbcE[i][j],bc);
-	    fillHisto2D("pfSC_EBCseedVsDeltaEtaBCSeedEle",fabs(distEta),pfSCbcE[i][j],bc);
+	    fillHisto2D("pfSC_EBCVsDeltaPhiBCSeedEle",fabs(distPhi),pfSCbcE[i][j],bc);
+	    fillHisto2D("pfSC_EBCVsDeltaEtaBCSeedEle",fabs(distEta),pfSCbcE[i][j],bc);
 	  }
 	}//pfscnBC
 	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinRinSCEle", maxDistR, pfscp4);
@@ -475,18 +477,19 @@ void createHistos::Loop2(){
 	for (int j=0;j< multi5x5SCnBC[i];j++){
 	  //	  std::cout<<multi5x5SCnBC[i]<< " i,j:"<<i<<","<<j<<" "<<multi5x5SCbcE[i][j]<<std::endl;
 	  if(multi5x5SCbcE[i][j]<0.01)continue;
-	  
 
 	  if(j>0){
-	    TLorentzVector* bc = createTLorentzVector(multi5x5SCbcE[i][j]/cosh(multi5x5SCbcEta[i][j]),multi5x5SCbcEta[i][j],multi5x5SCbcPhi[i][j],multi5x5SCbcE[i][j]);
+	    TLorentzVector* bc = createTLorentzVector(multi5x5SCbcE[i][j]/cosh(multi5x5SCbcEta[i][j]),multi5x5SCbcEta[i][j],multi5x5SCbcPhi[i][j],multi5x5SCbcE[i][j]);	  
+	    fillHisto("multi5x5SC_bcNXtals",multi5x5SCbcNXtals[i][j],bc);
+	    fillHisto("multi5x5SC_EBC",multi5x5SCbcE[i][j],bc);
 	    float distR=bc->DeltaR(seed);
 	    if(distR>maxDistR)maxDistR=distR;
 	    float distPhi=bc->DeltaPhi(seed);
 	    if(distPhi>maxDistPhi)maxDistPhi=distPhi;
 	    float distEta=sqrt(distR*distR-distPhi*distPhi);
 	    if(distEta>maxDistEta)maxDistEta=distEta;
-	    fillHisto2D("multi5x5SC_EBCseedVsDeltaPhiBCSeedEle",fabs(distPhi),multi5x5SCbcE[i][j],bc);
-	    fillHisto2D("multi5x5SC_EBCseedVsDeltaEtaBCSeedEle",fabs(distEta),multi5x5SCbcE[i][j],bc);
+	    fillHisto2D("multi5x5SC_EBCVsDeltaPhiBCSeedEle",fabs(distPhi),multi5x5SCbcE[i][j],bc);
+	    fillHisto2D("multi5x5SC_EBCVsDeltaEtaBCSeedEle",fabs(distEta),multi5x5SCbcE[i][j],bc);
 	  }
 	}//multi5x5scnBC
 	if(maxDistR>0)fillHisto("multi5x5SC_maxDistFromSeedinRinSCEle", maxDistR, multi5x5scp4);

@@ -121,7 +121,7 @@ public :
    Int_t           pfSCnXtalsTotal[MAXSCTOSAVE];   //[pfSCn]
    Float_t         pfSCbcEta[MAXSCTOSAVE][MAXBCTOSAVE];
    Float_t         pfSCbcPhi[MAXSCTOSAVE][MAXBCTOSAVE];
-   Int_t           pfSCbcE[MAXSCTOSAVE][MAXBCTOSAVE];
+   Float_t         pfSCbcE[MAXSCTOSAVE][MAXBCTOSAVE];
    Int_t           pfSCbcNXtals[MAXSCTOSAVE][MAXBCTOSAVE];
    Int_t           multi5x5SCn;
    Float_t         multi5x5SCeta[MAXSCTOSAVE];   //[multi5x5SCn]
