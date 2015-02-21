@@ -11,6 +11,8 @@ void createHistos::bookHistos(){
   bookHisto("ele_sMaj",200,0,3,"sMaj",false);
   bookHisto("ele_sMin",200,0,2,"sMin",false);
   bookHisto("ele_alpha",200,-2,2,"alpha",false);
+  bookHisto("ele_PtRight",150,0,100,"E_{reco}");
+  bookHisto("ele_PtWrong",150,0,100,"E_{reco}");
 
   //sc variables
   std::cout<<"booking"<<std::endl;
@@ -366,6 +368,11 @@ void createHistos::Loop2(){
       TLorentzVector* elep4=createTLorentzVector(elept[i],eleeta[i],elephi[i],elee[i]);
       int indexMatchEle=matchesGenEle(elep4);
       if(indexMatchEle<0)continue;
+      if(elee[i]/theGenElectrons_[indexMatchEle]->E()<0.5){
+	fillHisto("ele_PtWrong",elept[i],elep4);
+      }else{
+	fillHisto("ele_PtRight",elept[i],elep4);
+      }
       fillHisto("ele_ErecoOverETrue",elee[i]/theGenElectrons_[indexMatchEle]->E(),elep4);
       fillHisto("ele_sMaj",elesMajZS[i],elep4);
       fillHisto("ele_sMin",elesMinZS[i],elep4);
