@@ -58,10 +58,8 @@ int main( int argc, char* argv[] ) {
     }
     printf("Histo name:%s title:%s\n",obj->GetName(),obj->GetTitle());
        if((strcmp(obj->IsA()->GetName(),"TH1F"))==0){
-      std::cout<<"h1"<<std::endl;
       histoNamesnoPU[obj->GetName()]=(TH1F*)obj;
     }else if ((strcmp(obj->IsA()->GetName(),"TH2F"))==0){
-      std::cout<<"h2"<<std::endl;
       histoNames2DnoPU[obj->GetName()]=(TH2F*)obj;
     }
   }
