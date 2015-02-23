@@ -11,14 +11,14 @@ void createHistos::bookHistos(){
   bookHisto("ele_sMaj",200,0,3,"sMaj",false);
   bookHisto("ele_sMin",200,0,2,"sMin",false);
   bookHisto("ele_alpha",200,-2,2,"alpha",false);
-  bookHisto("ele_PtRight",150,0,100,"E_{reco}");
-  bookHisto("ele_PtWrong",150,0,100,"E_{reco}");
+  bookHisto("ele_ptRight",150,0,100,"E_{reco}");
+  bookHisto("ele_ptWrong",150,0,100,"E_{reco}");
 
   //sc variables
   std::cout<<"booking"<<std::endl;
   bookHisto("pfSC_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}");
-  bookHisto("pfSC_EnergyWrong",150,0,300,"E_{reco}");
-  bookHisto("pfSC_EnergyRight",150,0,300,"E_{reco}");
+  bookHisto("pfSC_ptWrong",100,0,100,"E_{reco}");
+  bookHisto("pfSC_ptRight",100,0,100,"E_{reco}");
   bookHisto("pfSC_EBC",150,0,300,"E_{reco}^{BC}");
   bookHisto("pfSC_nXtalsTotalWrong",250,-0.5,249.5,"N_{xtals}");
   bookHisto("pfSC_nXtalsTotalRight",250,-0.5,249.5,"N_{xtals}");
@@ -361,17 +361,19 @@ void createHistos::Loop2(){
     buildGenEle();
     buildGenPho();
 
+    float ptcut=20.;
+
     //loop on ele
     for(int i=0;i<elen;i++){
-      if(elept[i]<0.1)continue;
+      if(elept[i]<ptcut)continue;
 
       TLorentzVector* elep4=createTLorentzVector(elept[i],eleeta[i],elephi[i],elee[i]);
       int indexMatchEle=matchesGenEle(elep4);
       if(indexMatchEle<0)continue;
       if(elee[i]/theGenElectrons_[indexMatchEle]->E()<0.5){
-	fillHisto("ele_PtWrong",elept[i],elep4);
+	fillHisto("ele_ptWrong",elept[i],elep4);
       }else{
-	fillHisto("ele_PtRight",elept[i],elep4);
+	fillHisto("ele_ptRight",elept[i],elep4);
       }
       fillHisto("ele_ErecoOverETrue",elee[i]/theGenElectrons_[indexMatchEle]->E(),elep4);
       fillHisto("ele_sMaj",elesMajZS[i],elep4);
@@ -385,21 +387,23 @@ void createHistos::Loop2(){
       for (int i=0;i<pfSCn;i++){
 	
 	TLorentzVector* pfscp4 = createTLorentzVector(pfSCe[i]/cosh(pfSCeta[i]),pfSCeta[i],pfSCphi[i],pfSCe[i]);
-	
+
+	if(pfscp4->Pt()<ptcut)continue;	
 	int indexMatchEle=matchesGenEle(pfscp4);
 	if(indexMatchEle<0)continue;
 	//	if(indexMatchEle>-1)    std::cout<<"gen:"<<theGenElectrons_[indexMatchEle]->E()<<" "<<theGenElectrons_[indexMatchEle]->Eta()<<" "<<theGenElectrons_[indexMatchEle]->Phi()<<std::endl;  
 	//	std::cout<<"pfsc:"<<pfscp4->E()<<" "<<pfscp4->Eta()<<" "<<pfscp4->Phi()<<std::endl;
 
 	fillHisto("pfSC_ErecoOverETrue",pfSCe[i]/theGenElectrons_[indexMatchEle]->E(),pfscp4);
+
 	if(pfSCe[i]/theGenElectrons_[indexMatchEle]->E()<0.5){
-	  fillHisto("pfSC_EnergyWrong",pfSCe[i],pfscp4);
+	  fillHisto("pfSC_ptWrong",pfSCe[i]/cosh(pfSCeta[i]),pfscp4);
 	  fillHisto("pfSC_nXtalsSeedWrong",pfSCnXtalsSeed[i],pfscp4);
 	  fillHisto("pfSC_nXtalsTotalWrong",pfSCnXtalsTotal[i],pfscp4);
 	  fillHisto2D("pfSC_EnergyVsnXtalsSeedWrong",pfSCnXtalsSeed[i],pfSCe[i],pfscp4);
 	  fillHisto2D("pfSC_EnergyVsnXtalsTotalWrong",pfSCnXtalsTotal[i],pfSCe[i],pfscp4);
 	}else{
-	  fillHisto("pfSC_EnergyRight",pfSCe[i],pfscp4);
+	  fillHisto("pfSC_ptRight",pfSCe[i]/cosh(pfSCeta[i]),pfscp4);
 	  fillHisto("pfSC_nXtalsSeedRight",pfSCnXtalsSeed[i],pfscp4);
 	  fillHisto("pfSC_nXtalsSeedWrong",pfSCnXtalsSeed[i],pfscp4);
 	  fillHisto("pfSC_nXtalsTotalRight",pfSCnXtalsTotal[i],pfscp4);
@@ -449,6 +453,8 @@ void createHistos::Loop2(){
       for (int i=0;i<multi5x5SCn;i++){
 	
 	TLorentzVector* multi5x5scp4 = createTLorentzVector(multi5x5SCe[i]/cosh(multi5x5SCeta[i]),multi5x5SCeta[i],multi5x5SCphi[i],multi5x5SCe[i]);
+
+	if(multi5x5scp4->Pt()<ptcut)continue;	
 	
 	int indexMatchEle=matchesGenEle(multi5x5scp4);
 	if(indexMatchEle<0)continue;
@@ -456,13 +462,13 @@ void createHistos::Loop2(){
 	fillHisto("multi5x5SC_ErecoOverETrue",multi5x5SCe[i]/theGenElectrons_[indexMatchEle]->E(),multi5x5scp4);
 
 	if(multi5x5SCe[i]/theGenElectrons_[indexMatchEle]->E()<0.5){
-	  fillHisto("multi5x5SC_EnergyWrong",multi5x5SCe[i],multi5x5scp4);
+	  fillHisto("multi5x5SC_ptWrong",multi5x5SCe[i]/cosh(multi5x5SCeta[i]),multi5x5scp4);
 	  fillHisto("multi5x5SC_nXtalsSeedWrong",multi5x5SCnXtalsSeed[i],multi5x5scp4);
 	  fillHisto("multi5x5SC_nXtalsTotalWrong",multi5x5SCnXtalsTotal[i],multi5x5scp4);
 	  fillHisto2D("multi5x5SC_EnergyVsnXtalsSeedWrong",multi5x5SCnXtalsSeed[i],multi5x5SCe[i],multi5x5scp4);
 	  fillHisto2D("multi5x5SC_EnergyVsnXtalsTotalWrong",multi5x5SCnXtalsTotal[i],multi5x5SCe[i],multi5x5scp4);
 	}else{
-	  fillHisto("multi5x5SC_EnergyRight",multi5x5SCe[i],multi5x5scp4);
+	  fillHisto("multi5x5SC_ptRight",multi5x5SCe[i]/cosh(multi5x5SCeta[i]),multi5x5scp4);
 	  fillHisto("multi5x5SC_nXtalsSeedRight",multi5x5SCnXtalsSeed[i],multi5x5scp4);
 	  fillHisto("multi5x5SC_nXtalsTotalRight",multi5x5SCnXtalsTotal[i],multi5x5scp4);
 	  fillHisto2D("multi5x5SC_EnergyVsnXtalsSeedRight",multi5x5SCnXtalsSeed[i],multi5x5SCe[i],multi5x5scp4);
