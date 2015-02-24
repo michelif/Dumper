@@ -390,6 +390,7 @@ private:
 
   bool isData;
   bool saveReco;
+  int recHitNEvts;
 
   int entryNumber;
 
@@ -405,6 +406,7 @@ dumper::dumper(const edm::ParameterSet& iConfig) {
   outputFileName  = iConfig.getParameter<std::string>("OutputFileName");
   isData          = iConfig.getParameter<bool>("isData");
   saveReco        = iConfig.getParameter<bool>("saveReco");
+  recHitNEvts        = iConfig.getParameter<int>("recHitNEvts");
 }
 
 dumper::~dumper() 
@@ -455,7 +457,7 @@ void dumper::clearVector(){
 
 void dumper::recHitReco(const EERecHitCollection* rhitsee){
   
-  //save rechits only for first 100 evts
+  //save rechits only for first n evts
   rechit_n=0;
   
   for (EcalRecHitCollection::const_iterator itRecHit = rhitsee->begin();
@@ -1018,7 +1020,7 @@ void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH,std::vector<El
 	gp_phi[gp_n] = gp->phi();
 	gp_idMC [gp_n] = gp->pdgId();
 	gp_statusMC [gp_n] = gp->status();
-	gp_motherIdMC [gp_n] = gp->mother()->pdgId();
+	if(gp->mother()!=0)	gp_motherIdMC [gp_n] = gp->mother()->pdgId();
 	gp_n++;
 
 	if((abs(gp->pdgId()) == 22)){
@@ -1177,8 +1179,8 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
 
       clearVector();
 
-      //rechit are too much, just save them for the first 100 events
-      if(entryNumber<101)recHitReco(rhitsee);
+      //rechits are too much, just save them for the first 100 events
+      if(entryNumber<recHitNEvts)recHitReco(rhitsee);
 
       //PHOTONS
       phoReco(phoH,tracks,rhitseb,rhitsee,PFCandidates);
