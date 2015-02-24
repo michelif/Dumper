@@ -44,7 +44,7 @@ process.dumper = cms.EDAnalyzer('dumper',
                                    OutputFileName = cms.string("outDumper.root"),
                                    isData = cms.bool(False),
                                    saveReco = cms.bool(True),
-                                   recHitNEvts= cms.int32(200),
+                                   recHitNEvts= cms.int32(101),
                                    trgSelection = cms.vstring("HLT_Ele27WP85_Gsf_v1", "HLT_Ele20WP60_Ele8_Mass55_v1","HLT_Ele25WP60_SC4_Mass5_v1",)
                                 )
 
