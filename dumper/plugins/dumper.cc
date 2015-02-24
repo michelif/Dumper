@@ -179,7 +179,7 @@ private:
   Float_t rechit_e[MAXRECHITTOSAVE];
   Float_t rechit_ix[MAXRECHITTOSAVE];
   Float_t rechit_iy[MAXRECHITTOSAVE];
-
+  Float_t rechit_time[MAXRECHITTOSAVE];
 
   Float_t pho_pt[MAXPHOTONSTOSAVE];
   Float_t pho_eta[MAXPHOTONSTOSAVE];
@@ -465,6 +465,7 @@ void dumper::recHitReco(const EERecHitCollection* rhitsee){
       EKDetId ekId(itRecHit->id());
       rechit_ix[rechit_n]=ekId.ix();
       rechit_iy[rechit_n]=ekId.iy();
+      rechit_time[rechit_n]=itRecHit->time();
       rechit_n++;
     }
   }
@@ -1450,8 +1451,7 @@ void dumper::beginJob() {
     t->Branch("rechite",  &rechit_e,  "rechite[rechitn]/F");
     t->Branch("rechitix", &rechit_ix, "rechitix[rechitn]/F");
     t->Branch("rechitiy", &rechit_iy, "rechitiy[rechitn]/F");
-
-
+    t->Branch("rechittime", &rechit_time, "rechittime[rechitn]/F");
   }   
       
   if (!isData) {
