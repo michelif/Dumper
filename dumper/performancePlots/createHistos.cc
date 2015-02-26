@@ -20,7 +20,7 @@ void createHistos::bookHistos(){
   bookHisto("pfSC_ptWrong",100,0,100,"E_{reco}");
   bookHisto("pfSC_ptRight",100,0,100,"E_{reco}");
   bookHisto("pfSC_EBC",150,0,300,"E_{reco}^{BC}");
-  bookHisto("pfSC_EseedOverETrue",150,0,300,"E_{reco}^{seed}/E_{true}");
+  bookHisto("pfSC_EseedOverETrue",200,0,2,"E_{reco}^{seed}/E_{true}");
   bookHisto("pfSC_nXtalsTotalWrong",250,-0.5,249.5,"N_{xtals}");
   bookHisto("pfSC_nXtalsTotalRight",250,-0.5,249.5,"N_{xtals}");
   bookHisto("pfSC_nXtalsSeedWrong",250,-0.5,249.5,"N_{xtals}");
