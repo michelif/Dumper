@@ -106,7 +106,7 @@
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-
+#include "DataFormats/ParticleFlowReco/interface/PFSuperCluster.h"
 //#include "Dumper/dumper/interface/EcalClusterTools.h"
 
 #include "TLorentzVector.h"
@@ -123,6 +123,7 @@
 #define MAXBCTOSAVE 200
 #define MAXPFCANDTOSAVE 200
 #define MAXRECHITTOSAVE 20000
+#define MAXPFRECHITTOSAVE 150
 
 //note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
 
@@ -136,7 +137,7 @@ public:
   void mcTruth(edm::Handle<reco::GenParticleCollection> genParticleH,std::vector<ElectronMCTruth> MCElectrons);
   void phoReco(edm::Handle<reco::PhotonCollection> photonH, edm::Handle<reco::TrackCollection> traH, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee,edm::Handle<reco::PFCandidateCollection>  PFCandidates);
   void eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle,edm::Handle<reco::ConversionCollection> hConversions, edm::Handle<reco::BeamSpot> recoBeamSpotHandle, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee,edm::Handle<reco::PFCandidateCollection>  PFCandidates);
-  void scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHandle, edm::Handle<reco::SuperClusterCollection> superClustersEEHandle);
+  void scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHandle, edm::Handle<reco::SuperClusterCollection> superClustersEEHandlee, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee);
   void multi5x5scReco(edm::Handle<reco::SuperClusterCollection> multi5x5Handle);
   void hybridscReco(edm::Handle<reco::SuperClusterCollection> hybridHandle);
   void recHitReco(const EERecHitCollection* rhitsee);
@@ -155,7 +156,7 @@ private:
   const CaloTopology *topology;
   
   Float_t rho;
-  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n, multi5x5SC_n, hybridSC_n, pfcandPho_n, pfcandEle_n, rechit_n;
+  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n, multi5x5SC_n, hybridSC_n, pfcandPho_n, pfcandEle_n, rechit_n, pfSCRecHitsSeed_n;
 
   Float_t gp_pt[MAXPARTICLESTOSAVE];
   Float_t gp_eta[MAXPARTICLESTOSAVE];
@@ -246,6 +247,8 @@ private:
   Float_t   pfSC_e[MAXSCTOSAVE];
   Int_t pfSC_nBC[MAXSCTOSAVE];
   Int_t pfSC_nXtalsSeed[MAXSCTOSAVE];
+  Float_t pfSC_RecHitsfractionsSeed[MAXPFRECHITTOSAVE];
+  Float_t pfSC_RecHitsfractionsTimeSeed[MAXPFRECHITTOSAVE];
   Int_t pfSC_nXtalsTotal[MAXSCTOSAVE];  
 //bc info
   Float_t pfSC_bcEta[MAXSCTOSAVE][MAXBCTOSAVE];//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
@@ -829,6 +832,7 @@ void dumper::eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle, ed
      ele_pfsumNeutralHadronEt[ele_n] = pfIso.neutralHadronIso;
      ele_pfsumPhotonEt[ele_n] = pfIso.photonIso;
      //     ele_pfsumPUPt[ele_n] = pfIso.sumPUPt; //not  in cmssw6
+     
 
 
      ele_n++;
@@ -922,7 +926,7 @@ void dumper::hybridscReco(edm::Handle<reco::SuperClusterCollection> hybridHandle
 }
 
 
-void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHandle, edm::Handle<reco::SuperClusterCollection> superClustersEEHandle){
+void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHandle, edm::Handle<reco::SuperClusterCollection> superClustersEEHandle,const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee){
 
   pfSC_n=0;
 
@@ -939,6 +943,24 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
       pfSC_nBC[pfSC_n] = itSC->clustersSize();
       pfSC_nXtalsSeed[pfSC_n] = itSC->seed()->size();
       pfSC_nXtalsTotal[pfSC_n] = 0;
+
+      //rechit variables
+      pfSCRecHitsSeed_n=0;
+      std::vector<std::pair<DetId,float> > scDetIds = itSC->seed()->hitsAndFractions();
+      for(std::vector<std::pair<DetId,float> >::const_iterator idIt=scDetIds.begin(); idIt!=scDetIds.end(); ++idIt){
+	const EcalRecHit* rh=0;
+	if ( (*idIt).first.subdetId() == EcalBarrel)
+	  rh = &*(rhitseb->find((*idIt).first));
+	else if ( (*idIt).first.subdetId() == EcalShashlik) 
+	  rh = &*(rhitsee->find((*idIt).first));
+	if (!rh)	 std::cout << "Dumper::BIG ERROR::RecHit NOT FOUND" << std::endl;
+
+	pfSC_RecHitsfractionsSeed[pfSCRecHitsSeed_n]=idIt->second;
+	pfSC_RecHitsfractionsTimeSeed[pfSCRecHitsSeed_n]=rh->time();
+	pfSCRecHitsSeed_n++;
+	//FIXME, put a lower threshold at 10-7
+      }
+
       //basicClusters
       int nBC=0;
       for (reco::CaloCluster_iterator bclus = (itSC->clustersBegin()); bclus != (itSC->clustersEnd()); ++bclus) {
@@ -974,6 +996,26 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
       pfSC_nXtalsSeed[pfSC_n] = itSC->seed()->size();
       pfSC_nXtalsTotal[pfSC_n] = 0;
       //      std::cout<<" seed E:"<<itSC->seed()->energy()<<" seed Eta:"<<itSC->seed()->eta()<<std::endl;
+
+      //rechit variables
+      pfSCRecHitsSeed_n=0;
+      std::vector<std::pair<DetId,float> > scDetIds = itSC->seed()->hitsAndFractions();
+      for(std::vector<std::pair<DetId,float> >::const_iterator idIt=scDetIds.begin(); idIt!=scDetIds.end(); ++idIt){
+	const EcalRecHit* rh=0;
+	if ( (*idIt).first.subdetId() == EcalBarrel)
+	  rh = &*(rhitseb->find((*idIt).first));
+	else if ( (*idIt).first.subdetId() == EcalShashlik) 
+	  rh = &*(rhitsee->find((*idIt).first));
+	if (!rh)	 std::cout << "Dumper::BIG ERROR::RecHit NOT FOUND" << std::endl;
+
+	pfSC_RecHitsfractionsSeed[pfSCRecHitsSeed_n]=idIt->second;
+	pfSC_RecHitsfractionsTimeSeed[pfSCRecHitsSeed_n]=rh->time();
+	pfSCRecHitsSeed_n++;
+	//FIXME, controllo dimensione
+      }
+
+
+
       //basicClusters
       int nBC=0;
       for (reco::CaloCluster_iterator bclus = (itSC->clustersBegin()); bclus != (itSC->clustersEnd()); ++bclus) {
@@ -1208,7 +1250,7 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
       edm::Handle<reco::SuperClusterCollection> superClustersEEHandle;
       event.getByLabel("particleFlowSuperClusterECAL","particleFlowSuperClusterECALEndcapWithPreshower",superClustersEEHandle);
       //PFSUPERCLUSTERS
-      scReco(superClustersEBHandle,superClustersEEHandle);
+      scReco(superClustersEBHandle,superClustersEEHandle,rhitseb,rhitsee);
 
 
       //multi5x5SuperClusters
@@ -1318,6 +1360,9 @@ void dumper::beginJob() {
     t->Branch("pfSCeta", &pfSC_eta, "pfSCeta[pfSCn]/F");
     t->Branch("pfSCphi", &pfSC_phi, "pfSCphi[pfSCn]/F");
     t->Branch("pfSCe", &pfSC_e, "pfSCe[pfSCn]/F");
+    t->Branch("pfSCRecHitsSeedn",   &pfSCRecHitsSeed_n,   "pfSCRecHitsSeedn/I");
+    t->Branch("pfSCRecRecHitsFractionsSeed", &pfSC_RecHitsfractionsSeed, "pfSCRecHitsFractionsSeed[pfSCRecHitsSeedn]/F");
+    t->Branch("pfSCRecHitsFractionsTimeSeed", &pfSC_RecHitsfractionsTimeSeed, "pfSCRecHitsFractionsTimeSeed[pfSCRecHitsSeedn]/F");
     t->Branch("pfSCnBC", &pfSC_nBC, "pfSCnBC[pfSCn]/I");
     t->Branch("pfSCnXtalsSeed", &pfSC_nXtalsSeed, "pfSCnXtalsSeed[pfSCn]/I");
     t->Branch("pfSCnXtalsTotal", &pfSC_nXtalsTotal, "pfSCnXtalsTotal[pfSCn]/I");
