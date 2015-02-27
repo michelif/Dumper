@@ -248,7 +248,8 @@ private:
   Int_t pfSC_nBC[MAXSCTOSAVE];
   Int_t pfSC_nXtalsSeed[MAXSCTOSAVE];
   Float_t pfSC_RecHitsfractionsSeed[MAXPFRECHITTOSAVE];
-  Float_t pfSC_RecHitsfractionsTimeSeed[MAXPFRECHITTOSAVE];
+  Float_t pfSC_RecHitsEnergySeed[MAXPFRECHITTOSAVE];
+  Float_t pfSC_RecHitsTimeSeed[MAXPFRECHITTOSAVE];
   Int_t pfSC_nXtalsTotal[MAXSCTOSAVE];  
 //bc info
   Float_t pfSC_bcEta[MAXSCTOSAVE][MAXBCTOSAVE];//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
@@ -935,7 +936,6 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 
     if (itSC->energy() > 0. && pfSC_n<MAXSCTOSAVE) {
 
-
       pfSC_eta[pfSC_n] = itSC->eta();
       pfSC_phi[pfSC_n] = itSC->phi();
 
@@ -948,17 +948,19 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
       pfSCRecHitsSeed_n=0;
       std::vector<std::pair<DetId,float> > scDetIds = itSC->seed()->hitsAndFractions();
       for(std::vector<std::pair<DetId,float> >::const_iterator idIt=scDetIds.begin(); idIt!=scDetIds.end(); ++idIt){
-	const EcalRecHit* rh=0;
-	if ( (*idIt).first.subdetId() == EcalBarrel)
-	  rh = &*(rhitseb->find((*idIt).first));
-	else if ( (*idIt).first.subdetId() == EcalShashlik) 
-	  rh = &*(rhitsee->find((*idIt).first));
-	if (!rh)	 std::cout << "Dumper::BIG ERROR::RecHit NOT FOUND" << std::endl;
-
-	pfSC_RecHitsfractionsSeed[pfSCRecHitsSeed_n]=idIt->second;
-	pfSC_RecHitsfractionsTimeSeed[pfSCRecHitsSeed_n]=rh->time();
-	pfSCRecHitsSeed_n++;
-	//FIXME, put a lower threshold at 10-7
+	if(pfSCRecHitsSeed_n < MAXPFRECHITTOSAVE){
+	  const EcalRecHit* rh=0;
+	  if ( (*idIt).first.subdetId() == EcalBarrel)
+	    rh = &*(rhitseb->find((*idIt).first));
+	  else if ( (*idIt).first.subdetId() == EcalShashlik) 
+	    rh = &*(rhitsee->find((*idIt).first));
+	  if (!rh)	 std::cout << "Dumper::BIG ERROR::RecHit NOT FOUND" << std::endl;
+	  
+	  pfSC_RecHitsfractionsSeed[pfSCRecHitsSeed_n]=idIt->second;
+	  pfSC_RecHitsTimeSeed[pfSCRecHitsSeed_n]=rh->time();
+	  pfSC_RecHitsEnergySeed[pfSCRecHitsSeed_n]=rh->energy();
+	  pfSCRecHitsSeed_n++;
+	}
       }
 
       //basicClusters
@@ -987,7 +989,6 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
        itSC != superClustersEEHandle->end(); ++itSC) {
     if (itSC->energy() > 0. && pfSC_n<MAXSCTOSAVE) {
       
-
       pfSC_eta[pfSC_n] = itSC->eta();
       pfSC_phi[pfSC_n] = itSC->phi();
 
@@ -1001,17 +1002,19 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
       pfSCRecHitsSeed_n=0;
       std::vector<std::pair<DetId,float> > scDetIds = itSC->seed()->hitsAndFractions();
       for(std::vector<std::pair<DetId,float> >::const_iterator idIt=scDetIds.begin(); idIt!=scDetIds.end(); ++idIt){
-	const EcalRecHit* rh=0;
-	if ( (*idIt).first.subdetId() == EcalBarrel)
-	  rh = &*(rhitseb->find((*idIt).first));
-	else if ( (*idIt).first.subdetId() == EcalShashlik) 
-	  rh = &*(rhitsee->find((*idIt).first));
-	if (!rh)	 std::cout << "Dumper::BIG ERROR::RecHit NOT FOUND" << std::endl;
-
-	pfSC_RecHitsfractionsSeed[pfSCRecHitsSeed_n]=idIt->second;
-	pfSC_RecHitsfractionsTimeSeed[pfSCRecHitsSeed_n]=rh->time();
-	pfSCRecHitsSeed_n++;
-	//FIXME, controllo dimensione
+	if(pfSCRecHitsSeed_n < MAXPFRECHITTOSAVE){
+	  const EcalRecHit* rh=0;
+	  if ( (*idIt).first.subdetId() == EcalBarrel)
+	    rh = &*(rhitseb->find((*idIt).first));
+	  else if ( (*idIt).first.subdetId() == EcalShashlik) 
+	    rh = &*(rhitsee->find((*idIt).first));
+	  if (!rh)	 std::cout << "Dumper::BIG ERROR::RecHit NOT FOUND" << std::endl;
+	  
+	  pfSC_RecHitsfractionsSeed[pfSCRecHitsSeed_n]=idIt->second;
+	  pfSC_RecHitsTimeSeed[pfSCRecHitsSeed_n]=rh->time();
+	  pfSC_RecHitsEnergySeed[pfSCRecHitsSeed_n]=rh->energy();
+	  pfSCRecHitsSeed_n++;
+	}
       }
 
 
@@ -1362,7 +1365,7 @@ void dumper::beginJob() {
     t->Branch("pfSCe", &pfSC_e, "pfSCe[pfSCn]/F");
     t->Branch("pfSCRecHitsSeedn",   &pfSCRecHitsSeed_n,   "pfSCRecHitsSeedn/I");
     t->Branch("pfSCRecRecHitsFractionsSeed", &pfSC_RecHitsfractionsSeed, "pfSCRecHitsFractionsSeed[pfSCRecHitsSeedn]/F");
-    t->Branch("pfSCRecHitsFractionsTimeSeed", &pfSC_RecHitsfractionsTimeSeed, "pfSCRecHitsFractionsTimeSeed[pfSCRecHitsSeedn]/F");
+    t->Branch("pfSCRecHitsTimeSeed", &pfSC_RecHitsTimeSeed, "pfSCRecHitsTimeSeed[pfSCRecHitsSeedn]/F");
     t->Branch("pfSCnBC", &pfSC_nBC, "pfSCnBC[pfSCn]/I");
     t->Branch("pfSCnXtalsSeed", &pfSC_nXtalsSeed, "pfSCnXtalsSeed[pfSCn]/I");
     t->Branch("pfSCnXtalsTotal", &pfSC_nXtalsTotal, "pfSCnXtalsTotal[pfSCn]/I");
