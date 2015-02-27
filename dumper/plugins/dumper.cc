@@ -156,7 +156,7 @@ private:
   const CaloTopology *topology;
   
   Float_t rho;
-  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n, multi5x5SC_n, hybridSC_n, pfcandPho_n, pfcandEle_n, rechit_n, pfSCRecHitsSeed_n;
+  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n, multi5x5SC_n, hybridSC_n, pfcandPho_n, pfcandEle_n, rechit_n, pfSCRecHitsSeed_n[MAXSCTOSAVE];
 
   Float_t gp_pt[MAXPARTICLESTOSAVE];
   Float_t gp_eta[MAXPARTICLESTOSAVE];
@@ -177,7 +177,7 @@ private:
   Float_t gele_fbrem120[MAXPHOTONSTOSAVE];
   Int_t gele_index[MAXPHOTONSTOSAVE];
 
-  Float_t rechit_e[MAXRECHITTOSAVE];
+  Float_t rechit_e [MAXRECHITTOSAVE];
   Float_t rechit_ix[MAXRECHITTOSAVE];
   Float_t rechit_iy[MAXRECHITTOSAVE];
   Float_t rechit_time[MAXRECHITTOSAVE];
@@ -247,9 +247,9 @@ private:
   Float_t   pfSC_e[MAXSCTOSAVE];
   Int_t pfSC_nBC[MAXSCTOSAVE];
   Int_t pfSC_nXtalsSeed[MAXSCTOSAVE];
-  Float_t pfSC_RecHitsfractionsSeed[MAXPFRECHITTOSAVE];
-  Float_t pfSC_RecHitsEnergySeed[MAXPFRECHITTOSAVE];
-  Float_t pfSC_RecHitsTimeSeed[MAXPFRECHITTOSAVE];
+  Float_t pfSC_RecHitsfractionsSeed[MAXSCTOSAVE][MAXPFRECHITTOSAVE];
+  Float_t pfSC_RecHitsEnergySeed[MAXSCTOSAVE][MAXPFRECHITTOSAVE];
+  Float_t pfSC_RecHitsTimeSeed[MAXSCTOSAVE][MAXPFRECHITTOSAVE];
   Int_t pfSC_nXtalsTotal[MAXSCTOSAVE];  
 //bc info
   Float_t pfSC_bcEta[MAXSCTOSAVE][MAXBCTOSAVE];//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
@@ -435,6 +435,11 @@ void dumper::clearVector(){
       hybridSC_bcPhi[i][j]=0.;
       hybridSC_bcE[i][j]=0.;
       hybridSC_bcNXtals[i][j]=0;
+
+      pfSC_RecHitsfractionsSeed[i][j]=0.;
+      pfSC_RecHitsTimeSeed[i][j]=0.;
+      pfSC_RecHitsEnergySeed[i][j]=0.;
+
 
     }
   }
@@ -945,10 +950,10 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
       pfSC_nXtalsTotal[pfSC_n] = 0;
 
       //rechit variables
-      pfSCRecHitsSeed_n=0;
+      pfSCRecHitsSeed_n[pfSC_n]=0;
       std::vector<std::pair<DetId,float> > scDetIds = itSC->seed()->hitsAndFractions();
       for(std::vector<std::pair<DetId,float> >::const_iterator idIt=scDetIds.begin(); idIt!=scDetIds.end(); ++idIt){
-	if(pfSCRecHitsSeed_n < MAXPFRECHITTOSAVE){
+	if(pfSCRecHitsSeed_n[pfSC_n] < MAXPFRECHITTOSAVE){
 	  const EcalRecHit* rh=0;
 	  if ( (*idIt).first.subdetId() == EcalBarrel)
 	    rh = &*(rhitseb->find((*idIt).first));
@@ -956,10 +961,10 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 	    rh = &*(rhitsee->find((*idIt).first));
 	  if (!rh)	 std::cout << "Dumper::BIG ERROR::RecHit NOT FOUND" << std::endl;
 	  
-	  pfSC_RecHitsfractionsSeed[pfSCRecHitsSeed_n]=idIt->second;
-	  pfSC_RecHitsTimeSeed[pfSCRecHitsSeed_n]=rh->time();
-	  pfSC_RecHitsEnergySeed[pfSCRecHitsSeed_n]=rh->energy();
-	  pfSCRecHitsSeed_n++;
+	  pfSC_RecHitsfractionsSeed[pfSC_n][pfSCRecHitsSeed_n[pfSC_n]]=idIt->second;
+	  pfSC_RecHitsTimeSeed[pfSC_n][pfSCRecHitsSeed_n[pfSC_n]]=rh->time();
+	  pfSC_RecHitsEnergySeed[pfSC_n][pfSCRecHitsSeed_n[pfSC_n]]=rh->energy();
+	  pfSCRecHitsSeed_n[pfSC_n]++;
 	}
       }
 
@@ -999,10 +1004,10 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
       //      std::cout<<" seed E:"<<itSC->seed()->energy()<<" seed Eta:"<<itSC->seed()->eta()<<std::endl;
 
       //rechit variables
-      pfSCRecHitsSeed_n=0;
+      pfSCRecHitsSeed_n[pfSC_n]=0;
       std::vector<std::pair<DetId,float> > scDetIds = itSC->seed()->hitsAndFractions();
       for(std::vector<std::pair<DetId,float> >::const_iterator idIt=scDetIds.begin(); idIt!=scDetIds.end(); ++idIt){
-	if(pfSCRecHitsSeed_n < MAXPFRECHITTOSAVE){
+	if(pfSCRecHitsSeed_n[pfSC_n] < MAXPFRECHITTOSAVE){
 	  const EcalRecHit* rh=0;
 	  if ( (*idIt).first.subdetId() == EcalBarrel)
 	    rh = &*(rhitseb->find((*idIt).first));
@@ -1010,10 +1015,10 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 	    rh = &*(rhitsee->find((*idIt).first));
 	  if (!rh)	 std::cout << "Dumper::BIG ERROR::RecHit NOT FOUND" << std::endl;
 	  
-	  pfSC_RecHitsfractionsSeed[pfSCRecHitsSeed_n]=idIt->second;
-	  pfSC_RecHitsTimeSeed[pfSCRecHitsSeed_n]=rh->time();
-	  pfSC_RecHitsEnergySeed[pfSCRecHitsSeed_n]=rh->energy();
-	  pfSCRecHitsSeed_n++;
+	  pfSC_RecHitsfractionsSeed[pfSC_n][pfSCRecHitsSeed_n[pfSC_n]]=idIt->second;
+	  pfSC_RecHitsTimeSeed[pfSC_n][pfSCRecHitsSeed_n[pfSC_n]]=rh->time();
+	  pfSC_RecHitsEnergySeed[pfSC_n][pfSCRecHitsSeed_n[pfSC_n]]=rh->energy();
+	  pfSCRecHitsSeed_n[pfSC_n]++;
 	}
       }
 
@@ -1363,9 +1368,10 @@ void dumper::beginJob() {
     t->Branch("pfSCeta", &pfSC_eta, "pfSCeta[pfSCn]/F");
     t->Branch("pfSCphi", &pfSC_phi, "pfSCphi[pfSCn]/F");
     t->Branch("pfSCe", &pfSC_e, "pfSCe[pfSCn]/F");
-    t->Branch("pfSCRecHitsSeedn",   &pfSCRecHitsSeed_n,   "pfSCRecHitsSeedn/I");
-    t->Branch("pfSCRecRecHitsFractionsSeed", &pfSC_RecHitsfractionsSeed, "pfSCRecHitsFractionsSeed[pfSCRecHitsSeedn]/F");
-    t->Branch("pfSCRecHitsTimeSeed", &pfSC_RecHitsTimeSeed, "pfSCRecHitsTimeSeed[pfSCRecHitsSeedn]/F");
+    t->Branch("pfSCRecHitsSeedn",   &pfSCRecHitsSeed_n,   "pfSCRecHitsSeedn[200]/I");
+    t->Branch("pfSCRecRecHitsFractionsSeed", &pfSC_RecHitsfractionsSeed, "pfSCRecHitsFractionsSeed[200][150]/F");
+    t->Branch("pfSCRecHitsTimeSeed", &pfSC_RecHitsTimeSeed, "pfSCRecHitsTimeSeed[200][150]/F");
+    t->Branch("pfSCRecHitsEnergySeed", &pfSC_RecHitsEnergySeed, "pfSCRecHitsEnergySeed[200][150]/F");
     t->Branch("pfSCnBC", &pfSC_nBC, "pfSCnBC[pfSCn]/I");
     t->Branch("pfSCnXtalsSeed", &pfSC_nXtalsSeed, "pfSCnXtalsSeed[pfSCn]/I");
     t->Branch("pfSCnXtalsTotal", &pfSC_nXtalsTotal, "pfSCnXtalsTotal[pfSCn]/I");
