@@ -91,6 +91,7 @@ int main( int argc, char* argv[] ) {
       histoNamesPU[out->first]->DrawNormalized();
       histoNamesnoPU[out->first]->DrawNormalized("same");
     }
+    if(out->first.Contains("pfSC_RecHits"))c1->SetLogy();
     c1->SaveAs("plots/h1_PUvsnoPU_"+out->first+".png");
     c1->SaveAs("plots/h1_PUvsnoPU_"+out->first+".pdf");
     c1->Write(out->first);
