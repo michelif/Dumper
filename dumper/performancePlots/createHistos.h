@@ -33,7 +33,7 @@
 #define MAXSCTOSAVE 200
 #define MAXBCTOSAVE 200
 #define MAXPFCANDTOSAVE 200
-
+#define MAXPFRECHITTOSAVE 150
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
@@ -112,6 +112,10 @@ public :
    Float_t         phoPfSumChargedHadronPt[MAXPHOTONSTOSAVE];   //[phon]
    Float_t         phoPfSumNeutralHadronEt[MAXPHOTONSTOSAVE];   //[phon]
    Float_t         phoPfSumPhotonEt[MAXPHOTONSTOSAVE];   //[phon]
+   Int_t           pfSCRecHitsSeedn[MAXSCTOSAVE];
+   Float_t         pfSCRecRecHitsFractionsSeed[MAXSCTOSAVE][MAXPFRECHITTOSAVE];
+   Float_t         pfSCRecHitsEnergySeed[MAXSCTOSAVE][MAXPFRECHITTOSAVE];
+   Float_t         pfSCRecHitsTimeSeed[MAXSCTOSAVE][MAXPFRECHITTOSAVE];
    Int_t           pfSCn;
    Float_t         pfSCeta[MAXSCTOSAVE];   //[pfSCn]
    Float_t         pfSCphi[MAXSCTOSAVE];   //[pfSCn]
@@ -308,6 +312,10 @@ public :
    TBranch        *b_phoPfSumChargedHadronPt;   //!
    TBranch        *b_phoPfSumNeutralHadronEt;   //!
    TBranch        *b_phoPfSumPhotonEt;   //!
+   TBranch        *b_pfSCRecHitsSeedn;   //!   
+   TBranch        *b_pfSCRecRecHitsFractionsSeed;   //!
+   TBranch        *b_pfSCRecHitsTimeSeed;   //!
+   TBranch        *b_pfSCRecHitsEnergySeed;   //!
    TBranch        *b_pfSCn;   //!
    TBranch        *b_pfSCeta;   //!
    TBranch        *b_pfSCphi;   //!

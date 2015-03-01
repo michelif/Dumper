@@ -11,20 +11,12 @@ void createHistos::bookHistos(){
   bookHisto("ele_sMaj",200,0,3,"sMaj",false);
   bookHisto("ele_sMin",200,0,2,"sMin",false);
   bookHisto("ele_alpha",200,-2,2,"alpha",false);
-  bookHisto("ele_ptRight",150,0,100,"E_{reco}");
-  bookHisto("ele_ptWrong",150,0,100,"E_{reco}");
 
   //sc variables
   std::cout<<"booking"<<std::endl;
   bookHisto("pfSC_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}");
-  bookHisto("pfSC_ptWrong",100,0,100,"E_{reco}");
-  bookHisto("pfSC_ptRight",100,0,100,"E_{reco}");
   bookHisto("pfSC_EBC",150,0,300,"E_{reco}^{BC}");
   bookHisto("pfSC_EseedOverETrue",200,0,2,"E_{reco}^{seed}/E_{true}");
-  bookHisto("pfSC_nXtalsTotalWrong",250,-0.5,249.5,"N_{xtals}");
-  bookHisto("pfSC_nXtalsTotalRight",250,-0.5,249.5,"N_{xtals}");
-  bookHisto("pfSC_nXtalsSeedWrong",250,-0.5,249.5,"N_{xtals}");
-  bookHisto("pfSC_nXtalsSeedRight",250,-0.5,249.5,"N_{xtals}");
   bookHisto("pfSC_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}");
   bookHisto("pfSC_nXtalsTotal",250,-0.5,249.5,"N_{xtals}");
   bookHisto("pfSC_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC");
@@ -34,12 +26,13 @@ void createHistos::bookHistos(){
   bookHisto("pfSC_bcNXtals",100,-0.5,99.5,"N_{xtals}^{BC}");
   bookHisto2D("pfSC_EBCVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
   bookHisto2D("pfSC_EBCVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_EnergyVsnXtalsTotalWrong",250,-0.5,249.5,150,0,300,"N_{xtals}","E_{reco}");
-  bookHisto2D("pfSC_EnergyVsnXtalsTotalRight",250,-0.5,249.5,150,0,300,"N_{xtals}","E_{reco}");
-  bookHisto2D("pfSC_EnergyVsnXtalsSeedWrong",250,-0.5,249.5,150,0,300,"N_{xtals}^{seed}","E_{reco}");
-  bookHisto2D("pfSC_EnergyVsnXtalsSeedRight",250,-0.5,249.5,150,0,300,"N_{xtals}^{seed}","E_{reco}");
   bookHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",20,0,200,150,-0.5,0.5,"#frac{#rhoxN_{xtals}}{100}","#frac{E_{reco}-E_{true}}{E_{reco}}");
 
+  //rechits
+  bookHisto("pfSC_RecHitsSeedN",70,-0.5,69.5,"N_{xtals}",false);
+  bookHisto("pfSC_RecHitsFractionsSeed",101,0.,1.1,"Fraction",false);
+  bookHisto("pfSC_RecHitsTimeSeed",150,-50.5,49.5,"RecHitTime",false);
+  bookHisto("pfSC_RecHitsEnergySeed",40,0,5.,"RecHitEnergy",false);
 }
 
 
@@ -296,11 +289,6 @@ void createHistos::Loop2(){
       TLorentzVector* elep4=createTLorentzVector(elept[i],eleeta[i],elephi[i],elee[i]);
       int indexMatchEle=matchesGenEle(elep4);
       if(indexMatchEle<0)continue;
-      if(elee[i]/theGenElectrons_[indexMatchEle]->E()<0.5){
-	fillHisto("ele_ptWrong",elept[i],elep4);
-      }else{
-	fillHisto("ele_ptRight",elept[i],elep4);
-      }
       fillHisto("ele_ErecoOverETrue",elee[i]/theGenElectrons_[indexMatchEle]->E(),elep4);
       fillHisto("ele_sMaj",elesMajZS[i],elep4);
       fillHisto("ele_sMin",elesMinZS[i],elep4);
@@ -321,21 +309,6 @@ void createHistos::Loop2(){
 	//	std::cout<<"pfsc:"<<pfscp4->E()<<" "<<pfscp4->Eta()<<" "<<pfscp4->Phi()<<std::endl;
 
 	fillHisto("pfSC_ErecoOverETrue",pfSCe[i]/theGenElectrons_[indexMatchEle]->E(),pfscp4);
-
-	if(pfSCe[i]/theGenElectrons_[indexMatchEle]->E()<0.5){
-	  fillHisto("pfSC_ptWrong",pfSCe[i]/cosh(pfSCeta[i]),pfscp4);
-	  fillHisto("pfSC_nXtalsSeedWrong",pfSCnXtalsSeed[i],pfscp4);
-	  fillHisto("pfSC_nXtalsTotalWrong",pfSCnXtalsTotal[i],pfscp4);
-	  fillHisto2D("pfSC_EnergyVsnXtalsSeedWrong",pfSCnXtalsSeed[i],pfSCe[i],pfscp4);
-	  fillHisto2D("pfSC_EnergyVsnXtalsTotalWrong",pfSCnXtalsTotal[i],pfSCe[i],pfscp4);
-	}else{
-	  fillHisto("pfSC_ptRight",pfSCe[i]/cosh(pfSCeta[i]),pfscp4);
-	  fillHisto("pfSC_nXtalsSeedRight",pfSCnXtalsSeed[i],pfscp4);
-	  fillHisto("pfSC_nXtalsSeedWrong",pfSCnXtalsSeed[i],pfscp4);
-	  fillHisto("pfSC_nXtalsTotalRight",pfSCnXtalsTotal[i],pfscp4);
-	  fillHisto2D("pfSC_EnergyVsnXtalsSeedRight",pfSCnXtalsSeed[i],pfSCe[i],pfscp4);
-	  fillHisto2D("pfSC_EnergyVsnXtalsTotalRight",pfSCnXtalsTotal[i],pfSCe[i],pfscp4);
-	} 
 
 	fillHisto("pfSC_nXtalsSeed",pfSCnXtalsSeed[i],pfscp4);
 	fillHisto("pfSC_nXtalsTotal",pfSCnXtalsTotal[i],pfscp4);
@@ -373,6 +346,16 @@ void createHistos::Loop2(){
 	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinRinSCEle", maxDistR, pfscp4);
 	if(maxDistEta>0)fillHisto("pfSC_maxDistFromSeedinEtainSCEle", maxDistEta, pfscp4);
 	if(maxDistPhi>0)fillHisto("pfSC_maxDistFromSeedinPhiinSCEle", maxDistPhi, pfscp4);
+
+	//rechits filling
+	for(int k=0;k<pfSCRecHitsSeedn[i];k++){
+	  fillHisto("pfSC_RecHitsSeedN",pfSCRecHitsSeedn[i],&seed);
+	  fillHisto("pfSC_RecHitsFractionsSeed",pfSCRecRecHitsFractionsSeed[i][k],&seed);
+	  fillHisto("pfSC_RecHitsTimeSeed",pfSCRecHitsTimeSeed[i][k],&seed);
+	  fillHisto("pfSC_RecHitsEnergySeed",pfSCRecHitsEnergySeed[i][k],&seed);
+
+	}
+
       }//pfscn
     }//if pfscn>0
     
@@ -390,19 +373,6 @@ void createHistos::Loop2(){
 
 	fillHisto("multi5x5SC_ErecoOverETrue",multi5x5SCe[i]/theGenElectrons_[indexMatchEle]->E(),multi5x5scp4);
 
-	if(multi5x5SCe[i]/theGenElectrons_[indexMatchEle]->E()<0.5){
-	  fillHisto("multi5x5SC_ptWrong",multi5x5SCe[i]/cosh(multi5x5SCeta[i]),multi5x5scp4);
-	  fillHisto("multi5x5SC_nXtalsSeedWrong",multi5x5SCnXtalsSeed[i],multi5x5scp4);
-	  fillHisto("multi5x5SC_nXtalsTotalWrong",multi5x5SCnXtalsTotal[i],multi5x5scp4);
-	  fillHisto2D("multi5x5SC_EnergyVsnXtalsSeedWrong",multi5x5SCnXtalsSeed[i],multi5x5SCe[i],multi5x5scp4);
-	  fillHisto2D("multi5x5SC_EnergyVsnXtalsTotalWrong",multi5x5SCnXtalsTotal[i],multi5x5SCe[i],multi5x5scp4);
-	}else{
-	  fillHisto("multi5x5SC_ptRight",multi5x5SCe[i]/cosh(multi5x5SCeta[i]),multi5x5scp4);
-	  fillHisto("multi5x5SC_nXtalsSeedRight",multi5x5SCnXtalsSeed[i],multi5x5scp4);
-	  fillHisto("multi5x5SC_nXtalsTotalRight",multi5x5SCnXtalsTotal[i],multi5x5scp4);
-	  fillHisto2D("multi5x5SC_EnergyVsnXtalsSeedRight",multi5x5SCnXtalsSeed[i],multi5x5SCe[i],multi5x5scp4);
-	  fillHisto2D("multi5x5SC_EnergyVsnXtalsTotalRight",multi5x5SCnXtalsTotal[i],multi5x5SCe[i],multi5x5scp4);
-	}
 
 	fillHisto("multi5x5SC_nXtalsSeed",multi5x5SCnXtalsSeed[i],multi5x5scp4);
 	fillHisto("multi5x5SC_nXtalsTotal",multi5x5SCnXtalsTotal[i],multi5x5scp4);
@@ -441,9 +411,11 @@ void createHistos::Loop2(){
 	if(maxDistPhi>0)fillHisto("multi5x5SC_maxDistFromSeedinPhiinSCEle", maxDistPhi, multi5x5scp4);
       }//multi5x5scn
     }//if multi5x5scn>0
-
-
-    }
+    
+    
+   
+      
+      }
   
 }
 
@@ -634,6 +606,10 @@ void createHistos::Init(TTree *tree)
    fChain->SetBranchAddress("phoPfSumChargedHadronPt", phoPfSumChargedHadronPt, &b_phoPfSumChargedHadronPt);
    fChain->SetBranchAddress("phoPfSumNeutralHadronEt", phoPfSumNeutralHadronEt, &b_phoPfSumNeutralHadronEt);
    fChain->SetBranchAddress("phoPfSumPhotonEt", phoPfSumPhotonEt, &b_phoPfSumPhotonEt);
+   fChain->SetBranchAddress("pfSCRecHitsSeedn",   pfSCRecHitsSeedn,   &b_pfSCRecHitsSeedn);
+   fChain->SetBranchAddress("pfSCRecRecHitsFractionsSeed", pfSCRecRecHitsFractionsSeed, &b_pfSCRecRecHitsFractionsSeed);
+   fChain->SetBranchAddress("pfSCRecHitsTimeSeed",pfSCRecHitsTimeSeed, &b_pfSCRecHitsTimeSeed);
+   fChain->SetBranchAddress("pfSCRecHitsEnergySeed",pfSCRecHitsEnergySeed, &b_pfSCRecHitsEnergySeed);
    fChain->SetBranchAddress("pfSCn", &pfSCn, &b_pfSCn);
    fChain->SetBranchAddress("pfSCeta", pfSCeta, &b_pfSCeta);
    fChain->SetBranchAddress("pfSCphi", pfSCphi, &b_pfSCphi);
