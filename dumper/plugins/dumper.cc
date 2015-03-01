@@ -1368,8 +1368,8 @@ void dumper::beginJob() {
     t->Branch("pfSCeta", &pfSC_eta, "pfSCeta[pfSCn]/F");
     t->Branch("pfSCphi", &pfSC_phi, "pfSCphi[pfSCn]/F");
     t->Branch("pfSCe", &pfSC_e, "pfSCe[pfSCn]/F");
-    t->Branch("pfSCRecHitsSeedn",   &pfSCRecHitsSeed_n,   "pfSCRecHitsSeedn[200]/I");
-    t->Branch("pfSCRecRecHitsFractionsSeed", &pfSC_RecHitsfractionsSeed, "pfSCRecHitsFractionsSeed[200][150]/F");
+    t->Branch("pfSCRecHitsSeedn",   &pfSCRecHitsSeed_n,   "pfSCRecHitsSeedn[pfSCn]/I");
+    t->Branch("pfSCRecHitsFractionsSeed", &pfSC_RecHitsfractionsSeed, "pfSCRecHitsFractionsSeed[200][150]/F");
     t->Branch("pfSCRecHitsTimeSeed", &pfSC_RecHitsTimeSeed, "pfSCRecHitsTimeSeed[200][150]/F");
     t->Branch("pfSCRecHitsEnergySeed", &pfSC_RecHitsEnergySeed, "pfSCRecHitsEnergySeed[200][150]/F");
     t->Branch("pfSCnBC", &pfSC_nBC, "pfSCnBC[pfSCn]/I");
