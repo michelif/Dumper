@@ -21,12 +21,12 @@ void createHistos::bookHistos(){
   bookHisto("pfSC_nXtalsTotal",250,-0.5,249.5,"N_{xtals}");
   bookHisto("pfSC_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC");
   bookHisto("pfSC_maxDistFromSeedinRinSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
-  bookHisto("pfSC_maxDistFromSeedinEtainSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
-  bookHisto("pfSC_maxDistFromSeedinPhiinSCEle",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
+  bookHisto("pfSC_maxDistFromSeedinEtainSCEle",300,0,0.8  ,"max#Delta #eta_{BC}^{seed}");
+  bookHisto("pfSC_maxDistFromSeedinPhiinSCEle",300,0,0.8  ,"max#Delta #phi_{BC}^{seed}");
   bookHisto("pfSC_bcNXtals",100,-0.5,99.5,"N_{xtals}^{BC}");
   bookHisto2D("pfSC_EBCVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
   bookHisto2D("pfSC_EBCVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",20,0,200,150,-0.5,0.5,"#frac{#rhoxN_{xtals}}{100}","#frac{E_{reco}-E_{true}}{E_{reco}}");
+  bookHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",20,0,200,150,-0.5,0.5,"#rhoxN_{xtals}/100","(E_{reco}-E_{true})/(E_{reco})");
 
   //rechits
   bookHisto("pfSC_RecHitsSeedN",70,-0.5,69.5,"N_{xtals}",false);
@@ -350,7 +350,8 @@ void createHistos::Loop2(){
 	//rechits filling
 	for(int k=0;k<pfSCRecHitsSeedn[i];k++){
 	  fillHisto("pfSC_RecHitsSeedN",pfSCRecHitsSeedn[i],&seed);
-	  fillHisto("pfSC_RecHitsFractionsSeed",pfSCRecRecHitsFractionsSeed[i][k],&seed);
+	  //	  fillHisto("pfSC_RecHitsFractionsSeed",pfSCRecRecHitsFractionsSeed[i][k],&seed);
+	  fillHisto("pfSC_RecHitsFractionsSeed",pfSCRecHitsFractionsSeed[i][k],&seed);
 	  fillHisto("pfSC_RecHitsTimeSeed",pfSCRecHitsTimeSeed[i][k],&seed);
 	  fillHisto("pfSC_RecHitsEnergySeed",pfSCRecHitsEnergySeed[i][k],&seed);
 
@@ -607,7 +608,8 @@ void createHistos::Init(TTree *tree)
    fChain->SetBranchAddress("phoPfSumNeutralHadronEt", phoPfSumNeutralHadronEt, &b_phoPfSumNeutralHadronEt);
    fChain->SetBranchAddress("phoPfSumPhotonEt", phoPfSumPhotonEt, &b_phoPfSumPhotonEt);
    fChain->SetBranchAddress("pfSCRecHitsSeedn",   pfSCRecHitsSeedn,   &b_pfSCRecHitsSeedn);
-   fChain->SetBranchAddress("pfSCRecRecHitsFractionsSeed", pfSCRecRecHitsFractionsSeed, &b_pfSCRecRecHitsFractionsSeed);
+   //   fChain->SetBranchAddress("pfSCRecRecHitsFractionsSeed", pfSCRecRecHitsFractionsSeed, &b_pfSCRecRecHitsFractionsSeed);
+   fChain->SetBranchAddress("pfSCRecHitsFractionsSeed", pfSCRecHitsFractionsSeed, &b_pfSCRecHitsFractionsSeed);
    fChain->SetBranchAddress("pfSCRecHitsTimeSeed",pfSCRecHitsTimeSeed, &b_pfSCRecHitsTimeSeed);
    fChain->SetBranchAddress("pfSCRecHitsEnergySeed",pfSCRecHitsEnergySeed, &b_pfSCRecHitsEnergySeed);
    fChain->SetBranchAddress("pfSCn", &pfSCn, &b_pfSCn);

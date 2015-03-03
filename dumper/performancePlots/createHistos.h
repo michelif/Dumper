@@ -113,7 +113,8 @@ public :
    Float_t         phoPfSumNeutralHadronEt[MAXPHOTONSTOSAVE];   //[phon]
    Float_t         phoPfSumPhotonEt[MAXPHOTONSTOSAVE];   //[phon]
    Int_t           pfSCRecHitsSeedn[MAXSCTOSAVE];
-   Float_t         pfSCRecRecHitsFractionsSeed[MAXSCTOSAVE][MAXPFRECHITTOSAVE];
+   //   Float_t         pfSCRecRecHitsFractionsSeed[MAXSCTOSAVE][MAXPFRECHITTOSAVE];
+   Float_t         pfSCRecHitsFractionsSeed[MAXSCTOSAVE][MAXPFRECHITTOSAVE];
    Float_t         pfSCRecHitsEnergySeed[MAXSCTOSAVE][MAXPFRECHITTOSAVE];
    Float_t         pfSCRecHitsTimeSeed[MAXSCTOSAVE][MAXPFRECHITTOSAVE];
    Int_t           pfSCn;
@@ -313,7 +314,8 @@ public :
    TBranch        *b_phoPfSumNeutralHadronEt;   //!
    TBranch        *b_phoPfSumPhotonEt;   //!
    TBranch        *b_pfSCRecHitsSeedn;   //!   
-   TBranch        *b_pfSCRecRecHitsFractionsSeed;   //!
+   //   TBranch        *b_pfSCRecRecHitsFractionsSeed;   //!
+   TBranch        *b_pfSCRecHitsFractionsSeed;   //!
    TBranch        *b_pfSCRecHitsTimeSeed;   //!
    TBranch        *b_pfSCRecHitsEnergySeed;   //!
    TBranch        *b_pfSCn;   //!
