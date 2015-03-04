@@ -6,11 +6,9 @@
 #include <TProfile.h>
 #include "createHistos.h"
 #include "TKey.h"
-
-
+#include "TPaveText.h"
 
 int main( int argc, char* argv[] ) {
-
 
   if(argc<3 || argc>4) {
     std::cout << "Usage:  ./tmp/plotHistos noPUFile.root PUFile.root output.root"<<std::endl
@@ -69,10 +67,31 @@ int main( int argc, char* argv[] ) {
 
   for(std::map<TString,TH1F*>::const_iterator out=histoNamesnoPU.begin();out!=histoNamesnoPU.end();++out){
     std::cout<<"plotting histo 1d:"<<out->first<<std::endl;
+    TPaveText * pave= new TPaveText(0.7,0.7,0.90,0.85,"NDC");
+    pave->SetFillColor(kWhite);
+    pave->SetTextSize(0.030);
+    pave->SetTextAlign(22);
+    pave->SetTextFont(62);
+
+    TString meannoPU;
+    meannoPU.Form("%.2f",histoNamesnoPU[out->first]->GetMean());
+    TString rmsnoPU;
+    rmsnoPU.Form("%.2f",histoNamesnoPU[out->first]->GetRMS());
+    pave->AddText("noPU Mean:"+meannoPU+" RMS:"+rmsnoPU);
+
+    histoNamesPU[out->first]=(TH1F*)PUFile->Get(out->first);
+    TString meanPU;
+    meanPU.Form("%.2f",histoNamesPU[out->first]->GetMean());
+    TString rmsPU;
+    rmsPU.Form("%.2f",histoNamesPU[out->first]->GetRMS());
+    pave->AddText("PU Mean:"+meanPU+" RMS:"+rmsPU);
+    pave->SetAllWith("PU Mean:"+meanPU+" RMS:"+rmsPU,"color",kRed);
+
+
     histoNamesnoPU[out->first]->SetLineWidth(2);
     histoNamesnoPU[out->first]->SetLineColor(kBlack);
 
-    histoNamesPU[out->first]=(TH1F*)PUFile->Get(out->first);
+
     histoNamesPU[out->first]->SetLineWidth(2);
     histoNamesPU[out->first]->SetLineColor(kRed);
 
@@ -91,6 +110,8 @@ int main( int argc, char* argv[] ) {
       histoNamesPU[out->first]->DrawNormalized();
       histoNamesnoPU[out->first]->DrawNormalized("same");
     }
+
+    pave->Draw("same");
     if(out->first.Contains("pfSC_RecHits"))c1->SetLogy();
     c1->SaveAs("plots/h1_PUvsnoPU_"+out->first+".png");
     c1->SaveAs("plots/h1_PUvsnoPU_"+out->first+".pdf");
