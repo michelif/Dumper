@@ -74,16 +74,16 @@ int main( int argc, char* argv[] ) {
     pave->SetTextFont(62);
 
     TString meannoPU;
-    meannoPU.Form("%.2f",histoNamesnoPU[out->first]->GetMean());
+    meannoPU.Form("%.3f",histoNamesnoPU[out->first]->GetMean());
     TString rmsnoPU;
-    rmsnoPU.Form("%.2f",histoNamesnoPU[out->first]->GetRMS());
+    rmsnoPU.Form("%.3f",histoNamesnoPU[out->first]->GetRMS());
     pave->AddText("noPU Mean:"+meannoPU+" RMS:"+rmsnoPU);
 
     histoNamesPU[out->first]=(TH1F*)PUFile->Get(out->first);
     TString meanPU;
-    meanPU.Form("%.2f",histoNamesPU[out->first]->GetMean());
+    meanPU.Form("%.3f",histoNamesPU[out->first]->GetMean());
     TString rmsPU;
-    rmsPU.Form("%.2f",histoNamesPU[out->first]->GetRMS());
+    rmsPU.Form("%.3f",histoNamesPU[out->first]->GetRMS());
     pave->AddText("PU Mean:"+meanPU+" RMS:"+rmsPU);
     pave->SetAllWith("PU Mean:"+meanPU+" RMS:"+rmsPU,"color",kRed);
 
