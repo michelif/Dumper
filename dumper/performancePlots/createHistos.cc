@@ -27,6 +27,7 @@ void createHistos::bookHistos(){
   bookHisto2D("pfSC_EBCVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
   bookHisto2D("pfSC_EBCVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
   bookHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",20,0,200,150,-0.5,0.5,"#rhoxN_{xtals}/100","(E_{reco}-E_{true})/(E_{reco})");
+  bookHisto2D("pfSC_DeltaPhiVslogEtBCVsBC",25,-2,2,20,0.,0.7,"log(E_{t}^{BC})","#Delta#phi_{BC}^{seed}");
 
   //rechits
   bookHisto("pfSC_RecHitsSeedN",70,-0.5,69.5,"N_{xtals}",false);
@@ -339,6 +340,7 @@ void createHistos::Loop2(){
 	    if(distEta>maxDistEta)maxDistEta=distEta;
 	    fillHisto2D("pfSC_EBCVsDeltaPhiBCSeedEle",fabs(distPhi),pfSCbcE[i][j],bc);
 	    fillHisto2D("pfSC_EBCVsDeltaEtaBCSeedEle",fabs(distEta),pfSCbcE[i][j],bc);
+	    fillHisto2D("pfSC_DeltaPhiVslogEtBCVsBC", log10(pfSCbcE[i][j]/cosh(pfSCbcEta[i][j])), distPhi, bc);
 	  }else{
 	    fillHisto("pfSC_EseedOverETrue",pfSCbcE[i][j]/theGenElectrons_[indexMatchEle]->E(),bc);
 	  }
