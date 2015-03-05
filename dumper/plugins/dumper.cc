@@ -107,6 +107,7 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/ParticleFlowReco/interface/PFSuperCluster.h"
+#include "DataFormats/ParticleFlowReco/interface/PFClusterFwd.h"
 //#include "Dumper/dumper/interface/EcalClusterTools.h"
 
 #include "TLorentzVector.h"
@@ -121,6 +122,7 @@
 #define MAXPHOTONSTOSAVE 20
 #define MAXSCTOSAVE 200
 #define MAXBCTOSAVE 200
+#define MAXPFBCTOSAVE 2000
 #define MAXPFCANDTOSAVE 200
 #define MAXRECHITTOSAVE 20000
 #define MAXPFRECHITTOSAVE 150
@@ -138,6 +140,7 @@ public:
   void phoReco(edm::Handle<reco::PhotonCollection> photonH, edm::Handle<reco::TrackCollection> traH, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee,edm::Handle<reco::PFCandidateCollection>  PFCandidates);
   void eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle,edm::Handle<reco::ConversionCollection> hConversions, edm::Handle<reco::BeamSpot> recoBeamSpotHandle, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee,edm::Handle<reco::PFCandidateCollection>  PFCandidates);
   void scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHandle, edm::Handle<reco::SuperClusterCollection> superClustersEEHandlee, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee);
+  void bcReco(edm::Handle<reco::PFClusterCollection> clustersHandle);
   void multi5x5scReco(edm::Handle<reco::SuperClusterCollection> multi5x5Handle);
   void hybridscReco(edm::Handle<reco::SuperClusterCollection> hybridHandle);
   void recHitReco(const EERecHitCollection* rhitsee);
@@ -156,7 +159,7 @@ private:
   const CaloTopology *topology;
   
   Float_t rho;
-  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n, multi5x5SC_n, hybridSC_n, pfcandPho_n, pfcandEle_n, rechit_n, pfSCRecHitsSeed_n[MAXSCTOSAVE];
+  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n, multi5x5SC_n, hybridSC_n, pfcandPho_n, pfcandEle_n, rechit_n, pfSCRecHitsSeed_n[MAXSCTOSAVE],pfBC_n;
 
   Float_t gp_pt[MAXPARTICLESTOSAVE];
   Float_t gp_eta[MAXPARTICLESTOSAVE];
@@ -241,6 +244,11 @@ private:
   Float_t  pho_pfsumNeutralHadronEt[MAXPHOTONSTOSAVE];
   Float_t  pho_pfsumPhotonEt[MAXPHOTONSTOSAVE];
   Float_t  pho_pfsumPUPt[MAXPHOTONSTOSAVE];
+
+  Float_t pfBC_eta[MAXPFBCTOSAVE];
+  Float_t pfBC_phi[MAXPFBCTOSAVE];
+  Float_t   pfBC_e[MAXPFBCTOSAVE];
+  Int_t   pfBC_nXtals[MAXPFBCTOSAVE];
 
   Float_t pfSC_eta[MAXSCTOSAVE];
   Float_t pfSC_phi[MAXSCTOSAVE];
@@ -931,6 +939,22 @@ void dumper::hybridscReco(edm::Handle<reco::SuperClusterCollection> hybridHandle
 
 }
 
+void dumper::bcReco(edm::Handle<reco::PFClusterCollection> clustersHandle){
+
+  pfBC_n=0;
+
+  for (reco::PFClusterCollection::const_iterator itBC = clustersHandle->begin();
+       itBC != clustersHandle->end(); ++itBC) {
+    if (itBC->energy() > 0. && pfBC_n<MAXPFBCTOSAVE) {
+      pfBC_eta[pfBC_n] = itBC->eta();
+      pfBC_phi[pfBC_n] = itBC->phi();
+      pfBC_e[pfBC_n] = itBC->energy();
+      pfBC_nXtals[pfBC_n]=itBC->size(); 
+      pfBC_n++;
+    }
+  }
+
+}
 
 void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHandle, edm::Handle<reco::SuperClusterCollection> superClustersEEHandle,const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee){
 
@@ -1251,12 +1275,20 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
       eleReco(ElectronHandle,hConversions,recoBeamSpotHandle,rhitseb,rhitsee,PFCandidates);
      
 
+      //PFBCCLUSTERS
+      edm::Handle<reco::PFClusterCollection> clustersHandle;
+      event.getByLabel("particleFlowClusterECAL",clustersHandle);
+      bcReco(clustersHandle);
+
+
       //pfsuperclusters
       edm::Handle<reco::SuperClusterCollection> superClustersEBHandle;
       event.getByLabel("particleFlowSuperClusterECAL","particleFlowSuperClusterECALBarrel",superClustersEBHandle);
 
       edm::Handle<reco::SuperClusterCollection> superClustersEEHandle;
       event.getByLabel("particleFlowSuperClusterECAL","particleFlowSuperClusterECALEndcapWithPreshower",superClustersEEHandle);
+
+
       //PFSUPERCLUSTERS
       scReco(superClustersEBHandle,superClustersEEHandle,rhitseb,rhitsee);
 
@@ -1363,6 +1395,12 @@ void dumper::beginJob() {
     t->Branch("phoPfSumChargedHadronPt",&pho_pfSumChargedHadronPt,"phoPfSumChargedHadronPt[phon]/F");
     t->Branch("phoPfSumNeutralHadronEt",&pho_pfsumNeutralHadronEt,"phoPfSumNeutralHadronEt[phon]/F");
     t->Branch("phoPfSumPhotonEt",&pho_pfsumPhotonEt,"phoPfSumPhotonEt[phon]/F");
+
+    t->Branch("pfBCn",   &pfBC_n,   "pfBCn/I");
+    t->Branch("pfBCeta", &pfBC_eta, "pfBCeta[pfBCn]/F");
+    t->Branch("pfBCphi", &pfBC_phi, "pfBCphi[pfBCn]/F");
+    t->Branch("pfBCe", &pfBC_e, "pfBCe[pfBCn]/F");
+    t->Branch("pfBCnXtals", &pfBC_nXtals, "pfBCnXtals[pfBCn]/I");
 
     t->Branch("pfSCn",   &pfSC_n,   "pfSCn/I");
     t->Branch("pfSCeta", &pfSC_eta, "pfSCeta[pfSCn]/F");
