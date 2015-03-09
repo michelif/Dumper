@@ -214,7 +214,7 @@ void createHistos::buildGenPho(){
 
   for(int j=0;j<gphon;j++){
     if(gpstatusMC[gphoindex[j]]!=3)continue;
-    if(gphopt[j]<5)continue;
+    if(gphopt[j]<0.5)continue;
 
     TLorentzVector* gphop4 = createTLorentzVector(gphopt[j],gphoeta[j],gphophi[j],gphopt[j]*cosh(gphoeta[j]));
     theGenPhotons_.push_back(gphop4);	
@@ -305,6 +305,7 @@ void createHistos::Loop2(){
 
 	if(pfscp4->Pt()<ptcut)continue;	
 	int indexMatchEle=matchesGenEle(pfscp4);
+	//	int indexMatchPhoton=matchesGenPho(pfscp4);
 	if(indexMatchEle<0)continue;
 	//	if(indexMatchEle>-1)    std::cout<<"gen:"<<theGenElectrons_[indexMatchEle]->E()<<" "<<theGenElectrons_[indexMatchEle]->Eta()<<" "<<theGenElectrons_[indexMatchEle]->Phi()<<std::endl;  
 	//	std::cout<<"pfsc:"<<pfscp4->E()<<" "<<pfscp4->Eta()<<" "<<pfscp4->Phi()<<std::endl;
