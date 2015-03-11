@@ -57,7 +57,7 @@ int main( int argc, char* argv[] ) {
   theHistos.setOutputFile(OutputFileName);
   theHistos.defineCategories();
   theHistos.bookHistos();
-  theHistos.Loop2();
+  theHistos.LoopElectrons();
   theHistos.writeHistos();
 
   return 0;

@@ -36,22 +36,95 @@ void createHistos::bookHistos(){
   bookHisto("pfSC_RecHitsEnergySeed",40,0,5.,"RecHitEnergy",false);
 }
 
+void createHistos::bookHistosPhotons(){
+
+  //sc variables
+  std::cout<<"booking"<<std::endl;
+  bookHisto("pfSC_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}");
+  bookHisto("pfSC_EBC",150,0,300,"E_{reco}^{BC}");
+  bookHisto("pfSC_EseedOverETrue",200,0,2,"E_{reco}^{seed}/E_{true}");
+  bookHisto("pfSC_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}");
+  bookHisto("pfSC_nXtalsTotal",250,-0.5,249.5,"N_{xtals}");
+  bookHisto("pfSC_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC");
+  bookHisto("pfSC_maxDistFromSeedinRinSCPho",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
+  bookHisto("pfSC_maxDistFromSeedinEtainSCPho",300,0,0.8  ,"max#Delta #eta_{BC}^{seed}");
+  bookHisto("pfSC_maxDistFromSeedinPhiinSCPho",300,0,0.8  ,"max#Delta #phi_{BC}^{seed}");
+  bookHisto("pfSC_bcNXtals",100,-0.5,99.5,"N_{xtals}^{BC}");
+  bookHisto2D("pfSC_EBCVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
+  bookHisto2D("pfSC_EBCVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
+  bookHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",20,0,200,150,-0.5,0.5,"#rhoxN_{xtals}/100","(E_{reco}-E_{true})/(E_{reco})");
+  bookHisto2D("pfSC_DeltaPhiVslogEtBCVsBC",25,-2,2,20,0.,0.7,"log(E_{t}^{BC})","#Delta#phi_{BC}^{seed}");
+
+}
+
 
 void createHistos::bookHisto(TString name, int nbins, float xLow, float xUp){
   histos_[name]=new TH1F(name, name, nbins,xLow,xUp);
 
 }
 
-void createHistos::bookHisto(TString name, int nbins, float xLow, float xUp,TString xAxisName, bool bookMulti5x5){
+//void createHistos::bookHisto(TString name, int nbins, float xLow, float xUp,TString xAxisName, bool bookMulti5x5){
+//
+//    TString histonameIncl=name+"_inclusive";
+//    histos_[histonameIncl]=new TH1F(histonameIncl, histonameIncl, nbins,xLow,xUp);    
+//    setAxisTitle(histonameIncl,xAxisName);
+//    if(bookMulti5x5){
+//      histonameIncl.Replace(0,2,"multi5x5");
+//      histos_[histonameIncl]=new TH1F(histonameIncl, histonameIncl, nbins,xLow,xUp);    
+//      setAxisTitle(histonameIncl,xAxisName);
+//    }
+//  
+//  for (std::map<TString,std::vector<float> >::const_iterator itCatCuts=categoriesAndCuts_.begin();itCatCuts!=categoriesAndCuts_.end();++itCatCuts){
+//
+//
+//    for(int i=0;i<itCatCuts->second.size();++i){
+//      TString bin;
+//      bin.Form("%d",i);
+//      TString histoname=name+"_"+itCatCuts->first+"bin"+bin;
+//      histos_[histoname]=new TH1F(histoname, histoname, nbins,xLow,xUp);    
+//      setAxisTitle(histoname,xAxisName);
+//      if(bookMulti5x5){
+//	histoname.Replace(0,2,"multi5x5");
+//	histos_[histoname]=new TH1F(histoname, histoname, nbins,xLow,xUp);    
+//	setAxisTitle(histoname,xAxisName);
+//      }
+//    }
+//    
+//  }
+//  
+//}
 
-    TString histonameIncl=name+"_inclusive";
+
+void createHistos::bookHisto(TString name, int nbins, float xLow, float xUp,TString xAxisName, bool bookMulti5x5, bool splitUnconverted){
+  
+  TString histonameIncl=name+"_inclusive";
+  if(splitUnconverted){
+    TString unconvertedname = histonameIncl + "_unconv";
+    TString convertedname = histonameIncl + "_conv";
+    histos_[unconvertedname]=new TH1F(unconvertedname, unconvertedname, nbins,xLow,xUp);    
+    histos_[convertedname]=new TH1F(convertedname, convertedname, nbins,xLow,xUp);    
+    setAxisTitle(convertedname,xAxisName);
+    setAxisTitle(unconvertedname,xAxisName);
+  }else{
     histos_[histonameIncl]=new TH1F(histonameIncl, histonameIncl, nbins,xLow,xUp);    
     setAxisTitle(histonameIncl,xAxisName);
-    if(bookMulti5x5){
+  }
+
+  if(bookMulti5x5){
+    if(splitUnconverted){
+      histonameIncl.Replace(0,2,"multi5x5");
+      TString unconvertedname = histonameIncl + "_unconv";
+      TString convertedname = histonameIncl + "_conv";
+      histos_[unconvertedname]=new TH1F(unconvertedname, unconvertedname, nbins,xLow,xUp);    
+      histos_[convertedname]=new TH1F(convertedname, convertedname, nbins,xLow,xUp);    
+      setAxisTitle(convertedname,xAxisName);
+      setAxisTitle(unconvertedname,xAxisName);
+    }else{
       histonameIncl.Replace(0,2,"multi5x5");
       histos_[histonameIncl]=new TH1F(histonameIncl, histonameIncl, nbins,xLow,xUp);    
       setAxisTitle(histonameIncl,xAxisName);
     }
+  }
   
   for (std::map<TString,std::vector<float> >::const_iterator itCatCuts=categoriesAndCuts_.begin();itCatCuts!=categoriesAndCuts_.end();++itCatCuts){
 
@@ -60,12 +133,31 @@ void createHistos::bookHisto(TString name, int nbins, float xLow, float xUp,TStr
       TString bin;
       bin.Form("%d",i);
       TString histoname=name+"_"+itCatCuts->first+"bin"+bin;
-      histos_[histoname]=new TH1F(histoname, histoname, nbins,xLow,xUp);    
-      setAxisTitle(histoname,xAxisName);
-      if(bookMulti5x5){
-	histoname.Replace(0,2,"multi5x5");
+      if(splitUnconverted){
+	TString unconvertedname = histoname + "_unconv";
+	TString convertedname = histoname + "_conv";
+	histos_[unconvertedname]=new TH1F(unconvertedname, unconvertedname, nbins,xLow,xUp);    
+	histos_[convertedname]=new TH1F(convertedname, convertedname, nbins,xLow,xUp);    
+	setAxisTitle(convertedname,xAxisName);
+	setAxisTitle(unconvertedname,xAxisName);
+      }else{
 	histos_[histoname]=new TH1F(histoname, histoname, nbins,xLow,xUp);    
 	setAxisTitle(histoname,xAxisName);
+      }
+      if(bookMulti5x5){
+	if(splitUnconverted){
+	  histoname.Replace(0,2,"multi5x5");
+	  TString unconvertedname = histoname + "_unconv";
+	  TString convertedname = histoname + "_conv";
+	  histos_[unconvertedname]=new TH1F(unconvertedname, unconvertedname, nbins,xLow,xUp);    
+	  histos_[convertedname]=new TH1F(convertedname, convertedname, nbins,xLow,xUp);    
+	  setAxisTitle(convertedname,xAxisName);
+	  setAxisTitle(unconvertedname,xAxisName);
+	}else{
+	  histoname.Replace(0,2,"multi5x5");
+	  histos_[histoname]=new TH1F(histoname, histoname, nbins,xLow,xUp);    
+	  setAxisTitle(histoname,xAxisName);
+	}  
       }
     }
     
@@ -73,7 +165,8 @@ void createHistos::bookHisto(TString name, int nbins, float xLow, float xUp,TStr
   
 }
 
-//farla double float int
+
+
 void createHistos::fillHisto2D(TString name, double valueX, double valueY, TLorentzVector* p4){
   for (std::map<TString,std::vector<float> >::const_iterator itCatCuts=categoriesAndCuts_.begin();itCatCuts!=categoriesAndCuts_.end();++itCatCuts){
 
@@ -100,12 +193,20 @@ void createHistos::fillHisto2D(TString name, double valueX, double valueY, TLore
 }
 
 
-//farla double float int
-void createHistos::fillHisto(TString name, double value,TLorentzVector* p4){
+void createHistos::fillHisto(TString name, double value,TLorentzVector* p4, float R9){//R9 is -1 as default in .h
   for (std::map<TString,std::vector<float> >::const_iterator itCatCuts=categoriesAndCuts_.begin();itCatCuts!=categoriesAndCuts_.end();++itCatCuts){
     TString histonameIncl=name+"_inclusive";
-    if(p4->Eta() > itCatCuts->second[0])    histos_[histonameIncl]->Fill(value);
-    
+    if(R9<0.){
+      if(p4->Eta() > itCatCuts->second[0])    histos_[histonameIncl]->Fill(value);
+    }else{
+      TString unconvertedname = histonameIncl + "_unconv";
+      TString convertedname = histonameIncl + "_conv";
+      if(R9>0.94){
+	if(p4->Eta() > itCatCuts->second[0])    histos_[unconvertedname]->Fill(value);
+      }else{
+	if(p4->Eta() > itCatCuts->second[0])    histos_[convertedname]->Fill(value);
+      }
+    }
 
     if(itCatCuts->first.EqualTo("eta")){
       for(int i=0;i<itCatCuts->second.size();++i){
@@ -114,17 +215,39 @@ void createHistos::fillHisto(TString name, double value,TLorentzVector* p4){
 	TString histoname=name+"_"+itCatCuts->first+"bin"+bin;
 	if(i<itCatCuts->second.size()-1){
 	  if(p4->Eta() > itCatCuts->second[i] && p4->Eta() < itCatCuts->second[i+1] ){
-	    histos_[histoname]->Fill(value);
+	    if(R9<0.){
+	      histos_[histoname]->Fill(value);
+	    }else{
+	      TString unconvertedname = histoname + "_unconv";
+	      TString convertedname = histoname + "_conv";
+	      if(R9>0.94){
+		histos_[unconvertedname]->Fill(value);		
+	      }else{
+		histos_[unconvertedname]->Fill(value);				
+	      }
+	    }
 	  }
 	}else {
-	  if(p4->Eta() > itCatCuts->second[i])
-	    histos_[histoname]->Fill(value);
+	  if(R9<0.){
+	    if(p4->Eta() > itCatCuts->second[i])
+	      histos_[histoname]->Fill(value);
+	  }else{
+	    TString unconvertedname = histoname + "_unconv";
+	    TString convertedname = histoname + "_conv";
+	    if(R9>0.94){
+	      histos_[unconvertedname]->Fill(value);
+	    }else{
+	      histos_[convertedname]->Fill(value);
+	    }
+	    
+	  }
 	}
       }
     }
   }
-  
 }
+      
+    
 
 void createHistos::bookHisto2D(TString name, int nbins, float xLow, float xUp,int nbinsY, float yLow, float yUp){
   histos2D_[name]=new TH2F(name, name, nbins,xLow,xUp,nbins, yLow,yUp);
@@ -262,7 +385,7 @@ int createHistos::matchesGenPho(TLorentzVector* objectToMatch, float DeltaR ){
 
 
 
-void createHistos::Loop2(){
+void createHistos::LoopElectrons(){
 
   if (fChain == 0) return;
   
@@ -279,7 +402,6 @@ void createHistos::Loop2(){
     if(jentry%500==0)std::cout<<"jentry:"<<jentry<<"/"<<nentries<<std::endl;
  
     buildGenEle();
-    buildGenPho();
 
     float ptcut=20.;
 
@@ -305,7 +427,6 @@ void createHistos::Loop2(){
 
 	if(pfscp4->Pt()<ptcut)continue;	
 	int indexMatchEle=matchesGenEle(pfscp4);
-	//	int indexMatchPhoton=matchesGenPho(pfscp4);
 	if(indexMatchEle<0)continue;
 	//	if(indexMatchEle>-1)    std::cout<<"gen:"<<theGenElectrons_[indexMatchEle]->E()<<" "<<theGenElectrons_[indexMatchEle]->Eta()<<" "<<theGenElectrons_[indexMatchEle]->Phi()<<std::endl;  
 	//	std::cout<<"pfsc:"<<pfscp4->E()<<" "<<pfscp4->Eta()<<" "<<pfscp4->Phi()<<std::endl;
@@ -421,6 +542,45 @@ void createHistos::Loop2(){
       
       }
   
+}
+
+
+void createHistos::LoopPhotons(){
+
+  if (fChain == 0) return;
+  
+  Long64_t nentries = fChain->GetEntries();
+  std::cout<<"nentries:"<<nentries<<std::endl;
+  Long64_t nbytes = 0, nb = 0;
+  for (Long64_t jentry=0; jentry<nentries;jentry++) {
+    //  for (Long64_t jentry=0; jentry<20;jentry++) {
+    Long64_t ientry = LoadTree(jentry);
+    if (ientry < 0) break;
+    nb = fChain->GetEntry(jentry);   nbytes += nb;
+    // if (Cut(ientry) < 0) continue;           
+    
+    if(jentry%500==0)std::cout<<"jentry:"<<jentry<<"/"<<nentries<<std::endl;
+ 
+    buildGenPho();
+
+    float ptcut=20.;
+
+    //loop on pfSC
+    if(pfSCn>0){
+      for (int i=0;i<pfSCn;i++){
+	
+	TLorentzVector* pfscp4 = createTLorentzVector(pfSCe[i]/cosh(pfSCeta[i]),pfSCeta[i],pfSCphi[i],pfSCe[i]);
+
+	if(pfscp4->Pt()<ptcut)continue;	
+	int indexMatchPho=matchesGenPho(pfscp4);
+	if(indexMatchPho<0)continue;
+
+	fillHisto("pfSC_ErecoOverETrue",pfSCe[i]/theGenPhotons_[indexMatchPho]->E(),pfscp4,phoE9[i]/theGenPhotons_[indexMatchPho]->E());
+      }
+    }
+
+
+  }
 }
 
 void createHistos::Loop(){
