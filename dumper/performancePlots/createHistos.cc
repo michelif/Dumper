@@ -40,7 +40,7 @@ void createHistos::bookHistosPhotons(){
 
   //sc variables
   std::cout<<"booking"<<std::endl;
-  bookHisto("pfSC_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}");
+  bookHisto("pfSC_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}",false);
   bookHisto("pfSC_EBC",150,0,300,"E_{reco}^{BC}");
   bookHisto("pfSC_EseedOverETrue",200,0,2,"E_{reco}^{seed}/E_{true}");
   bookHisto("pfSC_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}");
@@ -202,7 +202,10 @@ void createHistos::fillHisto(TString name, double value,TLorentzVector* p4, floa
       TString unconvertedname = histonameIncl + "_unconv";
       TString convertedname = histonameIncl + "_conv";
       if(R9>0.94){
-	if(p4->Eta() > itCatCuts->second[0])    histos_[unconvertedname]->Fill(value);
+
+	if(p4->Eta() > itCatCuts->second[0]) {
+	  histos_[unconvertedname]->Fill(value);
+	}
       }else{
 	if(p4->Eta() > itCatCuts->second[0])    histos_[convertedname]->Fill(value);
       }
@@ -223,7 +226,7 @@ void createHistos::fillHisto(TString name, double value,TLorentzVector* p4, floa
 	      if(R9>0.94){
 		histos_[unconvertedname]->Fill(value);		
 	      }else{
-		histos_[unconvertedname]->Fill(value);				
+		histos_[convertedname]->Fill(value);				
 	      }
 	    }
 	  }
@@ -574,12 +577,12 @@ void createHistos::LoopPhotons(){
 	if(pfscp4->Pt()<ptcut)continue;	
 	int indexMatchPho=matchesGenPho(pfscp4);
 	if(indexMatchPho<0)continue;
-
-	fillHisto("pfSC_ErecoOverETrue",pfSCe[i]/theGenPhotons_[indexMatchPho]->E(),pfscp4,phoE9[i]/theGenPhotons_[indexMatchPho]->E());
+	if(pfscp4->Eta()<1.5) continue;
+	fillHisto("pfSC_ErecoOverETrue",pfSCe[i]/theGenPhotons_[indexMatchPho]->E(),pfscp4);
       }
     }
-
-
+    
+    
   }
 }
 
@@ -733,6 +736,7 @@ void createHistos::Init(TTree *tree)
    fChain->SetBranchAddress("phoisEB", phoisEB, &b_phoisEB);
    fChain->SetBranchAddress("phoisEE", phoisEE, &b_phoisEE);
    fChain->SetBranchAddress("phoisEBEEGap", phoisEBEEGap, &b_phoisEBEEGap);
+   fChain->SetBranchAddress("phoR9", phoR9, &b_phoR9);
    fChain->SetBranchAddress("phoE9", phoE9, &b_phoE9);
    fChain->SetBranchAddress("phoE25", phoE25, &b_phoE25);
    fChain->SetBranchAddress("phojurECAL", phojurECAL, &b_phojurECAL);

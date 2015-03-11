@@ -76,6 +76,7 @@ public :
    Float_t         phoisEE[MAXPHOTONSTOSAVE];   //[phon]
    Float_t         phoisEBEEGap[MAXPHOTONSTOSAVE];   //[phon]
    Float_t         phoE9[MAXPHOTONSTOSAVE];   //[phon]
+   Float_t         phoR9[MAXPHOTONSTOSAVE];   //[phon]
    Float_t         phoE25[MAXPHOTONSTOSAVE];   //[phon]
    Float_t         phojurECAL[MAXPHOTONSTOSAVE];   //[phon]
    Float_t         photwrHCAL[MAXPHOTONSTOSAVE];   //[phon]
@@ -277,6 +278,7 @@ public :
    TBranch        *b_phoisEE;   //!
    TBranch        *b_phoisEBEEGap;   //!
    TBranch        *b_phoE9;   //!
+   TBranch        *b_phoR9;   //!
    TBranch        *b_phoE25;   //!
    TBranch        *b_phojurECAL;   //!
    TBranch        *b_photwrHCAL;   //!
