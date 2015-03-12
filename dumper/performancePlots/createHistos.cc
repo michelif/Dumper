@@ -50,8 +50,8 @@ void createHistos::bookHistosPhotons(){
   bookHisto("pfSC_maxDistFromSeedinEtainSCPho",300,0,0.8  ,"max#Delta #eta_{BC}^{seed}",false,false);
   bookHisto("pfSC_maxDistFromSeedinPhiinSCPho",300,0,0.8  ,"max#Delta #phi_{BC}^{seed}",false,false);
   bookHisto("pfSC_bcNXtals",100,-0.5,99.5,"N_{xtals}^{BC}",false,false);
-  bookHisto2D("pfSC_EBCVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}",false);
-  bookHisto2D("pfSC_EBCVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}",false);
+  bookHisto2D("pfSC_EBCVsDeltaPhiBCSeedPho",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}",false);
+  bookHisto2D("pfSC_EBCVsDeltaEtaBCSeedPho",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}",false);
   bookHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",20,0,200,150,-0.5,0.5,"#rhoxN_{xtals}/100","(E_{reco}-E_{true})/(E_{reco})",false);
   bookHisto2D("pfSC_DeltaPhiVslogEtBCVsBC",25,-2,2,20,0.,0.7,"log(E_{t}^{BC})","#Delta#phi_{BC}^{seed}",false);
 
