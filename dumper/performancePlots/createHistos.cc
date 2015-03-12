@@ -40,20 +40,20 @@ void createHistos::bookHistosPhotons(){
 
   //sc variables
   std::cout<<"booking"<<std::endl;
-  bookHisto("pfSC_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}",false);
-  bookHisto("pfSC_EBC",150,0,300,"E_{reco}^{BC}");
-  bookHisto("pfSC_EseedOverETrue",200,0,2,"E_{reco}^{seed}/E_{true}");
-  bookHisto("pfSC_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}");
-  bookHisto("pfSC_nXtalsTotal",250,-0.5,249.5,"N_{xtals}");
-  bookHisto("pfSC_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC");
-  bookHisto("pfSC_maxDistFromSeedinRinSCPho",300,0,0.8  ,"max#Delta R_{BC}^{seed}");
-  bookHisto("pfSC_maxDistFromSeedinEtainSCPho",300,0,0.8  ,"max#Delta #eta_{BC}^{seed}");
-  bookHisto("pfSC_maxDistFromSeedinPhiinSCPho",300,0,0.8  ,"max#Delta #phi_{BC}^{seed}");
-  bookHisto("pfSC_bcNXtals",100,-0.5,99.5,"N_{xtals}^{BC}");
-  bookHisto2D("pfSC_EBCVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_EBCVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}");
-  bookHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",20,0,200,150,-0.5,0.5,"#rhoxN_{xtals}/100","(E_{reco}-E_{true})/(E_{reco})");
-  bookHisto2D("pfSC_DeltaPhiVslogEtBCVsBC",25,-2,2,20,0.,0.7,"log(E_{t}^{BC})","#Delta#phi_{BC}^{seed}");
+  bookHisto("pfSC_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}",false,false);
+  bookHisto("pfSC_EBC",150,0,300,"E_{reco}^{BC}",false,false);
+  bookHisto("pfSC_EseedOverETrue",200,0,2,"E_{reco}^{seed}/E_{true}",false,false);
+  bookHisto("pfSC_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}",false,false);
+  bookHisto("pfSC_nXtalsTotal",250,-0.5,249.5,"N_{xtals}",false,false);
+  bookHisto("pfSC_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC",false,false);
+  bookHisto("pfSC_maxDistFromSeedinRinSCPho",300,0,0.8  ,"max#Delta R_{BC}^{seed}",false,false);
+  bookHisto("pfSC_maxDistFromSeedinEtainSCPho",300,0,0.8  ,"max#Delta #eta_{BC}^{seed}",false,false);
+  bookHisto("pfSC_maxDistFromSeedinPhiinSCPho",300,0,0.8  ,"max#Delta #phi_{BC}^{seed}",false,false);
+  bookHisto("pfSC_bcNXtals",100,-0.5,99.5,"N_{xtals}^{BC}",false,false);
+  bookHisto2D("pfSC_EBCVsDeltaPhiBCSeedEle",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}",false);
+  bookHisto2D("pfSC_EBCVsDeltaEtaBCSeedEle",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}",false);
+  bookHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",20,0,200,150,-0.5,0.5,"#rhoxN_{xtals}/100","(E_{reco}-E_{true})/(E_{reco})",false);
+  bookHisto2D("pfSC_DeltaPhiVslogEtBCVsBC",25,-2,2,20,0.,0.7,"log(E_{t}^{BC})","#Delta#phi_{BC}^{seed}",false);
 
 }
 
@@ -579,7 +579,45 @@ void createHistos::LoopPhotons(){
 	if(indexMatchPho<0)continue;
 	if(pfscp4->Eta()<1.5) continue;
 	fillHisto("pfSC_ErecoOverETrue",pfSCe[i]/theGenPhotons_[indexMatchPho]->E(),pfscp4);
-      }
+	fillHisto("pfSC_nXtalsSeed",pfSCnXtalsSeed[i],pfscp4);
+	fillHisto("pfSC_nXtalsTotal",pfSCnXtalsTotal[i],pfscp4);
+	fillHisto("pfSC_nBCForSC",pfSCnBC[i],pfscp4);
+	fillHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",rho*pfSCnXtalsTotal[i]/100.,(pfSCe[i]-theGenPhotons_[indexMatchPho]->E())/pfSCe[i],pfscp4);
+
+	TLorentzVector seed;
+	seed.SetPtEtaPhiE(pfSCbcE[i][0]/cosh(pfSCbcEta[i][0]),pfSCbcEta[i][0],pfSCbcPhi[i][0],pfSCbcE[i][0]);
+
+
+
+	float maxDistR=0;
+	float maxDistEta=0;
+	float maxDistPhi=0;
+
+	for (int j=0;j< pfSCnBC[i];j++){
+	  //	  std::cout<<pfSCnBC[i]<< " i,j:"<<i<<","<<j<<" "<<pfSCbcE[i][j]<<std::endl;
+	  if(pfSCbcE[i][j]<0.01)continue;
+	  TLorentzVector* bc = createTLorentzVector(pfSCbcE[i][j]/cosh(pfSCbcEta[i][j]),pfSCbcEta[i][j],pfSCbcPhi[i][j],pfSCbcE[i][j]);
+	  if(j>0){
+	    fillHisto("pfSC_bcNXtals",pfSCbcNXtals[i][j],bc);
+	    fillHisto("pfSC_EBC",pfSCbcE[i][j],bc);
+	    float distR=bc->DeltaR(seed);
+	    if(distR>maxDistR)maxDistR=distR;
+	    float distPhi=bc->DeltaPhi(seed);
+	    if(distPhi>maxDistPhi)maxDistPhi=distPhi;
+	    float distEta=sqrt(distR*distR-distPhi*distPhi);
+	    if(distEta>maxDistEta)maxDistEta=distEta;
+	    fillHisto2D("pfSC_EBCVsDeltaPhiBCSeedPho",fabs(distPhi),pfSCbcE[i][j],bc);
+	    fillHisto2D("pfSC_EBCVsDeltaEtaBCSeedPho",fabs(distEta),pfSCbcE[i][j],bc);
+	    fillHisto2D("pfSC_DeltaPhiVslogEtBCVsBC", log10(pfSCbcE[i][j]/cosh(pfSCbcEta[i][j])), distPhi, bc);
+	  }else{
+	    fillHisto("pfSC_EseedOverETrue",pfSCbcE[i][j]/theGenPhotons_[indexMatchPho]->E(),bc);
+	  }
+	}//pfscnBC
+	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinRinSCPho", maxDistR, pfscp4);
+	if(maxDistEta>0)fillHisto("pfSC_maxDistFromSeedinEtainSCPho", maxDistEta, pfscp4);
+	if(maxDistPhi>0)fillHisto("pfSC_maxDistFromSeedinPhiinSCPho", maxDistPhi, pfscp4);
+
+      }//pfscn
     }
     
     
