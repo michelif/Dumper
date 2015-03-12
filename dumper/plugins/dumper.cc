@@ -104,6 +104,10 @@
 #include "RecoEgamma/EgammaMCTools/interface/ElectronMCTruthFinder.h"
 #include "RecoEgamma/EgammaMCTools/interface/ElectronMCTruth.h"
 
+#include "RecoEgamma/EgammaMCTools/interface/PhotonMCTruthFinder.h"
+#include "RecoEgamma/EgammaMCTools/interface/PhotonMCTruth.h"
+
+
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/ParticleFlowReco/interface/PFSuperCluster.h"
@@ -136,7 +140,7 @@ public:
   
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
   void clearVector();
-  void mcTruth(edm::Handle<reco::GenParticleCollection> genParticleH,std::vector<ElectronMCTruth> MCElectrons);
+  void mcTruth(edm::Handle<reco::GenParticleCollection> genParticleH,std::vector<ElectronMCTruth> MCElectrons, std::vector<PhotonMCTruth> MCPhotons);
   void phoReco(edm::Handle<reco::PhotonCollection> photonH, edm::Handle<reco::TrackCollection> traH, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee,edm::Handle<reco::PFCandidateCollection>  PFCandidates);
   void eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle,edm::Handle<reco::ConversionCollection> hConversions, edm::Handle<reco::BeamSpot> recoBeamSpotHandle, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee,edm::Handle<reco::PFCandidateCollection>  PFCandidates);
   void scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHandle, edm::Handle<reco::SuperClusterCollection> superClustersEEHandlee, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee);
@@ -171,6 +175,7 @@ private:
   Float_t gpho_pt[MAXPHOTONSTOSAVE];
   Float_t gpho_eta[MAXPHOTONSTOSAVE];
   Float_t gpho_phi[MAXPHOTONSTOSAVE];
+  Int_t gpho_isConverted[MAXPHOTONSTOSAVE];
   Int_t gpho_index[MAXPHOTONSTOSAVE];
 
   Float_t gele_pt[MAXPHOTONSTOSAVE];
@@ -1075,7 +1080,7 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 
 
 
-void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH,std::vector<ElectronMCTruth> MCElectrons) {
+void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH,std::vector<ElectronMCTruth> MCElectrons,std::vector<PhotonMCTruth> MCPhotons) {
   
   gp_n = 0;
   gpho_n = 0;
@@ -1103,6 +1108,30 @@ void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH,std::vector<El
 	    gpho_eta[gpho_n] = gp->eta();
 	    gpho_phi[gpho_n] = gp->phi();
 	    gpho_index [gpho_n] = gp_n-1;
+
+	    gpho_isConverted[gpho_n]=-1;
+	    float drMatch=999;
+	    for ( std::vector<PhotonMCTruth>::const_iterator mcPho=MCPhotons.begin(); mcPho !=MCPhotons.end(); mcPho++) {
+	      //matching
+
+	      float phoEta=(*mcPho).fourMomentum().eta();
+	      float phoPhi=(*mcPho).fourMomentum().phi();
+	      
+	      float dPhi = phoPhi-gpho_phi[gpho_n];
+	      float kPI=3.14159265;
+	      float kTWOPI=2*kPI;
+	      
+	      while(dPhi >= kPI) dPhi-=kTWOPI;
+	      while(dPhi < -kPI) dPhi+=kTWOPI;
+	      
+	      float dr=sqrt((gpho_eta[gpho_n]-phoEta)*(gpho_eta[gpho_n]-phoEta)+dPhi*dPhi);
+	      if(dr<0.5 && dr<drMatch) {
+		drMatch=dr;
+		gpho_isConverted[gpho_n]=(*mcPho).isAConversion();
+	      }
+
+	    }
+	    
 	    gpho_n++;
 	  }
 	}
@@ -1113,30 +1142,45 @@ void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH,std::vector<El
 	    gele_eta[gele_n] = gp->eta();
 	    gele_phi[gele_n] = gp->phi();
 	    gele_index [gele_n] = gp_n-1;
+
+	    gele_fbrem80[gele_n]=-1;
+	    gele_fbrem120[gele_n]=-1;
+	    float drMatch=999;
 	    for ( std::vector<ElectronMCTruth>::const_iterator iEl=MCElectrons.begin(); iEl !=MCElectrons.end(); ++iEl ){ 
 
 	      //matching
 	      float eleEta=(*iEl).fourMomentum().eta();
 	      float elePhi=(*iEl).fourMomentum().phi();
 
-	      if(sqrt((gele_eta[gele_n]-eleEta)*(gele_eta[gele_n]-eleEta)+(gele_phi[gele_n]-elePhi)*(gele_phi[gele_n]-elePhi))>0.5) continue;
+	      float dPhi = elePhi-gele_phi[gele_n];
+	      float kPI=3.14159265;
+	      float kTWOPI=2*kPI;
 
-	      float totBrem80=0 ;
-	      float totBrem120=0 ;
-	      unsigned int iBrem ;
-	      for ( iBrem=0; iBrem < (*iEl).bremVertices().size(); ++iBrem ) {
+	      while(dPhi >= kPI) dPhi-=kTWOPI;
+	      while(dPhi < -kPI) dPhi+=kTWOPI;
 
-		float rBrem= (*iEl).bremVertices()[iBrem].perp();
-		if(rBrem < 80){
-		  totBrem80 +=  (*iEl).bremMomentum()[iBrem].e();   
-		} 
-		if ( rBrem < 120 ) {
-		  totBrem120 +=  (*iEl).bremMomentum()[iBrem].e();   
+	      float dr=sqrt((gele_eta[gele_n]-eleEta)*(gele_eta[gele_n]-eleEta)+dPhi*dPhi);
+	      if(dr<0.5 && dr<drMatch) {
+		drMatch=dr;
+		float totBrem80=0 ;
+		float totBrem120=0 ;
+		unsigned int iBrem ;
+		for ( iBrem=0; iBrem < (*iEl).bremVertices().size(); ++iBrem ) {
+		  
+		  float rBrem= (*iEl).bremVertices()[iBrem].perp();
+		  if(rBrem < 80){
+		    totBrem80 +=  (*iEl).bremMomentum()[iBrem].e();   
+		  } 
+		  if ( rBrem < 120 ) {
+		    totBrem120 +=  (*iEl).bremMomentum()[iBrem].e();   
+		  }
 		}
+		gele_fbrem80[gele_n]=totBrem80/((*iEl).fourMomentum().e());
+		gele_fbrem120[gele_n]=totBrem120/((*iEl).fourMomentum().e());
 	      }
-	      gele_fbrem80[gele_n]=totBrem80/((*iEl).fourMomentum().e());
-	      gele_fbrem120[gele_n]=totBrem120/((*iEl).fourMomentum().e());
 	    }
+
+
 	    gele_n++;
 	  }
 	}
@@ -1209,8 +1253,11 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
 
     std::vector<SimTrack>::const_iterator iFirstSimTk = theSimTracks.begin();
     std::vector<ElectronMCTruth> MCElectrons=theElectronMCTruthFinder_->find (theSimTracks,  theSimVertices);
+
+    PhotonMCTruthFinder* thePhotonMCTruthFinder_ = new PhotonMCTruthFinder();
+    std::vector<PhotonMCTruth> MCPhotons=thePhotonMCTruthFinder_->find (theSimTracks,  theSimVertices);
     
-    mcTruth(gpH,MCElectrons);
+    mcTruth(gpH,MCElectrons,MCPhotons);
 
   }
   
@@ -1562,6 +1609,7 @@ void dumper::beginJob() {
     t->Branch("gphoeta", &gpho_eta, "gphoeta[gphon]/F");
     t->Branch("gphophi", &gpho_phi, "gphophi[gphon]/F");
     t->Branch("gphoindex", &gpho_index, "gphoindex[gphon]/I");
+    t->Branch("gphoisConverted",   &gpho_isConverted,   "gphoisConverted[gphon]/I");
 
     t->Branch("gelen",   &gele_n,   "gelen/I");
     t->Branch("gelept",  &gele_pt,  "gelept[gelen]/F");
