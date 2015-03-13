@@ -50,6 +50,7 @@ public :
    std::map<TString,std::vector<float> > categoriesAndCuts_;
    std::vector<TLorentzVector*> theGenElectrons_;
    std::vector<TLorentzVector*> theGenPhotons_;
+   std::vector<int> theConversions_;
 
    // Declaration of leaf types
    Int_t           nvtx;
@@ -243,6 +244,7 @@ public :
    Float_t         gphoeta[MAXPHOTONSTOSAVE];   //[gphon]
    Float_t         gphophi[MAXPHOTONSTOSAVE];   //[gphon]
    Int_t           gphoindex[MAXPHOTONSTOSAVE];   //[gphon]
+   Int_t           gphoisConverted[MAXPHOTONSTOSAVE];   //[gphon]
    Int_t           gelen;
    Float_t         gelept[MAXPHOTONSTOSAVE];   //[gelen]
    Float_t         geleeta[MAXPHOTONSTOSAVE];   //[gelen]
@@ -445,6 +447,7 @@ public :
    TBranch        *b_gphoeta;   //!
    TBranch        *b_gphophi;   //!
    TBranch        *b_gphoindex;   //!
+   TBranch        *b_gphoisConverted;   //!
    TBranch        *b_gelen;   //!
    TBranch        *b_gelept;   //!
    TBranch        *b_geleeta;   //!
@@ -482,7 +485,7 @@ public :
    void buildGenPho();
    int matchesGenEle(TLorentzVector* objectToMatch, float DeltaR=0.1);
    int matchesGenPho(TLorentzVector* objectToMatch, float DeltaR=0.1);
-   void fillHisto(TString name, double value,TLorentzVector* p4, float R9=-1);
+   void fillHisto(TString name, double value,TLorentzVector* p4, int isConv=-1);
    void fillHisto2D(TString name, double valueX, double valueY,TLorentzVector* p4);
    void defineCategories();
 };

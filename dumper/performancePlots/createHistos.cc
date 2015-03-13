@@ -40,16 +40,16 @@ void createHistos::bookHistosPhotons(){
 
   //sc variables
   std::cout<<"booking"<<std::endl;
-  bookHisto("pfSC_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}",false,false);
-  bookHisto("pfSC_EBC",150,0,300,"E_{reco}^{BC}",false,false);
+  bookHisto("pfSC_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}",false,true);
+  bookHisto("pfSC_EBC",150,0,300,"E_{reco}^{BC}",false,true);
   bookHisto("pfSC_EseedOverETrue",200,0,2,"E_{reco}^{seed}/E_{true}",false,false);
-  bookHisto("pfSC_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}",false,false);
-  bookHisto("pfSC_nXtalsTotal",250,-0.5,249.5,"N_{xtals}",false,false);
-  bookHisto("pfSC_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC",false,false);
-  bookHisto("pfSC_maxDistFromSeedinRinSCPho",300,0,0.8  ,"max#Delta R_{BC}^{seed}",false,false);
-  bookHisto("pfSC_maxDistFromSeedinEtainSCPho",300,0,0.8  ,"max#Delta #eta_{BC}^{seed}",false,false);
-  bookHisto("pfSC_maxDistFromSeedinPhiinSCPho",300,0,0.8  ,"max#Delta #phi_{BC}^{seed}",false,false);
-  bookHisto("pfSC_bcNXtals",100,-0.5,99.5,"N_{xtals}^{BC}",false,false);
+  bookHisto("pfSC_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}",false,true);
+  bookHisto("pfSC_nXtalsTotal",250,-0.5,249.5,"N_{xtals}",false,true);
+  bookHisto("pfSC_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC",false,true);
+  bookHisto("pfSC_maxDistFromSeedinRinSCPho",300,0,0.8  ,"max#Delta R_{BC}^{seed}",false,true);
+  bookHisto("pfSC_maxDistFromSeedinEtainSCPho",300,0,0.8  ,"max#Delta #eta_{BC}^{seed}",false,true);
+  bookHisto("pfSC_maxDistFromSeedinPhiinSCPho",300,0,0.8  ,"max#Delta #phi_{BC}^{seed}",false,true);
+  bookHisto("pfSC_bcNXtals",100,-0.5,99.5,"N_{xtals}^{BC}",false,true);
   bookHisto2D("pfSC_EBCVsDeltaPhiBCSeedPho",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}",false);
   bookHisto2D("pfSC_EBCVsDeltaEtaBCSeedPho",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}",false);
   bookHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",20,0,200,150,-0.5,0.5,"#rhoxN_{xtals}/100","(E_{reco}-E_{true})/(E_{reco})",false);
@@ -193,21 +193,21 @@ void createHistos::fillHisto2D(TString name, double valueX, double valueY, TLore
 }
 
 
-void createHistos::fillHisto(TString name, double value,TLorentzVector* p4, float R9){//R9 is -1 as default in .h
+void createHistos::fillHisto(TString name, double value,TLorentzVector* p4, int isConv){//isConv =-1 by default
   for (std::map<TString,std::vector<float> >::const_iterator itCatCuts=categoriesAndCuts_.begin();itCatCuts!=categoriesAndCuts_.end();++itCatCuts){
     TString histonameIncl=name+"_inclusive";
-    if(R9<0.){
+    if(isConv<0){
       if(p4->Eta() > itCatCuts->second[0])    histos_[histonameIncl]->Fill(value);
     }else{
       TString unconvertedname = histonameIncl + "_unconv";
       TString convertedname = histonameIncl + "_conv";
-      if(R9>0.94){
+      if(isConv>0.1){
 
 	if(p4->Eta() > itCatCuts->second[0]) {
-	  histos_[unconvertedname]->Fill(value);
+	  histos_[convertedname]->Fill(value);
 	}
       }else{
-	if(p4->Eta() > itCatCuts->second[0])    histos_[convertedname]->Fill(value);
+	if(p4->Eta() > itCatCuts->second[0])    histos_[unconvertedname]->Fill(value);
       }
     }
 
@@ -218,31 +218,31 @@ void createHistos::fillHisto(TString name, double value,TLorentzVector* p4, floa
 	TString histoname=name+"_"+itCatCuts->first+"bin"+bin;
 	if(i<itCatCuts->second.size()-1){
 	  if(p4->Eta() > itCatCuts->second[i] && p4->Eta() < itCatCuts->second[i+1] ){
-	    if(R9<0.){
+	    if(isConv<0){
 	      histos_[histoname]->Fill(value);
 	    }else{
 	      TString unconvertedname = histoname + "_unconv";
 	      TString convertedname = histoname + "_conv";
-	      if(R9>0.94){
-		histos_[unconvertedname]->Fill(value);		
+	      if(isConv>0.1){
+		histos_[convertedname]->Fill(value);		
 	      }else{
-		histos_[convertedname]->Fill(value);				
+		histos_[unconvertedname]->Fill(value);				
 	      }
 	    }
 	  }
 	}else {
-	  if(R9<0.){
-	    if(p4->Eta() > itCatCuts->second[i])
+	  if(p4->Eta() > itCatCuts->second[i]){
+	    if(isConv<0){
 	      histos_[histoname]->Fill(value);
-	  }else{
-	    TString unconvertedname = histoname + "_unconv";
-	    TString convertedname = histoname + "_conv";
-	    if(R9>0.94){
-	      histos_[unconvertedname]->Fill(value);
 	    }else{
-	      histos_[convertedname]->Fill(value);
+	      TString unconvertedname = histoname + "_unconv";
+	      TString convertedname = histoname + "_conv";
+	      if(isConv>0.1){
+		histos_[convertedname]->Fill(value);
+	      }else{
+		histos_[unconvertedname]->Fill(value);
+	      }
 	    }
-	    
 	  }
 	}
       }
@@ -344,8 +344,11 @@ void createHistos::buildGenPho(){
 
     TLorentzVector* gphop4 = createTLorentzVector(gphopt[j],gphoeta[j],gphophi[j],gphopt[j]*cosh(gphoeta[j]));
     theGenPhotons_.push_back(gphop4);	
+    theConversions_.push_back(gphoisConverted[j]);	
   }
 }
+
+
 
 int createHistos::matchesGenEle(TLorentzVector* objectToMatch, float DeltaR ){
   bool matches=false;
@@ -555,6 +558,10 @@ void createHistos::LoopPhotons(){
   Long64_t nentries = fChain->GetEntries();
   std::cout<<"nentries:"<<nentries<<std::endl;
   Long64_t nbytes = 0, nb = 0;
+
+  int nConv=0;
+  int nUnConv=0;
+
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
     //  for (Long64_t jentry=0; jentry<20;jentry++) {
     Long64_t ientry = LoadTree(jentry);
@@ -578,10 +585,12 @@ void createHistos::LoopPhotons(){
 	int indexMatchPho=matchesGenPho(pfscp4);
 	if(indexMatchPho<0)continue;
 	if(pfscp4->Eta()<1.5) continue;
-	fillHisto("pfSC_ErecoOverETrue",pfSCe[i]/theGenPhotons_[indexMatchPho]->E(),pfscp4);
-	fillHisto("pfSC_nXtalsSeed",pfSCnXtalsSeed[i],pfscp4);
-	fillHisto("pfSC_nXtalsTotal",pfSCnXtalsTotal[i],pfscp4);
-	fillHisto("pfSC_nBCForSC",pfSCnBC[i],pfscp4);
+	if(theConversions_[indexMatchPho]>0.1)nConv++;
+	if(theConversions_[indexMatchPho]<0.1 && theConversions_[indexMatchPho]>-0.1)nUnConv++;
+	fillHisto("pfSC_ErecoOverETrue",pfSCe[i]/theGenPhotons_[indexMatchPho]->E(),pfscp4,theConversions_[indexMatchPho]);
+	fillHisto("pfSC_nXtalsSeed",pfSCnXtalsSeed[i],pfscp4, theConversions_[indexMatchPho]);
+	fillHisto("pfSC_nXtalsTotal",pfSCnXtalsTotal[i],pfscp4, theConversions_[indexMatchPho]);
+	fillHisto("pfSC_nBCForSC",pfSCnBC[i],pfscp4,theConversions_[indexMatchPho]);
 	fillHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",rho*pfSCnXtalsTotal[i]/100.,(pfSCe[i]-theGenPhotons_[indexMatchPho]->E())/pfSCe[i],pfscp4);
 
 	TLorentzVector seed;
@@ -598,8 +607,8 @@ void createHistos::LoopPhotons(){
 	  if(pfSCbcE[i][j]<0.01)continue;
 	  TLorentzVector* bc = createTLorentzVector(pfSCbcE[i][j]/cosh(pfSCbcEta[i][j]),pfSCbcEta[i][j],pfSCbcPhi[i][j],pfSCbcE[i][j]);
 	  if(j>0){
-	    fillHisto("pfSC_bcNXtals",pfSCbcNXtals[i][j],bc);
-	    fillHisto("pfSC_EBC",pfSCbcE[i][j],bc);
+	    fillHisto("pfSC_bcNXtals",pfSCbcNXtals[i][j],bc, theConversions_[indexMatchPho]);
+	    fillHisto("pfSC_EBC",pfSCbcE[i][j],bc, theConversions_[indexMatchPho]);
 	    float distR=bc->DeltaR(seed);
 	    if(distR>maxDistR)maxDistR=distR;
 	    float distPhi=bc->DeltaPhi(seed);
@@ -613,15 +622,18 @@ void createHistos::LoopPhotons(){
 	    fillHisto("pfSC_EseedOverETrue",pfSCbcE[i][j]/theGenPhotons_[indexMatchPho]->E(),bc);
 	  }
 	}//pfscnBC
-	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinRinSCPho", maxDistR, pfscp4);
-	if(maxDistEta>0)fillHisto("pfSC_maxDistFromSeedinEtainSCPho", maxDistEta, pfscp4);
-	if(maxDistPhi>0)fillHisto("pfSC_maxDistFromSeedinPhiinSCPho", maxDistPhi, pfscp4);
+	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinRinSCPho", maxDistR, pfscp4, theConversions_[indexMatchPho]);
+	if(maxDistEta>0)fillHisto("pfSC_maxDistFromSeedinEtainSCPho", maxDistEta, pfscp4, theConversions_[indexMatchPho]);
+	if(maxDistPhi>0)fillHisto("pfSC_maxDistFromSeedinPhiinSCPho", maxDistPhi, pfscp4, theConversions_[indexMatchPho]);
 
       }//pfscn
     }
     
     
   }
+  std::cout<<"nConv:"<<nConv<<" "<<(float)100*nConv/(nConv+nUnConv)<<"%"<<std::endl;
+  std::cout<<"nUnConv:"<<nUnConv<<" "<<(float)100*nUnConv/(nConv+nUnConv)<<"%"<<std::endl;
+
 }
 
 void createHistos::Loop(){
@@ -942,6 +954,7 @@ void createHistos::Init(TTree *tree)
    fChain->SetBranchAddress("gphoeta", gphoeta, &b_gphoeta);
    fChain->SetBranchAddress("gphophi", gphophi, &b_gphophi);
    fChain->SetBranchAddress("gphoindex", gphoindex, &b_gphoindex);
+   fChain->SetBranchAddress("gphoisConverted", gphoisConverted, &b_gphoisConverted);
    fChain->SetBranchAddress("gelen", &gelen, &b_gelen);
    fChain->SetBranchAddress("gelept", gelept, &b_gelept);
    fChain->SetBranchAddress("geleeta", geleeta, &b_geleeta);
