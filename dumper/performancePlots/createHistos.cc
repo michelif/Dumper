@@ -54,7 +54,9 @@ void createHistos::bookHistosPhotons(){
   bookHisto2D("pfSC_EBCVsDeltaEtaBCSeedPho",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}",false);
   bookHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",20,0,200,150,-0.5,0.5,"#rhoxN_{xtals}/100","(E_{reco}-E_{true})/(E_{reco})",false);
   bookHisto2D("pfSC_DeltaPhiVslogEtBCVsBC",25,-2,2,20,0.,0.7,"log(E_{t}^{BC})","#Delta#phi_{BC}^{seed}",false);
+  bookHisto2D("pho_isConvertedVsR9",20,0,1,2,-0.5,1.5,"R9","isConverted",false);
 
+  bookHisto("pho_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}",false,true);
 }
 
 
@@ -575,6 +577,17 @@ void createHistos::LoopPhotons(){
 
     float ptcut=20.;
 
+    //loop on pho
+    for(int i=0;i<phon;i++){
+      if(phopt[i]<ptcut)continue;
+
+      TLorentzVector* phop4=createTLorentzVector(phopt[i],phoeta[i],phophi[i],phoe[i]);
+      int indexMatchPho=matchesGenPho(phop4);
+      if(indexMatchPho<0)continue;
+      fillHisto("pho_ErecoOverETrue",phop4->E()/theGenPhotons_[indexMatchPho]->E(),phop4,theConversions_[indexMatchPho]);
+      fillHisto2D("pho_isConvertedVsR9",phoR9[i],theConversions_[indexMatchPho],phop4);
+    }
+
     //loop on pfSC
     if(pfSCn>0){
       for (int i=0;i<pfSCn;i++){
@@ -633,7 +646,6 @@ void createHistos::LoopPhotons(){
   }
   std::cout<<"nConv:"<<nConv<<" "<<(float)100*nConv/(nConv+nUnConv)<<"%"<<std::endl;
   std::cout<<"nUnConv:"<<nUnConv<<" "<<(float)100*nUnConv/(nConv+nUnConv)<<"%"<<std::endl;
-
 }
 
 void createHistos::Loop(){
