@@ -13,9 +13,11 @@ void createHistos::bookHistos(){
   bookHisto("ele_sMaj",200,0,3,"sMaj",false);
   bookHisto("ele_sMin",200,0,2,"sMin",false);
   bookHisto("ele_alpha",200,-2,2,"alpha",false);
-  bookHisto("ele_pt",300,0,300,"p_{T}","GeV",false);
-  bookHisto("ele_eta",100,-3.,3,"#eta","",false);
-
+  bookHisto("ele_pt",300,0,300,"p_{T}(GeV)",false);
+  bookHisto("ele_eta",100,-3.,3,"#eta",false);
+  bookHisto("ele_r9",200,0.,1,"R_{9}",false);
+  bookHisto("ele_siEtaiEtaNoZS",200,0.,0.07,"#sigma_{i#etai#eta}",false);
+  bookHisto("ele_siEtaiEtaZS",200,0.,0.07,"#sigma_{i#etai#eta}",false);
 
   //sc variables
   std::cout<<"booking"<<std::endl;
@@ -64,6 +66,13 @@ void createHistos::bookHistosPhotons(){
   bookHisto("pho_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}",false,true);
   bookHisto("pho_pt",300,0,300,"p_{T}(GeV)",false,true);
   bookHisto("pho_eta",100,-3.,3,"#eta",false,true);
+  bookHisto("pho_sMaj",200,0,3,"sMaj",false,true);
+  bookHisto("pho_sMin",200,0,2,"sMin",false,true);
+  bookHisto("pho_alpha",200,-2,2,"alpha",false,true);
+  bookHisto("pho_r9",200,0.,1,"R_{9}",false,true);
+  bookHisto("pho_siEtaiEtaNoZS",200,0.,0.07,"#sigma_{i#etai#eta}",false,true);
+  bookHisto("pho_siEtaiEtaZS",200,0.,0.07,"#sigma_{i#etai#eta}",false,true);
+
 }
 
 
@@ -444,6 +453,9 @@ void createHistos::LoopElectrons(){
       fillHisto("ele_alpha",elealphaZS[i],elep4);
       fillHisto("ele_pt",elept[i],elep4);
       fillHisto("ele_eta",eleeta[i],elep4);
+      fillHisto("ele_r9",eler9[i],elep4);
+      fillHisto("ele_siEtaiEtaNoZS",elesiEtaiEtaNoZS[i],elep4);
+      fillHisto("ele_siEtaiEtaZS",elesiEtaiEtaZS[i],elep4);
       //filling outTree
       eleErecoOverEtrue_=elee[i]/theGenElectrons_[indexMatchEle]->E();
       eleeta_=eleeta[i];
@@ -616,9 +628,17 @@ void createHistos::LoopPhotons(){
       int indexMatchPho=matchesGenPho(phop4);
       if(indexMatchPho<0)continue;
       fillHisto("pho_ErecoOverETrue",phop4->E()/theGenPhotons_[indexMatchPho]->E(),phop4,theConversions_[indexMatchPho]);
+      fillHisto2D("pho_isConvertedVsR9",phoR9[i],theConversions_[indexMatchPho],phop4);
+      fillHisto("pho_sMaj",phosMajZS[i],phop4,theConversions_[indexMatchPho]);
+      fillHisto("pho_sMin",phosMinZS[i],phop4,theConversions_[indexMatchPho]);
+      fillHisto("pho_alpha",phoalphaZS[i],phop4,theConversions_[indexMatchPho]);
       fillHisto("pho_pt",phopt[i],phop4,theConversions_[indexMatchPho]);
       fillHisto("pho_eta",phoeta[i],phop4,theConversions_[indexMatchPho]);
-      fillHisto2D("pho_isConvertedVsR9",phoR9[i],theConversions_[indexMatchPho],phop4);
+      fillHisto("pho_r9",phoR9[i],phop4,theConversions_[indexMatchPho]);
+      fillHisto("pho_siEtaiEtaNoZS",phosiEtaiEtaNoZS[i],phop4,theConversions_[indexMatchPho]);
+      fillHisto("pho_siEtaiEtaZS",phosiEtaiEtaZS[i],phop4,theConversions_[indexMatchPho]);
+
+
     }
 
     //loop on pfSC
