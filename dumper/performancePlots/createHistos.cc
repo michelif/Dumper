@@ -608,7 +608,7 @@ void createHistos::LoopPhotons(){
 	if(pfscp4->Pt()<ptcut)continue;	
 	int indexMatchPho=matchesGenPho(pfscp4);
 	if(indexMatchPho<0)continue;
-	if(pfscp4->Eta()<1.5) continue;
+	if(TMath::Abs(pfscp4->Eta())<1.5) continue;
 	if(theConversions_[indexMatchPho]>0.1)nConv++;
 	if(theConversions_[indexMatchPho]<0.1 && theConversions_[indexMatchPho]>-0.1)nUnConv++;
 	fillHisto("pfSC_ErecoOverETrue",pfSCe[i]/theGenPhotons_[indexMatchPho]->E(),pfscp4,theConversions_[indexMatchPho]);
