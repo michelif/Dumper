@@ -2,7 +2,7 @@
 
 version=$1
 
-for dataset in DYToLLRelVal HggRelVal DYToEE GluGluToHToGG; do
+for dataset in DYToLLRelVal HggRelVal DYToEE GluGluToHToGG ZEERelVal QCDforPF; do
 
     eos=/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select
     

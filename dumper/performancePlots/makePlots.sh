@@ -1,8 +1,8 @@
 #!/bin/bash
 
+versions=$1
 
-
-for version in V21_b;do
+for version in $versions;do
     cd lists
     ./makeLists.sh $version
     cd -
@@ -11,13 +11,21 @@ for version in V21_b;do
     mkdir ~/www/plots/shashlikUpgrade/$dateDir/$version/
     cp ~/www/plots/shashlikUpgrade/index.php  ~/www/plots/shashlikUpgrade/$dateDir/
 
-for dataset in  HggRelVal DYToLLRelVal; do
+for dataset in  HggRelVal DYToLLRelVal ZEERelVal; do
     if [ "$dataset" == "DYToLLRelVal" ]
     then
 	./tmp/runCreateHistos2 lists/$dataset"_"$version.list $dataset"_"$version.root   
 	./tmp/runCreateHistos2 lists/$dataset"_noPU_"$version.list $dataset"_noPU_"$version.root
     echo "DY ok"
     fi
+
+    if [ "$dataset" == "ZEERelVal" ]
+    then
+	./tmp/runCreateHistos2 lists/$dataset"_"$version.list $dataset"_"$version.root   
+	./tmp/runCreateHistos2 lists/$dataset"_noPU_"$version.list $dataset"_noPU_"$version.root
+    echo "DY ok"
+    fi
+
 
     if [ "$dataset" == "HggRelVal" ]    
     then
