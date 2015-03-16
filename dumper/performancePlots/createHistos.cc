@@ -11,6 +11,9 @@ void createHistos::bookHistos(){
   bookHisto("ele_sMaj",200,0,3,"sMaj",false);
   bookHisto("ele_sMin",200,0,2,"sMin",false);
   bookHisto("ele_alpha",200,-2,2,"alpha",false);
+  bookHisto("ele_pt",300,0,300,"p_{T}","GeV",false);
+  bookHisto("ele_eta",100,-3.,3,"#eta","",false);
+
 
   //sc variables
   std::cout<<"booking"<<std::endl;
@@ -57,6 +60,8 @@ void createHistos::bookHistosPhotons(){
   bookHisto2D("pho_isConvertedVsR9",20,0,1,2,-0.5,1.5,"R9","isConverted",false);
 
   bookHisto("pho_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}",false,true);
+  bookHisto("pho_pt",300,0,300,"p_{T}(GeV)",false,true);
+  bookHisto("pho_eta",100,-3.,3,"#eta",false,true);
 }
 
 
@@ -173,7 +178,7 @@ void createHistos::fillHisto2D(TString name, double valueX, double valueY, TLore
   for (std::map<TString,std::vector<float> >::const_iterator itCatCuts=categoriesAndCuts_.begin();itCatCuts!=categoriesAndCuts_.end();++itCatCuts){
 
     TString histonameIncl=name+"_inclusive";
-    if(p4->Eta() > itCatCuts->second[0]) histos2D_[histonameIncl]->Fill(valueX, valueY);
+    if(TMath::Abs(p4->Eta()) > itCatCuts->second[0]) histos2D_[histonameIncl]->Fill(valueX, valueY);
 
     if(itCatCuts->first.EqualTo("eta")){
       for(int i=0;i<itCatCuts->second.size();++i){
@@ -181,11 +186,11 @@ void createHistos::fillHisto2D(TString name, double valueX, double valueY, TLore
 	bin.Form("%d",i);
 	TString histoname=name+"_"+itCatCuts->first+"bin"+bin;
 	if(i<itCatCuts->second.size()-1){
-	  if(p4->Eta() > itCatCuts->second[i] && p4->Eta() < itCatCuts->second[i+1] ){
+	  if(TMath::Abs(p4->Eta()) > itCatCuts->second[i] && TMath::Abs(p4->Eta()) < itCatCuts->second[i+1] ){
 	    histos2D_[histoname]->Fill(valueX, valueY);
 	  }
 	}else {
-	  if(p4->Eta() > itCatCuts->second[i])
+	  if(TMath::Abs(p4->Eta()) > itCatCuts->second[i])
 	    histos2D_[histoname]->Fill(valueX,valueY);
 	}
       }
@@ -199,17 +204,17 @@ void createHistos::fillHisto(TString name, double value,TLorentzVector* p4, int 
   for (std::map<TString,std::vector<float> >::const_iterator itCatCuts=categoriesAndCuts_.begin();itCatCuts!=categoriesAndCuts_.end();++itCatCuts){
     TString histonameIncl=name+"_inclusive";
     if(isConv<0){
-      if(p4->Eta() > itCatCuts->second[0])    histos_[histonameIncl]->Fill(value);
+      if(TMath::Abs(p4->Eta()) > itCatCuts->second[0])    histos_[histonameIncl]->Fill(value);
     }else{
       TString unconvertedname = histonameIncl + "_unconv";
       TString convertedname = histonameIncl + "_conv";
       if(isConv>0.1){
 
-	if(p4->Eta() > itCatCuts->second[0]) {
+	if(TMath::Abs(p4->Eta()) > itCatCuts->second[0]) {
 	  histos_[convertedname]->Fill(value);
 	}
       }else{
-	if(p4->Eta() > itCatCuts->second[0])    histos_[unconvertedname]->Fill(value);
+	if(TMath::Abs(p4->Eta()) > itCatCuts->second[0])    histos_[unconvertedname]->Fill(value);
       }
     }
 
@@ -219,7 +224,7 @@ void createHistos::fillHisto(TString name, double value,TLorentzVector* p4, int 
 	bin.Form("%d",i);
 	TString histoname=name+"_"+itCatCuts->first+"bin"+bin;
 	if(i<itCatCuts->second.size()-1){
-	  if(p4->Eta() > itCatCuts->second[i] && p4->Eta() < itCatCuts->second[i+1] ){
+	  if(TMath::Abs(p4->Eta()) > itCatCuts->second[i] && TMath::Abs(p4->Eta()) < itCatCuts->second[i+1] ){
 	    if(isConv<0){
 	      histos_[histoname]->Fill(value);
 	    }else{
@@ -233,7 +238,7 @@ void createHistos::fillHisto(TString name, double value,TLorentzVector* p4, int 
 	    }
 	  }
 	}else {
-	  if(p4->Eta() > itCatCuts->second[i]){
+	  if(TMath::Abs(p4->Eta()) > itCatCuts->second[i]){
 	    if(isConv<0){
 	      histos_[histoname]->Fill(value);
 	    }else{
@@ -424,6 +429,10 @@ void createHistos::LoopElectrons(){
       fillHisto("ele_sMaj",elesMajZS[i],elep4);
       fillHisto("ele_sMin",elesMinZS[i],elep4);
       fillHisto("ele_alpha",elealphaZS[i],elep4);
+      fillHisto("ele_pt",elept[i],elep4);
+      fillHisto("ele_eta",eleeta[i],elep4);
+
+
    }
 
 
@@ -585,6 +594,8 @@ void createHistos::LoopPhotons(){
       int indexMatchPho=matchesGenPho(phop4);
       if(indexMatchPho<0)continue;
       fillHisto("pho_ErecoOverETrue",phop4->E()/theGenPhotons_[indexMatchPho]->E(),phop4,theConversions_[indexMatchPho]);
+      fillHisto("pho_pt",phopt[i],phop4,theConversions_[indexMatchPho]);
+      fillHisto("pho_eta",phoeta[i],phop4,theConversions_[indexMatchPho]);
       fillHisto2D("pho_isConvertedVsR9",phoR9[i],theConversions_[indexMatchPho],phop4);
     }
 
