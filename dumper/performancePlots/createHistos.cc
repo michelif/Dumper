@@ -8,6 +8,8 @@ void createHistos::bookHistos(){
 
   //electrons
   bookHisto("ele_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}",false);
+  bookHisto("ele_ErecoOverETrueEEPlus",200,0,2,"E_{reco}/E_{true}",false);
+  bookHisto("ele_ErecoOverETrueEEMinus",200,0,2,"E_{reco}/E_{true}",false);
   bookHisto("ele_sMaj",200,0,3,"sMaj",false);
   bookHisto("ele_sMin",200,0,2,"sMin",false);
   bookHisto("ele_alpha",200,-2,2,"alpha",false);
@@ -396,12 +398,21 @@ int createHistos::matchesGenPho(TLorentzVector* objectToMatch, float DeltaR ){
 }
 
 
+void createHistos::createOutTree(){
+  outTreeElectrons = new TTree("outTreeElectrons","outTreeElectrons");
+  outTreeElectrons->Branch("elept", &elept_, "elept");
+  outTreeElectrons->Branch("eleeta", &eleeta_, "eleeta");
+  outTreeElectrons->Branch("elephi", &elephi_, "elephi");
+  outTreeElectrons->Branch("eler9", &eler9_, "eler9");
+  outTreeElectrons->Branch("elesiEtaiEtaNoZS", &elesiEtaiEtaNoZS_, "elesiEtaiEtaNoZS");
+  outTreeElectrons->Branch("elesiEtaiEtaZS", &elesiEtaiEtaZS_, "elesiEtaiEtaZS");
+  outTreeElectrons->Branch("eleErecoOverEtrue", &eleErecoOverEtrue_, "eleErecoOverEtrue");
 
+}
 
 void createHistos::LoopElectrons(){
 
   if (fChain == 0) return;
-  
   Long64_t nentries = fChain->GetEntries();
   std::cout<<"nentries:"<<nentries<<std::endl;
   Long64_t nbytes = 0, nb = 0;
@@ -415,23 +426,34 @@ void createHistos::LoopElectrons(){
     if(jentry%500==0)std::cout<<"jentry:"<<jentry<<"/"<<nentries<<std::endl;
  
     buildGenEle();
-
     float ptcut=20.;
 
     //loop on ele
     for(int i=0;i<elen;i++){
+      eleErecoOverEtrue_=-1;
       if(elept[i]<ptcut)continue;
 
       TLorentzVector* elep4=createTLorentzVector(elept[i],eleeta[i],elephi[i],elee[i]);
       int indexMatchEle=matchesGenEle(elep4);
       if(indexMatchEle<0)continue;
       fillHisto("ele_ErecoOverETrue",elee[i]/theGenElectrons_[indexMatchEle]->E(),elep4);
+      if(eleeta[i]>0)      fillHisto("ele_ErecoOverETrueEEPlus",elee[i]/theGenElectrons_[indexMatchEle]->E(),elep4);
+      if(eleeta[i]<0)      fillHisto("ele_ErecoOverETrueEEMinus",elee[i]/theGenElectrons_[indexMatchEle]->E(),elep4);
       fillHisto("ele_sMaj",elesMajZS[i],elep4);
       fillHisto("ele_sMin",elesMinZS[i],elep4);
       fillHisto("ele_alpha",elealphaZS[i],elep4);
       fillHisto("ele_pt",elept[i],elep4);
       fillHisto("ele_eta",eleeta[i],elep4);
+      //filling outTree
+      eleErecoOverEtrue_=elee[i]/theGenElectrons_[indexMatchEle]->E();
+      eleeta_=eleeta[i];
+      elephi_=elephi[i];
+      eler9_=eler9[i];
+      elept_=elept[i];
+      elesiEtaiEtaNoZS_=elesiEtaiEtaNoZS[i];
+      elesiEtaiEtaZS_=elesiEtaiEtaZS[i];
 
+      outTreeElectrons->Fill();
 
    }
 

@@ -52,6 +52,11 @@ public :
    std::vector<TLorentzVector*> theGenPhotons_;
    std::vector<int> theConversions_;
 
+   //outputTree
+   TTree* outTreeElectrons;
+   Float_t elept_,eleeta_,elephi_,eler9_,elesiEtaiEtaNoZS_,elesiEtaiEtaZS_,eleErecoOverEtrue_;
+
+
    // Declaration of leaf types
    Int_t           nvtx;
    Float_t         vertexx[200];   //[nvtx]
@@ -488,6 +493,7 @@ public :
    void fillHisto(TString name, double value,TLorentzVector* p4, int isConv=-1);
    void fillHisto2D(TString name, double valueX, double valueY,TLorentzVector* p4);
    void defineCategories();
+   void createOutTree();
 };
 
 
