@@ -56,6 +56,9 @@ public :
    TTree* outTreeElectrons;
    Float_t elept_,eleeta_,elephi_,eler9_,elesiEtaiEtaNoZS_,elesiEtaiEtaZS_,eleErecoOverEtrue_;
 
+   TTree* outTreepfSC;
+   Float_t pfSCpt_,pfSCeta_,pfSCphi_,pfSCErecoOverEtrue_,pfSC_nXtalsSeed_,pfSC_nXtalsTotal_,pfSC_nBCforSC_,pfSCEseedOverEtrue_;
+
 
    // Declaration of leaf types
    Int_t           nvtx;

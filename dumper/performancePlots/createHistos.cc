@@ -417,6 +417,17 @@ void createHistos::createOutTree(){
   outTreeElectrons->Branch("elesiEtaiEtaZS", &elesiEtaiEtaZS_, "elesiEtaiEtaZS");
   outTreeElectrons->Branch("eleErecoOverEtrue", &eleErecoOverEtrue_, "eleErecoOverEtrue");
 
+  outTreepfSC = new TTree("outTreepfSC","outTreepfSC");
+  outTreepfSC->Branch("pfSCpt", &pfSCpt_, "pfSCpt");
+  outTreepfSC->Branch("pfSCeta", &pfSCeta_, "pfSCeta");
+  outTreepfSC->Branch("pfSCphi", &pfSCphi_, "pfSCphi");
+  outTreepfSC->Branch("pfSCErecoOverEtrue", &pfSCErecoOverEtrue_, "pfSCErecoOverEtrue");
+  outTreepfSC->Branch("pfSC_nXtalsSeed", &pfSC_nXtalsSeed_,"pfSC_nXtalsSeed");
+  outTreepfSC->Branch("pfSC_nXtalsTotal", &pfSC_nXtalsTotal_,"pfSC_nXtalsTotal");
+  outTreepfSC->Branch("pfSC_nBCforSC", &pfSC_nBCforSC_,"pfSC_nBCforSC");
+  outTreepfSC->Branch("pfSCEseedOverEtrue", &pfSCEseedOverEtrue_,"pfSCEseedOverEtrue");
+	
+
 }
 
 void createHistos::LoopElectrons(){
@@ -521,6 +532,17 @@ void createHistos::LoopElectrons(){
 	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinRinSCEle", maxDistR, pfscp4);
 	if(maxDistEta>0)fillHisto("pfSC_maxDistFromSeedinEtainSCEle", maxDistEta, pfscp4);
 	if(maxDistPhi>0)fillHisto("pfSC_maxDistFromSeedinPhiinSCEle", maxDistPhi, pfscp4);
+
+	//outtree filling
+	pfSCpt_=(pfSCe[i]/cosh(pfSCeta[i]));
+	pfSCeta_=pfSCeta[i];
+	pfSCphi_=pfSCphi[i];
+	pfSCErecoOverEtrue_=pfSCe[i]/theGenElectrons_[indexMatchEle]->E();
+	pfSC_nXtalsSeed_=pfSCnXtalsSeed[i];
+	pfSC_nXtalsTotal_=pfSCnXtalsTotal[i];
+	pfSC_nBCforSC_=pfSCnBC[i];
+	pfSCEseedOverEtrue_=pfSCbcE[i][0]/theGenElectrons_[indexMatchEle]->E();
+	outTreepfSC->Fill();
 
 	//rechits filling
 	for(int k=0;k<pfSCRecHitsSeedn[i];k++){
@@ -691,6 +713,18 @@ void createHistos::LoopPhotons(){
 	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinRinSCPho", maxDistR, pfscp4, theConversions_[indexMatchPho]);
 	if(maxDistEta>0)fillHisto("pfSC_maxDistFromSeedinEtainSCPho", maxDistEta, pfscp4, theConversions_[indexMatchPho]);
 	if(maxDistPhi>0)fillHisto("pfSC_maxDistFromSeedinPhiinSCPho", maxDistPhi, pfscp4, theConversions_[indexMatchPho]);
+
+	//outtree filling
+	pfSCpt_=(pfSCe[i]/cosh(pfSCeta[i]));
+	pfSCeta_=pfSCeta[i];
+	pfSCphi_=pfSCphi[i];
+	pfSCErecoOverEtrue_=pfSCe[i]/theGenPhotons_[indexMatchPho]->E();
+	pfSC_nXtalsSeed_=pfSCnXtalsSeed[i];
+	pfSC_nXtalsTotal_=pfSCnXtalsTotal[i];
+	pfSC_nBCforSC_=pfSCnBC[i];
+	pfSCEseedOverEtrue_=pfSCbcE[i][0]/theGenPhotons_[indexMatchPho]->E();
+	outTreepfSC->Fill();
+
 
       }//pfscn
     }
