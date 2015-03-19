@@ -457,9 +457,10 @@ void createHistos::LoopElectrons(){
 
 
 
-    //loop on pfSC
+    //loop on genEle
     std::vector<int> indexpfSC;
     std::vector<int> indexGenEle;
+    std::vector<int> indexEle;
     for(int j=0;j<gelen;j++){
       if ( TMath::Abs(gphoeta[j])<1.6 || TMath::Abs(gphoeta[j])>2.7 )
 	continue;
@@ -469,10 +470,10 @@ void createHistos::LoopElectrons(){
       TLorentzVector* itGenEle = createTLorentzVector(gelept[j],geleeta[j],gelephi[j],gelept[j]*cosh(geleeta[j]));
       float drMatch=999;
       int indexMatchpfSC=-1;
-
+      int indexMatchElectron=-1;
       //matching pfSC
       for (int i=0;i<pfSCn;i++){
-	if ( TMath::Abs(pfSCeta[i])<1.5 || TMath::Abs(pfSCeta[i])>2.7 )
+	if ( TMath::Abs(pfSCeta[i])<1.6 || TMath::Abs(pfSCeta[i])>2.7 )
 	continue;
 	TLorentzVector* pfscp4 = createTLorentzVector(pfSCe[i]/cosh(pfSCeta[i]),pfSCeta[i],pfSCphi[i],pfSCe[i]);
 	if(pfscp4->Pt()<ptcut)continue;	
@@ -484,10 +485,25 @@ void createHistos::LoopElectrons(){
       if(indexMatchpfSC>-1){
 	indexpfSC.push_back(indexMatchpfSC);
 	indexGenEle.push_back(j);
-      }
 
 
-      
+	//matching electron
+	drMatch=999;
+	for (int i=0;i<elen;i++){
+	  if ( TMath::Abs(eleeta[i])<1.6 || TMath::Abs(eleeta[i])>2.7 )
+	    continue;
+	  TLorentzVector* pfscp4 = createTLorentzVector(elee[i]/cosh(eleeta[i]),eleeta[i],elephi[i],elee[i]);
+	  if(pfscp4->Pt()<ptcut)continue;	
+	  if(pfscp4->DeltaR(*(itGenEle))<drMatch && pfscp4->DeltaR(*(itGenEle))<0.1){
+	    indexMatchElectron=i;
+	    drMatch=pfscp4->DeltaR(*(itGenEle));
+	  }
+	}//elen
+	if(indexMatchElectron>-1 ){
+	  indexEle.push_back(indexMatchElectron);
+	}
+
+      }//indexMatchpfSC      
 
     }//genele loop
 
@@ -558,61 +574,39 @@ void createHistos::LoopElectrons(){
     }//close indexgenele
     
     //loop on ele
-//    for(int i=0;i<elen;i++){
-//      eleErecoOverEtrue_=-1;
-//      if(elept[i]<ptcut)continue;
-//
-//      TLorentzVector* elep4=createTLorentzVector(elept[i],eleeta[i],elephi[i],elee[i]);
-//      int indexMatchEle=matchesGenEle(elep4);
-//      if(indexMatchEle<0)continue;
-//
-//
-//      fillHisto("ele_ErecoOverETrue",elee[i]/theGenElectrons_[indexMatchEle]->E(),elep4);
-//      if(eleeta[i]>0)      fillHisto("ele_ErecoOverETrueEEPlus",elee[i]/theGenElectrons_[indexMatchEle]->E(),elep4);
-//      if(eleeta[i]<0)      fillHisto("ele_ErecoOverETrueEEMinus",elee[i]/theGenElectrons_[indexMatchEle]->E(),elep4);
-//      fillHisto("ele_sMaj",elesMajZS[i],elep4);
-//      fillHisto("ele_sMin",elesMinZS[i],elep4);
-//      fillHisto("ele_alpha",elealphaZS[i],elep4);
-//      fillHisto("ele_pt",elept[i],elep4);
-//      fillHisto("ele_eta",eleeta[i],elep4);
-//      fillHisto("ele_r9",eler9[i],elep4);
-//      fillHisto("ele_siEtaiEtaNoZS",elesiEtaiEtaNoZS[i],elep4);
-//      fillHisto("ele_siEtaiEtaZS",elesiEtaiEtaZS[i],elep4);
-//      //filling outTree
-//      eleErecoOverEtrue_=elee[i]/theGenElectrons_[indexMatchEle]->E();
-//      eleeta_=eleeta[i];
-//      elephi_=elephi[i];
-//      eler9_=eler9[i];
-//      elept_=elept[i];
-//      elesiEtaiEtaNoZS_=elesiEtaiEtaNoZS[i];
-//      elesiEtaiEtaZS_=elesiEtaiEtaZS[i];
-//
-//      outTreeElectrons->Fill();
-//
-//   }
-//
-//
-//
-//    //loop on genele
-//    TLorentzVector* gele1 = createTLorentzVector(0.2,1.5,0,0.2*cosh(1.5));
-//    TLorentzVector* gele2 = createTLorentzVector(0.1,1.5,0,0.1*cosh(1.5));
-//    for(int i=0;i<gelen;++i){
-//      if(gpstatusMC[geleindex[i]]!=3)continue;
-//      if(gelept[i]<0.5)continue;
-//      TLorentzVector* gelep4 = createTLorentzVector(gelept[i],geleeta[i],gelephi[i],gelept[i]*cosh(geleeta[i]));
-//
-//      if(gelep4->Pt()>gele1->Pt()){
-//	gele1=gelep4;
-//      }else if(gelep4->Pt()>gele2->Pt()){
-//	gele2=gelep4;
-//      }
-//    }
-//
-//    if(gele1->Pt()>20 && gele2->Pt()>20){
-//      TLorentzVector Z= *(gele1)+ *(gele2);
-//      geleMass_->Fill(Z.M());
-//    }
-    
+    if(indexEle.size()>2) std::cout<<"something is wrong, found more than two matching electrons:"<<indexEle.size()<<" ele found"<<std::endl;
+    for(int jj=0;jj<indexEle.size();++jj){
+      int i=indexEle[jj];
+      int iGen=indexGenEle[jj];
+      eleErecoOverEtrue_=-1;
+      if(elept[i]<ptcut)continue;
+
+      TLorentzVector* elep4=createTLorentzVector(elept[i],eleeta[i],elephi[i],elee[i]);
+
+      fillHisto("ele_ErecoOverETrue",elee[i]/(gelept[iGen]*cosh(geleeta[iGen])),elep4);
+      if(eleeta[i]>0)      fillHisto("ele_ErecoOverETrueEEPlus",elee[i]/(gelept[iGen]*cosh(geleeta[iGen])),elep4);
+      if(eleeta[i]<0)      fillHisto("ele_ErecoOverETrueEEMinus",elee[i]/(gelept[iGen]*cosh(geleeta[iGen])),elep4);
+      fillHisto("ele_sMaj",elesMajZS[i],elep4);
+      fillHisto("ele_sMin",elesMinZS[i],elep4);
+      fillHisto("ele_alpha",elealphaZS[i],elep4);
+      fillHisto("ele_pt",elept[i],elep4);
+      fillHisto("ele_eta",eleeta[i],elep4);
+      fillHisto("ele_r9",eler9[i],elep4);
+      fillHisto("ele_siEtaiEtaNoZS",elesiEtaiEtaNoZS[i],elep4);
+      fillHisto("ele_siEtaiEtaZS",elesiEtaiEtaZS[i],elep4);
+      //filling outTree
+      eleErecoOverEtrue_=elee[i]/(gelept[iGen]*cosh(geleeta[iGen]));
+      eleeta_=eleeta[i];
+      elephi_=elephi[i];
+      eler9_=eler9[i];
+      elept_=elept[i];
+      elesiEtaiEtaNoZS_=elesiEtaiEtaNoZS[i];
+      elesiEtaiEtaZS_=elesiEtaiEtaZS[i];
+
+      outTreeElectrons->Fill();
+
+   }
+
 
     //loop on multi5x5SC
 //    if(multi5x5SCn>0){
