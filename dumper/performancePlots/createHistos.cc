@@ -19,6 +19,7 @@ void createHistos::bookHistos(){
   bookHisto("ele_siEtaiEtaNoZS",200,0.,0.07,"#sigma_{i#etai#eta}",false);
   bookHisto("ele_siEtaiEtaZS",200,0.,0.07,"#sigma_{i#etai#eta}",false);
 
+
   //sc variables
   std::cout<<"booking"<<std::endl;
   bookHisto("pfSC_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}");
@@ -36,6 +37,7 @@ void createHistos::bookHistos(){
   bookHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",20,0,200,150,-0.5,0.5,"#rhoxN_{xtals}/100","(E_{reco}-E_{true})/(E_{reco})");
   bookHisto2D("pfSC_DeltaPhiVslogEtBCVsBC",25,-2,2,20,0.,0.7,"log(E_{t}^{BC})","#Delta#phi_{BC}^{seed}");
 
+  geleMass_ = new TH1F("geleMass","geleMass",200,50,150);
   //rechits
   bookHisto("pfSC_RecHitsSeedN",70,-0.5,69.5,"N_{xtals}",false);
   bookHisto("pfSC_RecHitsFractionsSeed",101,0.,1.1,"Fraction",false);
@@ -49,7 +51,7 @@ void createHistos::bookHistosPhotons(){
   std::cout<<"booking"<<std::endl;
   bookHisto("pfSC_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}",false,true);
   bookHisto("pfSC_EBC",150,0,300,"E_{reco}^{BC}",false,true);
-  bookHisto("pfSC_EseedOverETrue",200,0,2,"E_{reco}^{seed}/E_{true}",false,false);
+  bookHisto("pfSC_EseedOverETrue",200,0,2,"E_{reco}^{seed}/E_{true}",false,true);
   bookHisto("pfSC_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}",false,true);
   bookHisto("pfSC_nXtalsTotal",250,-0.5,249.5,"N_{xtals}",false,true);
   bookHisto("pfSC_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC",false,true);
@@ -215,17 +217,17 @@ void createHistos::fillHisto(TString name, double value,TLorentzVector* p4, int 
   for (std::map<TString,std::vector<float> >::const_iterator itCatCuts=categoriesAndCuts_.begin();itCatCuts!=categoriesAndCuts_.end();++itCatCuts){
     TString histonameIncl=name+"_inclusive";
     if(isConv<0){
-      if(TMath::Abs(p4->Eta()) > itCatCuts->second[0])    histos_[histonameIncl]->Fill(value);
+      if(TMath::Abs(p4->Eta()) > itCatCuts->second[0] && TMath::Abs(p4->Eta())<2.7)    histos_[histonameIncl]->Fill(value);
     }else{
       TString unconvertedname = histonameIncl + "_unconv";
       TString convertedname = histonameIncl + "_conv";
       if(isConv>0.1){
 
-	if(TMath::Abs(p4->Eta()) > itCatCuts->second[0]) {
+	if(TMath::Abs(p4->Eta()) > itCatCuts->second[0] && TMath::Abs(p4->Eta())<2.7) {
 	  histos_[convertedname]->Fill(value);
 	}
       }else{
-	if(TMath::Abs(p4->Eta()) > itCatCuts->second[0])    histos_[unconvertedname]->Fill(value);
+	if(TMath::Abs(p4->Eta()) > itCatCuts->second[0] && TMath::Abs(p4->Eta())<2.7)    histos_[unconvertedname]->Fill(value);
       }
     }
 
@@ -236,6 +238,8 @@ void createHistos::fillHisto(TString name, double value,TLorentzVector* p4, int 
 	TString histoname=name+"_"+itCatCuts->first+"bin"+bin;
 	if(i<itCatCuts->second.size()-1){
 	  if(TMath::Abs(p4->Eta()) > itCatCuts->second[i] && TMath::Abs(p4->Eta()) < itCatCuts->second[i+1] ){
+	    //	    std::cout<<p4->Eta()<<" "<<itCatCuts->second[i]<<"bin:"<<histoname<<std::endl;
+
 	    if(isConv<0){
 	      histos_[histoname]->Fill(value);
 	    }else{
@@ -249,7 +253,7 @@ void createHistos::fillHisto(TString name, double value,TLorentzVector* p4, int 
 	    }
 	  }
 	}else {
-	  if(TMath::Abs(p4->Eta()) > itCatCuts->second[i]){
+	  if(TMath::Abs(p4->Eta()) > itCatCuts->second[i] && TMath::Abs(p4->Eta())<2.7){
 	    if(isConv<0){
 	      histos_[histoname]->Fill(value);
 	    }else{
@@ -322,14 +326,15 @@ void createHistos::writeHistos(){
     out->second->Write(out->first,TObject::kOverwrite);
   }
 
+  geleMass_->Write();
  
 }
 
 
 void createHistos::defineCategories(){
 
-  categoriesAndCuts_["eta"].push_back(1.5);
-  categoriesAndCuts_["eta"].push_back(1.8);
+  categoriesAndCuts_["eta"].push_back(1.6);
+  categoriesAndCuts_["eta"].push_back(2);
   categoriesAndCuts_["eta"].push_back(2.4);
 
   //  categoriesAndCuts_["fbrem"].push_back(0.2);
@@ -347,12 +352,14 @@ void createHistos::buildGenEle(){
   for(int j=0;j<gelen;j++){
     if(gpstatusMC[geleindex[j]]!=3)continue;
     if(gelept[j]<0.5)continue;
-    
+    if(gpmotherIdMC[geleindex[j]]!=23)continue;    
     TLorentzVector* gelep4 = createTLorentzVector(gelept[j],geleeta[j],gelephi[j],gelept[j]*cosh(geleeta[j]));
     theGenElectrons_.push_back(gelep4);	
     //    std::cout<<"build:"<<gelep4->E()<<" "<<gelep4->Eta()<<" "<<gelep4->Phi()<<std::endl;  
   }
 }
+
+
 
 void createHistos::buildGenPho(){
 
@@ -448,58 +455,53 @@ void createHistos::LoopElectrons(){
     buildGenEle();
     float ptcut=20.;
 
-    //loop on ele
-    for(int i=0;i<elen;i++){
-      eleErecoOverEtrue_=-1;
-      if(elept[i]<ptcut)continue;
-
-      TLorentzVector* elep4=createTLorentzVector(elept[i],eleeta[i],elephi[i],elee[i]);
-      int indexMatchEle=matchesGenEle(elep4);
-      if(indexMatchEle<0)continue;
-      fillHisto("ele_ErecoOverETrue",elee[i]/theGenElectrons_[indexMatchEle]->E(),elep4);
-      if(eleeta[i]>0)      fillHisto("ele_ErecoOverETrueEEPlus",elee[i]/theGenElectrons_[indexMatchEle]->E(),elep4);
-      if(eleeta[i]<0)      fillHisto("ele_ErecoOverETrueEEMinus",elee[i]/theGenElectrons_[indexMatchEle]->E(),elep4);
-      fillHisto("ele_sMaj",elesMajZS[i],elep4);
-      fillHisto("ele_sMin",elesMinZS[i],elep4);
-      fillHisto("ele_alpha",elealphaZS[i],elep4);
-      fillHisto("ele_pt",elept[i],elep4);
-      fillHisto("ele_eta",eleeta[i],elep4);
-      fillHisto("ele_r9",eler9[i],elep4);
-      fillHisto("ele_siEtaiEtaNoZS",elesiEtaiEtaNoZS[i],elep4);
-      fillHisto("ele_siEtaiEtaZS",elesiEtaiEtaZS[i],elep4);
-      //filling outTree
-      eleErecoOverEtrue_=elee[i]/theGenElectrons_[indexMatchEle]->E();
-      eleeta_=eleeta[i];
-      elephi_=elephi[i];
-      eler9_=eler9[i];
-      elept_=elept[i];
-      elesiEtaiEtaNoZS_=elesiEtaiEtaNoZS[i];
-      elesiEtaiEtaZS_=elesiEtaiEtaZS[i];
-
-      outTreeElectrons->Fill();
-
-   }
 
 
     //loop on pfSC
-    if(pfSCn>0){
+    std::vector<int> indexpfSC;
+    std::vector<int> indexGenEle;
+    for(int j=0;j<gelen;j++){
+      if ( TMath::Abs(gphoeta[j])<1.6 || TMath::Abs(gphoeta[j])>2.7 )
+	continue;
+      if(gpstatusMC[geleindex[j]]!=3)continue;
+      if(gelept[j]<ptcut)continue;
+      if(gpmotherIdMC[geleindex[j]]!=23)continue;    
+      TLorentzVector* itGenEle = createTLorentzVector(gelept[j],geleeta[j],gelephi[j],gelept[j]*cosh(geleeta[j]));
+      float drMatch=999;
+      int indexMatchpfSC=-1;
+
+      //matching pfSC
       for (int i=0;i<pfSCn;i++){
-	
+	if ( TMath::Abs(pfSCeta[i])<1.5 || TMath::Abs(pfSCeta[i])>2.7 )
+	continue;
 	TLorentzVector* pfscp4 = createTLorentzVector(pfSCe[i]/cosh(pfSCeta[i]),pfSCeta[i],pfSCphi[i],pfSCe[i]);
-
 	if(pfscp4->Pt()<ptcut)continue;	
-	int indexMatchEle=matchesGenEle(pfscp4);
-	if(indexMatchEle<0)continue;
-	//	if(indexMatchEle>-1)    std::cout<<"gen:"<<theGenElectrons_[indexMatchEle]->E()<<" "<<theGenElectrons_[indexMatchEle]->Eta()<<" "<<theGenElectrons_[indexMatchEle]->Phi()<<std::endl;  
-	//	std::cout<<"pfsc:"<<pfscp4->E()<<" "<<pfscp4->Eta()<<" "<<pfscp4->Phi()<<std::endl;
+	if(pfscp4->DeltaR(*(itGenEle))<drMatch && pfscp4->DeltaR(*(itGenEle))<0.1){
+	  indexMatchpfSC=i;
+	  drMatch=pfscp4->DeltaR(*(itGenEle));
+	}
+      }//pfscn
+      if(indexMatchpfSC>-1){
+	indexpfSC.push_back(indexMatchpfSC);
+	indexGenEle.push_back(j);
+      }
 
-	fillHisto("pfSC_ErecoOverETrue",pfSCe[i]/theGenElectrons_[indexMatchEle]->E(),pfscp4);
 
-	fillHisto("pfSC_nXtalsSeed",pfSCnXtalsSeed[i],pfscp4);
-	fillHisto("pfSC_nXtalsTotal",pfSCnXtalsTotal[i],pfscp4);
-	fillHisto("pfSC_nBCForSC",pfSCnBC[i],pfscp4);
-	fillHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",rho*pfSCnXtalsTotal[i]/100.,(pfSCe[i]-theGenElectrons_[indexMatchEle]->E())/pfSCe[i],pfscp4);
+      
 
+    }//genele loop
+
+    if(indexpfSC.size()>2) std::cout<<"something is wrong, found more than two matching electrons:"<<indexpfSC.size()<<" ele found"<<std::endl;
+    for(int jj=0;jj<indexpfSC.size();++jj){
+      int i=indexpfSC[jj];
+      int iGen=indexGenEle[jj];
+      TLorentzVector* pfscp4 = createTLorentzVector(pfSCe[i]/cosh(pfSCeta[i]),pfSCeta[i],pfSCphi[i],pfSCe[i]);
+      fillHisto("pfSC_ErecoOverETrue",pfSCe[i]/(gelept[iGen]*cosh(geleeta[iGen])),pfscp4);
+      fillHisto("pfSC_nXtalsSeed",pfSCnXtalsSeed[i],pfscp4);
+      fillHisto("pfSC_nXtalsTotal",pfSCnXtalsTotal[i],pfscp4);
+      fillHisto("pfSC_nBCForSC",pfSCnBC[i],pfscp4);
+      fillHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",rho*pfSCnXtalsTotal[i]/100.,(pfSCe[i]-(gelept[iGen]*cosh(geleeta[iGen])))/pfSCe[i],pfscp4);
+      
 	TLorentzVector seed;
 	seed.SetPtEtaPhiE(pfSCbcE[i][0]/cosh(pfSCbcEta[i][0]),pfSCbcEta[i][0],pfSCbcPhi[i][0],pfSCbcE[i][0]);
 
@@ -526,7 +528,7 @@ void createHistos::LoopElectrons(){
 	    fillHisto2D("pfSC_EBCVsDeltaEtaBCSeedEle",fabs(distEta),pfSCbcE[i][j],bc);
 	    fillHisto2D("pfSC_DeltaPhiVslogEtBCVsBC", log10(pfSCbcE[i][j]/cosh(pfSCbcEta[i][j])), distPhi, bc);
 	  }else{
-	    fillHisto("pfSC_EseedOverETrue",pfSCbcE[i][j]/theGenElectrons_[indexMatchEle]->E(),bc);
+	    fillHisto("pfSC_EseedOverETrue",pfSCbcE[i][j]/(gelept[iGen]*cosh(geleeta[iGen])),bc);
 	  }
 	}//pfscnBC
 	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinRinSCEle", maxDistR, pfscp4);
@@ -537,11 +539,11 @@ void createHistos::LoopElectrons(){
 	pfSCpt_=(pfSCe[i]/cosh(pfSCeta[i]));
 	pfSCeta_=pfSCeta[i];
 	pfSCphi_=pfSCphi[i];
-	pfSCErecoOverEtrue_=pfSCe[i]/theGenElectrons_[indexMatchEle]->E();
+	pfSCErecoOverEtrue_=pfSCe[i]/(gelept[iGen]*cosh(geleeta[iGen]));
 	pfSC_nXtalsSeed_=pfSCnXtalsSeed[i];
 	pfSC_nXtalsTotal_=pfSCnXtalsTotal[i];
 	pfSC_nBCforSC_=pfSCnBC[i];
-	pfSCEseedOverEtrue_=pfSCbcE[i][0]/theGenElectrons_[indexMatchEle]->E();
+	pfSCEseedOverEtrue_=pfSCbcE[i][0]/(gelept[iGen]*cosh(geleeta[iGen]));
 	outTreepfSC->Fill();
 
 	//rechits filling
@@ -553,62 +555,116 @@ void createHistos::LoopElectrons(){
 	  fillHisto("pfSC_RecHitsEnergySeed",pfSCRecHitsEnergySeed[i][k],&seed);
 
 	}
-
-      }//pfscn
-    }//if pfscn>0
+    }//close indexgenele
+    
+    //loop on ele
+//    for(int i=0;i<elen;i++){
+//      eleErecoOverEtrue_=-1;
+//      if(elept[i]<ptcut)continue;
+//
+//      TLorentzVector* elep4=createTLorentzVector(elept[i],eleeta[i],elephi[i],elee[i]);
+//      int indexMatchEle=matchesGenEle(elep4);
+//      if(indexMatchEle<0)continue;
+//
+//
+//      fillHisto("ele_ErecoOverETrue",elee[i]/theGenElectrons_[indexMatchEle]->E(),elep4);
+//      if(eleeta[i]>0)      fillHisto("ele_ErecoOverETrueEEPlus",elee[i]/theGenElectrons_[indexMatchEle]->E(),elep4);
+//      if(eleeta[i]<0)      fillHisto("ele_ErecoOverETrueEEMinus",elee[i]/theGenElectrons_[indexMatchEle]->E(),elep4);
+//      fillHisto("ele_sMaj",elesMajZS[i],elep4);
+//      fillHisto("ele_sMin",elesMinZS[i],elep4);
+//      fillHisto("ele_alpha",elealphaZS[i],elep4);
+//      fillHisto("ele_pt",elept[i],elep4);
+//      fillHisto("ele_eta",eleeta[i],elep4);
+//      fillHisto("ele_r9",eler9[i],elep4);
+//      fillHisto("ele_siEtaiEtaNoZS",elesiEtaiEtaNoZS[i],elep4);
+//      fillHisto("ele_siEtaiEtaZS",elesiEtaiEtaZS[i],elep4);
+//      //filling outTree
+//      eleErecoOverEtrue_=elee[i]/theGenElectrons_[indexMatchEle]->E();
+//      eleeta_=eleeta[i];
+//      elephi_=elephi[i];
+//      eler9_=eler9[i];
+//      elept_=elept[i];
+//      elesiEtaiEtaNoZS_=elesiEtaiEtaNoZS[i];
+//      elesiEtaiEtaZS_=elesiEtaiEtaZS[i];
+//
+//      outTreeElectrons->Fill();
+//
+//   }
+//
+//
+//
+//    //loop on genele
+//    TLorentzVector* gele1 = createTLorentzVector(0.2,1.5,0,0.2*cosh(1.5));
+//    TLorentzVector* gele2 = createTLorentzVector(0.1,1.5,0,0.1*cosh(1.5));
+//    for(int i=0;i<gelen;++i){
+//      if(gpstatusMC[geleindex[i]]!=3)continue;
+//      if(gelept[i]<0.5)continue;
+//      TLorentzVector* gelep4 = createTLorentzVector(gelept[i],geleeta[i],gelephi[i],gelept[i]*cosh(geleeta[i]));
+//
+//      if(gelep4->Pt()>gele1->Pt()){
+//	gele1=gelep4;
+//      }else if(gelep4->Pt()>gele2->Pt()){
+//	gele2=gelep4;
+//      }
+//    }
+//
+//    if(gele1->Pt()>20 && gele2->Pt()>20){
+//      TLorentzVector Z= *(gele1)+ *(gele2);
+//      geleMass_->Fill(Z.M());
+//    }
     
 
     //loop on multi5x5SC
-    if(multi5x5SCn>0){
-      for (int i=0;i<multi5x5SCn;i++){
-	
-	TLorentzVector* multi5x5scp4 = createTLorentzVector(multi5x5SCe[i]/cosh(multi5x5SCeta[i]),multi5x5SCeta[i],multi5x5SCphi[i],multi5x5SCe[i]);
-
-	if(multi5x5scp4->Pt()<ptcut)continue;	
-	
-	int indexMatchEle=matchesGenEle(multi5x5scp4);
-	if(indexMatchEle<0)continue;
-
-	fillHisto("multi5x5SC_ErecoOverETrue",multi5x5SCe[i]/theGenElectrons_[indexMatchEle]->E(),multi5x5scp4);
-
-
-	fillHisto("multi5x5SC_nXtalsSeed",multi5x5SCnXtalsSeed[i],multi5x5scp4);
-	fillHisto("multi5x5SC_nXtalsTotal",multi5x5SCnXtalsTotal[i],multi5x5scp4);
-	fillHisto("multi5x5SC_nBCForSC",multi5x5SCnBC[i],multi5x5scp4);
-	fillHisto2D("multi5x5SC_ErecoMinusEtrueVsEffectiveArea",rho*multi5x5SCnXtalsTotal[i]/100.,(multi5x5SCe[i]-theGenElectrons_[indexMatchEle]->E())/multi5x5SCe[i],multi5x5scp4);
-
-	TLorentzVector seed;
-	seed.SetPtEtaPhiE(multi5x5SCbcE[i][0]/cosh(multi5x5SCbcEta[i][0]),multi5x5SCbcEta[i][0],multi5x5SCbcPhi[i][0],multi5x5SCbcE[i][0]);
-
-	float maxDistR=0;
-	float maxDistEta=0;
-	float maxDistPhi=0;
-
-	for (int j=0;j< multi5x5SCnBC[i];j++){
-	  //	  std::cout<<multi5x5SCnBC[i]<< " i,j:"<<i<<","<<j<<" "<<multi5x5SCbcE[i][j]<<std::endl;
-	  if(multi5x5SCbcE[i][j]<0.01)continue;
-	  TLorentzVector* bc = createTLorentzVector(multi5x5SCbcE[i][j]/cosh(multi5x5SCbcEta[i][j]),multi5x5SCbcEta[i][j],multi5x5SCbcPhi[i][j],multi5x5SCbcE[i][j]);	  
-
-	  if(j>0){
-	    fillHisto("multi5x5SC_bcNXtals",multi5x5SCbcNXtals[i][j],bc);
-	    fillHisto("multi5x5SC_EBC",multi5x5SCbcE[i][j],bc);
-	    float distR=bc->DeltaR(seed);
-	    if(distR>maxDistR)maxDistR=distR;
-	    float distPhi=bc->DeltaPhi(seed);
-	    if(distPhi>maxDistPhi)maxDistPhi=distPhi;
-	    float distEta=sqrt(distR*distR-distPhi*distPhi);
-	    if(distEta>maxDistEta)maxDistEta=distEta;
-	    fillHisto2D("multi5x5SC_EBCVsDeltaPhiBCSeedEle",fabs(distPhi),multi5x5SCbcE[i][j],bc);
-	    fillHisto2D("multi5x5SC_EBCVsDeltaEtaBCSeedEle",fabs(distEta),multi5x5SCbcE[i][j],bc);
-	  }else{
-	    fillHisto("multi5x5SC_EseedOverETrue",multi5x5SCbcE[i][j]/theGenElectrons_[indexMatchEle]->E(),bc);
-	  }
-	}//multi5x5scnBC
-	if(maxDistR>0)fillHisto("multi5x5SC_maxDistFromSeedinRinSCEle", maxDistR, multi5x5scp4);
-	if(maxDistEta>0)fillHisto("multi5x5SC_maxDistFromSeedinEtainSCEle", maxDistEta, multi5x5scp4);
-	if(maxDistPhi>0)fillHisto("multi5x5SC_maxDistFromSeedinPhiinSCEle", maxDistPhi, multi5x5scp4);
-      }//multi5x5scn
-    }//if multi5x5scn>0
+//    if(multi5x5SCn>0){
+//      for (int i=0;i<multi5x5SCn;i++){
+//	
+//	TLorentzVector* multi5x5scp4 = createTLorentzVector(multi5x5SCe[i]/cosh(multi5x5SCeta[i]),multi5x5SCeta[i],multi5x5SCphi[i],multi5x5SCe[i]);
+//
+//	if(multi5x5scp4->Pt()<ptcut)continue;	
+//	
+//	int indexMatchEle=matchesGenEle(multi5x5scp4);
+//	if(indexMatchEle<0)continue;
+//
+//	fillHisto("multi5x5SC_ErecoOverETrue",multi5x5SCe[i]/theGenElectrons_[indexMatchEle]->E(),multi5x5scp4);
+//
+//
+//	fillHisto("multi5x5SC_nXtalsSeed",multi5x5SCnXtalsSeed[i],multi5x5scp4);
+//	fillHisto("multi5x5SC_nXtalsTotal",multi5x5SCnXtalsTotal[i],multi5x5scp4);
+//	fillHisto("multi5x5SC_nBCForSC",multi5x5SCnBC[i],multi5x5scp4);
+//	fillHisto2D("multi5x5SC_ErecoMinusEtrueVsEffectiveArea",rho*multi5x5SCnXtalsTotal[i]/100.,(multi5x5SCe[i]-theGenElectrons_[indexMatchEle]->E())/multi5x5SCe[i],multi5x5scp4);
+//
+//	TLorentzVector seed;
+//	seed.SetPtEtaPhiE(multi5x5SCbcE[i][0]/cosh(multi5x5SCbcEta[i][0]),multi5x5SCbcEta[i][0],multi5x5SCbcPhi[i][0],multi5x5SCbcE[i][0]);
+//
+//	float maxDistR=0;
+//	float maxDistEta=0;
+//	float maxDistPhi=0;
+//
+//	for (int j=0;j< multi5x5SCnBC[i];j++){
+//	  //	  std::cout<<multi5x5SCnBC[i]<< " i,j:"<<i<<","<<j<<" "<<multi5x5SCbcE[i][j]<<std::endl;
+//	  if(multi5x5SCbcE[i][j]<0.01)continue;
+//	  TLorentzVector* bc = createTLorentzVector(multi5x5SCbcE[i][j]/cosh(multi5x5SCbcEta[i][j]),multi5x5SCbcEta[i][j],multi5x5SCbcPhi[i][j],multi5x5SCbcE[i][j]);	  
+//
+//	  if(j>0){
+//	    fillHisto("multi5x5SC_bcNXtals",multi5x5SCbcNXtals[i][j],bc);
+//	    fillHisto("multi5x5SC_EBC",multi5x5SCbcE[i][j],bc);
+//	    float distR=bc->DeltaR(seed);
+//	    if(distR>maxDistR)maxDistR=distR;
+//	    float distPhi=bc->DeltaPhi(seed);
+//	    if(distPhi>maxDistPhi)maxDistPhi=distPhi;
+//	    float distEta=sqrt(distR*distR-distPhi*distPhi);
+//	    if(distEta>maxDistEta)maxDistEta=distEta;
+//	    fillHisto2D("multi5x5SC_EBCVsDeltaPhiBCSeedEle",fabs(distPhi),multi5x5SCbcE[i][j],bc);
+//	    fillHisto2D("multi5x5SC_EBCVsDeltaEtaBCSeedEle",fabs(distEta),multi5x5SCbcE[i][j],bc);
+//	  }else{
+//	    fillHisto("multi5x5SC_EseedOverETrue",multi5x5SCbcE[i][j]/theGenElectrons_[indexMatchEle]->E(),bc);
+//	  }
+//	}//multi5x5scnBC
+//	if(maxDistR>0)fillHisto("multi5x5SC_maxDistFromSeedinRinSCEle", maxDistR, multi5x5scp4);
+//	if(maxDistEta>0)fillHisto("multi5x5SC_maxDistFromSeedinEtainSCEle", maxDistEta, multi5x5scp4);
+//	if(maxDistPhi>0)fillHisto("multi5x5SC_maxDistFromSeedinPhiinSCEle", maxDistPhi, multi5x5scp4);
+//      }//multi5x5scn
+//    }//if multi5x5scn>0
     
     
    

@@ -59,6 +59,7 @@ public :
    TTree* outTreepfSC;
    Float_t pfSCpt_,pfSCeta_,pfSCphi_,pfSCErecoOverEtrue_,pfSC_nXtalsSeed_,pfSC_nXtalsTotal_,pfSC_nBCforSC_,pfSCEseedOverEtrue_;
 
+   TH1F* geleMass_;
 
    // Declaration of leaf types
    Int_t           nvtx;
