@@ -473,7 +473,6 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop();
    virtual void     LoopElectrons();
    virtual void     LoopPhotons();
    virtual Bool_t   Notify();
@@ -490,10 +489,6 @@ public :
    //   void setInputFile(TString name);
    void setOutputFile(TString nameFile);
    TLorentzVector* createTLorentzVector(float pt, float eta, float phi, float m);
-   void buildGenEle();
-   void buildGenPho();
-   int matchesGenEle(TLorentzVector* objectToMatch, float DeltaR=0.1);
-   int matchesGenPho(TLorentzVector* objectToMatch, float DeltaR=0.1);
    void fillHisto(TString name, double value,TLorentzVector* p4, int isConv=-1);
    void fillHisto2D(TString name, double valueX, double valueY,TLorentzVector* p4);
    void defineCategories();
