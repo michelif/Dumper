@@ -7,9 +7,11 @@
 void createHistos::bookHistos(){
 
   //electrons
-  bookHisto("ele_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}",false);
-  bookHisto("ele_ErecoOverETrueEEPlus",200,0,2,"E_{reco}/E_{true}",false);
-  bookHisto("ele_ErecoOverETrueEEMinus",200,0,2,"E_{reco}/E_{true}",false);
+  bookHisto("ele_ErecoOverETrue",600,0,2,"E_{reco}/E_{true}",false);
+  bookHisto("ele_ErecoOverETrue_fbrembelow02",600,0,2,"E_{reco}/E_{true}",false);
+  bookHisto("ele_ErecoOverETrue_fbremgreater02",600,0,2,"E_{reco}/E_{true}",false);
+  bookHisto("ele_ErecoOverETrueEEPlus",600,0,2,"E_{reco}/E_{true}",false);
+  bookHisto("ele_ErecoOverETrueEEMinus",600,0,2,"E_{reco}/E_{true}",false);
   bookHisto("ele_sMaj",200,0,3,"sMaj",false);
   bookHisto("ele_sMin",200,0,2,"sMin",false);
   bookHisto("ele_alpha",200,-2,2,"alpha",false);
@@ -18,13 +20,16 @@ void createHistos::bookHistos(){
   bookHisto("ele_r9",200,0.,1,"R_{9}",false);
   bookHisto("ele_siEtaiEtaNoZS",200,0.,0.07,"#sigma_{i#etai#eta}",false);
   bookHisto("ele_siEtaiEtaZS",200,0.,0.07,"#sigma_{i#etai#eta}",false);
-
+  bookHisto("ele_fBrem",200,0.,1,"fbrem",false);
+  bookHisto2D("ele_R9VsfBrem",200,0.,1,200,0.,1.,"R_{9}","fBrem",false);
 
   //sc variables
   std::cout<<"booking"<<std::endl;
-  bookHisto("pfSC_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}",false);
+  bookHisto("pfSC_ErecoOverETrue",600,0,2,"E_{reco}/E_{true}",false);
+  bookHisto("pfSC_ErecoOverETrue_fbrembelow02",600,0,2,"E_{reco}/E_{true}",false);
+  bookHisto("pfSC_ErecoOverETrue_fbremgreater02",600,0,2,"E_{reco}/E_{true}",false);
   bookHisto("pfSC_EBC",150,0,300,"E_{reco}^{BC}",false);
-  bookHisto("pfSC_EseedOverETrue",200,0,2,"E_{reco}^{seed}/E_{true}",false);
+  bookHisto("pfSC_EseedOverETrue",600,0,2,"E_{reco}^{seed}/E_{true}",false);
   bookHisto("pfSC_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}",false);
   bookHisto("pfSC_nXtalsTotal",250,-0.5,249.5,"N_{xtals}",false);
   bookHisto("pfSC_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC",false);
@@ -37,6 +42,7 @@ void createHistos::bookHistos(){
   bookHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",20,0,200,150,-0.5,0.5,"#rhoxN_{xtals}/100","(E_{reco}-E_{true})/(E_{reco})",false);
   bookHisto2D("pfSC_DeltaPhiVslogEtBCVsBC",25,-2,2,20,0.,0.7,"log(E_{t}^{BC})","#Delta#phi_{BC}^{seed}",false);
 
+
   //rechits
   bookHisto("pfSC_RecHitsSeedN",70,-0.5,69.5,"N_{xtals}",false);
   bookHisto("pfSC_RecHitsFractionsSeed",101,0.,1.1,"Fraction",false);
@@ -48,9 +54,9 @@ void createHistos::bookHistosPhotons(){
 
   //sc variables
   std::cout<<"booking"<<std::endl;
-  bookHisto("pfSC_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}",false,true);
+  bookHisto("pfSC_ErecoOverETrue",600,0,2,"E_{reco}/E_{true}",false,true);
   bookHisto("pfSC_EBC",150,0,300,"E_{reco}^{BC}",false,true);
-  bookHisto("pfSC_EseedOverETrue",200,0,2,"E_{reco}^{seed}/E_{true}",false,true);
+  bookHisto("pfSC_EseedOverETrue",600,0,2,"E_{reco}^{seed}/E_{true}",false,true);
   bookHisto("pfSC_nXtalsSeed",100,-0.5,99.5,"N_{xtals}^{seed}",false,true);
   bookHisto("pfSC_nXtalsTotal",250,-0.5,249.5,"N_{xtals}",false,true);
   bookHisto("pfSC_nBCForSC",25,-0.5,24.5,   "N_{BC} for SC",false,true);
@@ -64,7 +70,7 @@ void createHistos::bookHistosPhotons(){
   bookHisto2D("pfSC_DeltaPhiVslogEtBCVsBC",25,-2,2,20,0.,0.7,"log(E_{t}^{BC})","#Delta#phi_{BC}^{seed}",false);
   bookHisto2D("pho_isConvertedVsR9",20,0,1,2,-0.5,1.5,"R9","isConverted",false);
 
-  bookHisto("pho_ErecoOverETrue",200,0,2,"E_{reco}/E_{true}",false,true);
+  bookHisto("pho_ErecoOverETrue",600,0,2,"E_{reco}/E_{true}",false,true);
   bookHisto("pho_pt",300,0,300,"p_{T}(GeV)",false,true);
   bookHisto("pho_eta",100,-3.,3,"#eta",false,true);
   bookHisto("pho_sMaj",200,0,3,"sMaj",false,true);
@@ -124,6 +130,8 @@ void createHistos::bookHisto(TString name, int nbins, float xLow, float xUp,TStr
     histos_[convertedname]=new TH1F(convertedname, convertedname, nbins,xLow,xUp);    
     setAxisTitle(convertedname,xAxisName);
     setAxisTitle(unconvertedname,xAxisName);
+    histos_[histonameIncl]=new TH1F(histonameIncl, histonameIncl, nbins,xLow,xUp);    
+    setAxisTitle(histonameIncl,xAxisName);
   }else{
     histos_[histonameIncl]=new TH1F(histonameIncl, histonameIncl, nbins,xLow,xUp);    
     setAxisTitle(histonameIncl,xAxisName);
@@ -138,6 +146,9 @@ void createHistos::bookHisto(TString name, int nbins, float xLow, float xUp,TStr
       histos_[convertedname]=new TH1F(convertedname, convertedname, nbins,xLow,xUp);    
       setAxisTitle(convertedname,xAxisName);
       setAxisTitle(unconvertedname,xAxisName);
+      histonameIncl.Replace(0,2,"multi5x5");
+      histos_[histonameIncl]=new TH1F(histonameIncl, histonameIncl, nbins,xLow,xUp);    
+      setAxisTitle(histonameIncl,xAxisName);
     }else{
       histonameIncl.Replace(0,2,"multi5x5");
       histos_[histonameIncl]=new TH1F(histonameIncl, histonameIncl, nbins,xLow,xUp);    
@@ -159,6 +170,8 @@ void createHistos::bookHisto(TString name, int nbins, float xLow, float xUp,TStr
 	histos_[convertedname]=new TH1F(convertedname, convertedname, nbins,xLow,xUp);    
 	setAxisTitle(convertedname,xAxisName);
 	setAxisTitle(unconvertedname,xAxisName);
+	histos_[histoname]=new TH1F(histoname, histoname, nbins,xLow,xUp);    
+	setAxisTitle(histoname,xAxisName);
       }else{
 	histos_[histoname]=new TH1F(histoname, histoname, nbins,xLow,xUp);    
 	setAxisTitle(histoname,xAxisName);
@@ -172,6 +185,9 @@ void createHistos::bookHisto(TString name, int nbins, float xLow, float xUp,TStr
 	  histos_[convertedname]=new TH1F(convertedname, convertedname, nbins,xLow,xUp);    
 	  setAxisTitle(convertedname,xAxisName);
 	  setAxisTitle(unconvertedname,xAxisName);
+	  histoname.Replace(0,2,"multi5x5");
+	  histos_[histoname]=new TH1F(histoname, histoname, nbins,xLow,xUp);    
+	  setAxisTitle(histoname,xAxisName);
 	}else{
 	  histoname.Replace(0,2,"multi5x5");
 	  histos_[histoname]=new TH1F(histoname, histoname, nbins,xLow,xUp);    
@@ -218,6 +234,7 @@ void createHistos::fillHisto(TString name, double value,TLorentzVector* p4, int 
     if(isConv<0){
       if(TMath::Abs(p4->Eta()) > itCatCuts->second[0] && TMath::Abs(p4->Eta())<2.7)    histos_[histonameIncl]->Fill(value);
     }else{
+      if(TMath::Abs(p4->Eta()) > itCatCuts->second[0] && TMath::Abs(p4->Eta())<2.7)    histos_[histonameIncl]->Fill(value);
       TString unconvertedname = histonameIncl + "_unconv";
       TString convertedname = histonameIncl + "_conv";
       if(isConv>0.1){
@@ -228,6 +245,7 @@ void createHistos::fillHisto(TString name, double value,TLorentzVector* p4, int 
       }else{
 	if(TMath::Abs(p4->Eta()) > itCatCuts->second[0] && TMath::Abs(p4->Eta())<2.7)    histos_[unconvertedname]->Fill(value);
       }
+
     }
 
     if(itCatCuts->first.EqualTo("eta")){
@@ -249,6 +267,7 @@ void createHistos::fillHisto(TString name, double value,TLorentzVector* p4, int 
 	      }else{
 		histos_[unconvertedname]->Fill(value);				
 	      }
+	      histos_[histoname]->Fill(value);
 	    }
 	  }
 	}else {
@@ -263,6 +282,7 @@ void createHistos::fillHisto(TString name, double value,TLorentzVector* p4, int 
 	      }else{
 		histos_[unconvertedname]->Fill(value);
 	      }
+	      histos_[histoname]->Fill(value);
 	    }
 	  }
 	}
@@ -447,6 +467,11 @@ void createHistos::LoopElectrons(){
       int iGen=indexGenEle[jj];
       TLorentzVector* pfscp4 = createTLorentzVector(pfSCe[i]/cosh(pfSCeta[i]),pfSCeta[i],pfSCphi[i],pfSCe[i]);
       fillHisto("pfSC_ErecoOverETrue",pfSCe[i]/(gelept[iGen]*cosh(geleeta[iGen])),pfscp4);
+      if(gelefbrem80[iGen]<0.2){
+	fillHisto("pfSC_ErecoOverETrue_fbrembelow02",pfSCe[i]/(gelept[iGen]*cosh(geleeta[iGen])),pfscp4);
+      }else{
+	fillHisto("pfSC_ErecoOverETrue_fbremgreater02",pfSCe[i]/(gelept[iGen]*cosh(geleeta[iGen])),pfscp4);
+      }
       fillHisto("pfSC_nXtalsSeed",pfSCnXtalsSeed[i],pfscp4);
       fillHisto("pfSC_nXtalsTotal",pfSCnXtalsTotal[i],pfscp4);
       fillHisto("pfSC_nBCForSC",pfSCnBC[i],pfscp4);
@@ -482,8 +507,8 @@ void createHistos::LoopElectrons(){
 	  }
 	}//pfscnBC
 	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinRinSCEle", maxDistR, pfscp4);
-	if(maxDistEta>0)fillHisto("pfSC_maxDistFromSeedinEtainSCEle", maxDistEta, pfscp4);
-	if(maxDistPhi>0)fillHisto("pfSC_maxDistFromSeedinPhiinSCEle", maxDistPhi, pfscp4);
+	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinEtainSCEle", maxDistEta, pfscp4);
+	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinPhiinSCEle", maxDistPhi, pfscp4);
 
 	//outtree filling
 	pfSCpt_=(pfSCe[i]/cosh(pfSCeta[i]));
@@ -518,6 +543,14 @@ void createHistos::LoopElectrons(){
       TLorentzVector* elep4=createTLorentzVector(elept[i],eleeta[i],elephi[i],elee[i]);
 
       fillHisto("ele_ErecoOverETrue",elee[i]/(gelept[iGen]*cosh(geleeta[iGen])),elep4);
+      fillHisto("ele_fBrem",gelefbrem80[iGen],elep4);
+      if(gelefbrem80[iGen]<0.2){
+	fillHisto("ele_ErecoOverETrue_fbrembelow02",elee[i]/(gelept[iGen]*cosh(geleeta[iGen])),elep4);
+      }else{
+	fillHisto("ele_ErecoOverETrue_fbremgreater02",elee[i]/(gelept[iGen]*cosh(geleeta[iGen])),elep4);
+      }
+      fillHisto2D("ele_R9VsfBrem",eler9[i],gelefbrem80[iGen],elep4);
+
       if(eleeta[i]>0)      fillHisto("ele_ErecoOverETrueEEPlus",elee[i]/(gelept[iGen]*cosh(geleeta[iGen])),elep4);
       if(eleeta[i]<0)      fillHisto("ele_ErecoOverETrueEEMinus",elee[i]/(gelept[iGen]*cosh(geleeta[iGen])),elep4);
       fillHisto("ele_sMaj",elesMajZS[i],elep4);
@@ -720,8 +753,8 @@ void createHistos::LoopPhotons(){
 	  }
 	}//pfscnBC
 	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinRinSCPho", maxDistR, pfscp4, gphoisConverted[iGen]);
-	if(maxDistEta>0)fillHisto("pfSC_maxDistFromSeedinEtainSCPho", maxDistEta, pfscp4, gphoisConverted[iGen]);
-	if(maxDistPhi>0)fillHisto("pfSC_maxDistFromSeedinPhiinSCPho", maxDistPhi, pfscp4, gphoisConverted[iGen]);
+	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinEtainSCPho", maxDistEta, pfscp4, gphoisConverted[iGen]);
+	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinPhiinSCPho", maxDistPhi, pfscp4, gphoisConverted[iGen]);
 
 	//outtree filling
 	pfSCpt_=(pfSCe[i]/cosh(pfSCeta[i]));
