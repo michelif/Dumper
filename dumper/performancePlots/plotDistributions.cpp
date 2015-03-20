@@ -149,23 +149,33 @@ int main( int argc, char* argv[] ) {
     pave->SetTextSize(0.030);
     pave->SetTextAlign(22);
     pave->SetTextFont(62);
-
+    TH1F* histo=out->second;
+    TString name(fileName);
+    if(!name.Contains("noPU"))histo->SetLineColor(kRed);
+    histo->SetLineWidth(2);
     if(out->first.Contains("ErecoOverETrue")){
-      TH1F* histo=out->second;
+     
       double effectiveSigma=effSigma(histo);
-      histo->SetLineWidth(2);
+
       histo->GetXaxis()->SetRangeUser(0.4,1.6);
       TString mean=Form("%.3f",histo->GetMean());
       TString sigma=Form("%.3f",effectiveSigma);
       pave->AddText("Mean:"+mean+" #sigma_{eff}:"+sigma);
       
+    
+      if(name.Contains("RelVal")|| name.Contains("dummy")){
+	histo->Rebin(5);
+      }
+    }
+
+
       outfile->cd();
       TCanvas* c1=new TCanvas();
       c1->cd();
       histo->Draw();
       pave->Draw("same");
       c1->SaveAs("plots_splitted/"+outName+out->first+".png");
-    }
+
   }
 }
 

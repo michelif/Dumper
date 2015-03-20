@@ -40,6 +40,26 @@ for dataset in  GluGluToHToGG DYToEE; do
 	cp plots/h* ~/www/plots/shashlikUpgrade/$dateDir/$version/$dataset/
 	cp ~/www/plots/shashlikUpgrade/index.php  ~/www/plots/shashlikUpgrade/$dateDir/$version/index.php
 	cp ~/www/plots/shashlikUpgrade/index.php  ~/www/plots/shashlikUpgrade/$dateDir/$version/$dataset/index.php
+
+	rm plots_splitted/*
+	./tmp/plotDistributions $dataset"_noPU_"$version.root plots_splitted_$dataset"_"$version
+	mkdir ~/www/plots/shashlikUpgrade/$dateDir/$version/$dataset/
+	mkdir ~/www/plots/shashlikUpgrade/$dateDir/$version/$dataset/noPU/
+	cp plots_splitted/* ~/www/plots/shashlikUpgrade/$dateDir/$version/$dataset/noPU/
+	cp ~/www/plots/shashlikUpgrade/index.php  ~/www/plots/shashlikUpgrade/$dateDir/$version/index.php
+	cp ~/www/plots/shashlikUpgrade/index.php  ~/www/plots/shashlikUpgrade/$dateDir/$version/$dataset/index.php
+	cp ~/www/plots/shashlikUpgrade/index.php  ~/www/plots/shashlikUpgrade/$dateDir/$version/$dataset/noPU/index.php
+
+	rm plots_splitted/*
+	./tmp/plotDistributions $dataset"_"$version.root plots_splitted_$dataset"_"$version
+	mkdir ~/www/plots/shashlikUpgrade/$dateDir/$version/$dataset/
+	mkdir ~/www/plots/shashlikUpgrade/$dateDir/$version/$dataset/PU140/
+	cp plots_splitted/* ~/www/plots/shashlikUpgrade/$dateDir/$version/$dataset/PU140/
+	cp ~/www/plots/shashlikUpgrade/index.php  ~/www/plots/shashlikUpgrade/$dateDir/$version/index.php
+	cp ~/www/plots/shashlikUpgrade/index.php  ~/www/plots/shashlikUpgrade/$dateDir/$version/$dataset/index.php
+	cp ~/www/plots/shashlikUpgrade/index.php  ~/www/plots/shashlikUpgrade/$dateDir/$version/$dataset/PU140/index.php
+
+
     fi
 done
 
