@@ -507,8 +507,8 @@ void createHistos::LoopElectrons(){
 	  }
 	}//pfscnBC
 	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinRinSCEle", maxDistR, pfscp4);
-	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinEtainSCEle", maxDistEta, pfscp4);
-	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinPhiinSCEle", maxDistPhi, pfscp4);
+	if(maxDistEta>0)fillHisto("pfSC_maxDistFromSeedinEtainSCEle", maxDistEta, pfscp4);
+	if(maxDistPhi>0)fillHisto("pfSC_maxDistFromSeedinPhiinSCEle", maxDistPhi, pfscp4);
 
 	//outtree filling
 	pfSCpt_=(pfSCe[i]/cosh(pfSCeta[i]));
@@ -753,8 +753,8 @@ void createHistos::LoopPhotons(){
 	  }
 	}//pfscnBC
 	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinRinSCPho", maxDistR, pfscp4, gphoisConverted[iGen]);
-	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinEtainSCPho", maxDistEta, pfscp4, gphoisConverted[iGen]);
-	if(maxDistR>0)fillHisto("pfSC_maxDistFromSeedinPhiinSCPho", maxDistPhi, pfscp4, gphoisConverted[iGen]);
+	if(maxDistEta>0)fillHisto("pfSC_maxDistFromSeedinEtainSCPho", maxDistEta, pfscp4, gphoisConverted[iGen]);
+	if(maxDistPhi>0)fillHisto("pfSC_maxDistFromSeedinPhiinSCPho", maxDistPhi, pfscp4, gphoisConverted[iGen]);
 
 	//outtree filling
 	pfSCpt_=(pfSCe[i]/cosh(pfSCeta[i]));
