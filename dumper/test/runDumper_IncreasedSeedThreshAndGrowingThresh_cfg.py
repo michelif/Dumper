@@ -34,7 +34,9 @@ process.source = cms.Source("PoolSource",
 #                            fileNames = cms.untracked.vstring('file:/afs/cern.ch/work/m/micheli/shashlikPerformance_2/CMSSW_6_2_0_SLHC23_patch1/src/HLTTest/MyCandidates/test/0683A170-619F-E411-A723-002481E9458E.root')
 #                            fileNames = cms.untracked.vstring('/store/relval/CMSSW_6_2_0_SLHC23_patch1/RelValZEE_14TeV/GEN-SIM-RECO/PH2_1K_FB_V6_UPG23SHNoTaper-v2/00000/44D00C34-6B9F-E411-A697-02163E00F518.root')
 #                            fileNames = cms.untracked.vstring('file:/tmp/micheli/089F7CA0-609F-E411-BF99-02163E00E791.root')
-                            fileNames = cms.untracked.vstring('root://xrootd.unl.edu//store/relval/CMSSW_6_2_0_SLHC23_patch1/RelValH130GGgluonfusion_14TeV/GEN-SIM-RECO/PH2_1K_FB_V6_UPG23SHNoTaper-v2/00000/0683A170-619F-E411-A723-002481E9458E.root')
+                            fileNames = cms.untracked.vstring('/store/relval/CMSSW_6_2_0_SLHC25/RelValZEE_14TeV/GEN-SIM-RECO/PU_PH2_1K_FB_V6_SHNoTaperPU140-v1/00000/0436728B-85CA-E411-99B6-0025905B8598.root')
+
+#                            fileNames = cms.untracked.vstring('root://xrootd.unl.edu//store/relval/CMSSW_6_2_0_SLHC23_patch1/RelValH130GGgluonfusion_14TeV/GEN-SIM-RECO/PH2_1K_FB_V6_UPG23SHNoTaper-v2/00000/0683A170-619F-E411-A723-002481E9458E.root')
                             )
 #multi5x5 clustering
 process.load("RecoEcal.EgammaClusterProducers.multi5x5ClusteringSequence_cff")
