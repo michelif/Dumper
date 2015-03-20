@@ -119,6 +119,7 @@
 #include "TTree.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TRandom3.h"
 
 #include <string>
 #include <iostream>
@@ -142,6 +143,7 @@ public:
   void clearVector();
   void mcTruth(edm::Handle<reco::GenParticleCollection> genParticleH,std::vector<ElectronMCTruth> MCElectrons, std::vector<PhotonMCTruth> MCPhotons);
   void phoReco(edm::Handle<reco::PhotonCollection> photonH, edm::Handle<reco::TrackCollection> traH, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee,edm::Handle<reco::PFCandidateCollection>  PFCandidates);
+  void recoPU(edm::Handle<reco::PFCandidateCollection>  PFCandidates);
   void eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle,edm::Handle<reco::ConversionCollection> hConversions, edm::Handle<reco::BeamSpot> recoBeamSpotHandle, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee,edm::Handle<reco::PFCandidateCollection>  PFCandidates);
   void scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHandle, edm::Handle<reco::SuperClusterCollection> superClustersEEHandlee, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee);
   void bcReco(edm::Handle<reco::PFClusterCollection> clustersHandle);
@@ -164,6 +166,7 @@ private:
   
   Float_t rho;
   Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n, multi5x5SC_n, hybridSC_n, pfcandPho_n, pfcandEle_n, rechit_n, pfSCRecHitsSeed_n[MAXSCTOSAVE],pfBC_n;
+
 
   Float_t gp_pt[MAXPARTICLESTOSAVE];
   Float_t gp_eta[MAXPARTICLESTOSAVE];
@@ -405,6 +408,12 @@ private:
   Float_t vertex_y[200];
   Float_t vertex_z[200];
 
+  Float_t rnd_chargedEt[2];
+  Float_t rnd_neutralHadEt[2];
+  Float_t rnd_neutralEMEt[2];
+  Float_t rnd_Phi[2];
+  Float_t rnd_Eta[2];       
+
   bool isData;
   bool saveReco;
   int recHitNEvts;
@@ -495,6 +504,74 @@ void dumper::recHitReco(const EERecHitCollection* rhitsee){
   }
   
   
+}
+
+
+void dumper::recoPU(edm::Handle<reco::PFCandidateCollection>  PFCandidates){
+  
+  for(int i =0;i<2;++i){
+    rnd_chargedEt[i]=0.;
+    rnd_neutralHadEt[i]=0.;
+    rnd_neutralEMEt[i]=0.;
+    rnd_Phi[i]=-100.;
+    rnd_Eta[i]=-100.;
+  }
+
+  TRandom3 rand;
+  rand.SetSeed(0);
+  double etaRand[2],phiRand[2];
+  etaRand[0]=rand.Uniform(1.6,2.7);
+  phiRand[0]=rand.Uniform(-3.14,3.14);  
+  
+  etaRand[1]=-etaRand[0];
+  phiRand[1]=-phiRand[0];
+
+
+  for(int i=0;i<2;++i){
+    for (reco::PFCandidateCollection::const_iterator jt = PFCandidates->begin();
+	 jt != PFCandidates->end(); ++jt) {
+      
+      reco::PFCandidate::ParticleType id = jt->particleId();
+      // Convert particle momentum to normal TLorentzVector, wrong type :(
+      math::XYZTLorentzVectorD const& p4t = jt->p4();
+      TLorentzVector p4(p4t.px(), p4t.py(), p4t.pz(), p4t.energy());
+      
+      double deltaPhi=p4.Phi()-phiRand[i];
+      double deltaEta=p4.Eta()-etaRand[i];
+      
+      if (deltaPhi > Geom::pi()) deltaPhi -= 2.*Geom::pi();
+      if (deltaPhi < -Geom::pi()) deltaPhi += 2.*Geom::pi();
+      double deltaR = std::sqrt(deltaEta*deltaEta+deltaPhi*deltaPhi);
+      
+      if(deltaR>0.3)continue;
+      
+      // Get the primary vertex coordinates
+      int closestVertex=0;
+      float dist_vtx=999;
+      if(nvtx>0){
+	dist_vtx=fabs(vertex_z[0]-jt->vz());
+	for(int i=0;i<nvtx;++i){
+	  float dist=fabs(vertex_z[i]-jt->vz());
+	  if(dist<dist_vtx){
+	    closestVertex=i;
+	    dist_vtx=dist;
+	  }
+	}
+      }
+      if((id==reco::PFCandidate::h || id==reco::PFCandidate::e|| id==reco::PFCandidate::mu)&& (dist_vtx>0.5 || closestVertex!=0))continue;
+      
+      if(id==reco::PFCandidate::h || id==reco::PFCandidate::e|| id==reco::PFCandidate::mu )
+	rnd_chargedEt[i]+=p4.Pt();
+      if(id==reco::PFCandidate::h0)
+	rnd_neutralHadEt[i]+=p4.Pt();
+      if(id==reco::PFCandidate::gamma)
+	rnd_neutralEMEt[i]+=p4.Pt();
+    }
+
+    rnd_Eta[i]=etaRand[i];    
+    rnd_Phi[i]=phiRand[i];    
+    //  std::cout<<etCharged<<" "<<etNeutral<<std::endl;
+  }
 }
 
 void dumper::phoReco(edm::Handle<reco::PhotonCollection> phoH, edm::Handle<reco::TrackCollection> tracksH, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee,edm::Handle<reco::PFCandidateCollection>  PFCandidates){
@@ -1306,6 +1383,9 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
       //PHOTONS
       phoReco(phoH,tracks,rhitseb,rhitsee,PFCandidates);
 
+      //muons
+      recoPU(PFCandidates);
+
       //electrons
       edm::Handle<reco::GsfElectronCollection>  ElectronHandle;
       event.getByLabel("gsfElectrons", ElectronHandle);
@@ -1593,6 +1673,14 @@ void dumper::beginJob() {
     t->Branch("rechitix", &rechit_ix, "rechitix[rechitn]/F");
     t->Branch("rechitiy", &rechit_iy, "rechitiy[rechitn]/F");
     t->Branch("rechittime", &rechit_time, "rechittime[rechitn]/F");
+
+    t->Branch("rndChargedEt", &rnd_chargedEt ,"rndChargedEt[2]/F" );
+    t->Branch("rndneutralHadEt", &rnd_neutralHadEt,"rndneutralHadEt[2]/F");
+    t->Branch("rndneutralEMEt", &rnd_neutralEMEt,"rndneutralEMEt[2]/F");
+    t->Branch("rndPhi", &rnd_Phi,"rndPhi[2]/F");
+    t->Branch("rndEta", &rnd_Eta,"rndEta[2]/F");
+
+
   }   
       
   if (!isData) {
