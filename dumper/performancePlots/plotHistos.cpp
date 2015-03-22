@@ -156,30 +156,32 @@ int main( int argc, char* argv[] ) {
 
     histoNamesPU[out->first]=(TH1F*)PUFile->Get(out->first);
 
-    if(out->first.Contains("ErecoOverETrue")){
-      histoNamesnoPU[out->first]->GetXaxis()->SetRangeUser(0.4,1.6);
+    if(out->first.Contains("OverETrue")){
       TString meannoPU;
       meannoPU.Form("%.3f",histoNamesnoPU[out->first]->GetMean());
       double effectiveSigmanoPU=effSigma(histoNamesnoPU[out->first]);
       TString sigmanoPU=Form("%.3f",effectiveSigmanoPU);
       pave->AddText("noPU Mean:"+meannoPU+" #sigma_{eff}:"+sigmanoPU);
       
+    
 
-      histoNamesPU[out->first]->GetXaxis()->SetRangeUser(0.4,1.6);
       TString meanPU;
       meanPU.Form("%.3f",histoNamesPU[out->first]->GetMean());
       double effectiveSigmaPU=effSigma(histoNamesPU[out->first]);
       TString sigmaPU=Form("%.3f",effectiveSigmaPU);
       pave->AddText("PU Mean:"+meanPU+" #sigma_{eff}:"+sigmaPU);
       pave->SetAllWith("PU Mean:"+meanPU+" #sigma_{eff}:"+sigmaPU,"color",kRed);
+      
 
       TString name(noPUFileName);
-
+      
       if(name.Contains("RelVal")|| name.Contains("dummy")){
-	histoNamesnoPU[out->first]->Rebin(5);
-	histoNamesPU[out->first]->Rebin(5);
+//	histoNamesnoPU[out->first]->Rebin(4);
+//	histoNamesPU[out->first]->Rebin(4);
       }
-
+      
+      histoNamesPU[out->first]->GetXaxis()->SetRangeUser(0.4,1.6);
+      histoNamesnoPU[out->first]->GetXaxis()->SetRangeUser(0.4,1.6); 
     }
 
 
@@ -206,7 +208,7 @@ int main( int argc, char* argv[] ) {
       histoNamesnoPU[out->first]->DrawNormalized("same");
     }
 
-    if(out->first.Contains("ErecoOverETrue"))    pave->Draw("same");
+    if(out->first.Contains("OverETrue"))    pave->Draw("same");
     if(out->first.Contains("pfSC_RecHits"))c1->SetLogy();
     c1->SaveAs("plots/h1_PUvsnoPU_"+out->first+".png");
     c1->SaveAs("plots/h1_PUvsnoPU_"+out->first+".pdf");

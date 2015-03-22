@@ -153,7 +153,7 @@ int main( int argc, char* argv[] ) {
     TString name(fileName);
     if(!name.Contains("noPU"))histo->SetLineColor(kRed);
     histo->SetLineWidth(2);
-    if(out->first.Contains("ErecoOverETrue")){
+    if(out->first.Contains("OverETrue")){
      
       double effectiveSigma=effSigma(histo);
 
