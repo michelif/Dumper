@@ -54,10 +54,13 @@ public :
 
    //outputTree
    TTree* outTreeElectrons;
-   Float_t elept_,eleeta_,elephi_,eler9_,elesiEtaiEtaNoZS_,elesiEtaiEtaZS_,eleErecoOverEtrue_;
+   Float_t elept_,eleeta_,elephi_,eler9_,elesiEtaiEtaNoZS_,elesiEtaiEtaZS_,eleErecoOverEtrue_,elefBrem_,eleEtrue_,elee_;
+
+   TTree* outTreePhotons;
+   Float_t phopt_,phoeta_,phophi_,phor9_,phoisConv_,phosiEtaiEtaNoZS_,phosiEtaiEtaZS_,phoErecoOverEtrue_,phoEseedOverEtrue_,phoEtrue_,phoe_;
 
    TTree* outTreepfSC;
-   Float_t pfSCpt_,pfSCeta_,pfSCphi_,pfSCErecoOverEtrue_,pfSC_nXtalsSeed_,pfSC_nXtalsTotal_,pfSC_nBCforSC_,pfSCEseedOverEtrue_;
+   Float_t pfSCpt_,pfSCeta_,pfSCphi_,pfSCErecoOverEtrue_,pfSC_nXtalsSeed_,pfSC_nXtalsTotal_,pfSC_nBCforSC_,pfSCEseedOverEtrue_,pfSCEtrue_,pfSCisEle_,pfSCe_;
 
    TH1F* geleMass_;
 

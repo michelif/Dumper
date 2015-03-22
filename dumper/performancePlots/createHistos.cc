@@ -20,8 +20,8 @@ void createHistos::bookHistos(){
   bookHisto("ele_r9",200,0.,1,"R_{9}",false);
   bookHisto("ele_siEtaiEtaNoZS",200,0.,0.07,"#sigma_{i#etai#eta}",false);
   bookHisto("ele_siEtaiEtaZS",200,0.,0.07,"#sigma_{i#etai#eta}",false);
-  bookHisto("ele_fBrem",200,0.,1,"fbrem",false);
-  bookHisto2D("ele_R9VsfBrem",200,0.,1,200,0.,1.,"R_{9}","fBrem",false);
+  bookHisto("ele_fBrem",200,0.,1.1,"fbrem",false);
+  bookHisto2D("ele_R9VsfBrem",200,0.,1.1,200,0.,1.1,"R_{9}","fBrem",false);
 
   //sc variables
   std::cout<<"booking"<<std::endl;
@@ -66,11 +66,12 @@ void createHistos::bookHistosPhotons(){
   bookHisto("pfSC_bcNXtals",100,-0.5,99.5,"N_{xtals}^{BC}",false,true);
   bookHisto2D("pfSC_EBCVsDeltaPhiBCSeedPho",150,0.,0.7,150,0.,50.,"#Delta#phi_{BC}^{seed}","E_{BC}",false);
   bookHisto2D("pfSC_EBCVsDeltaEtaBCSeedPho",150,0.,0.3,150,0.,50.,"#Delta#eta_{BC}^{seed}","E_{BC}",false);
-  bookHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",20,0,200,150,-0.5,0.5,"#rhoxN_{xtals}/100","(E_{reco}-E_{true})/(E_{reco})",false);
+  bookHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",100,0,200,300,-0.5,0.5,"#rhoxN_{xtals}/100","(E_{reco}-E_{true})/(E_{reco})",false);
   bookHisto2D("pfSC_DeltaPhiVslogEtBCVsBC",25,-2,2,20,0.,0.7,"log(E_{t}^{BC})","#Delta#phi_{BC}^{seed}",false);
   bookHisto2D("pho_isConvertedVsR9",20,0,1,2,-0.5,1.5,"R9","isConverted",false);
 
   bookHisto("pho_ErecoOverETrue",600,0,2,"E_{reco}/E_{true}",false,true);
+  bookHisto("pho_EtestOverETrue",600,0,2,"E_{reco}/E_{true}",false,true);
   bookHisto("pho_pt",300,0,300,"p_{T}(GeV)",false,true);
   bookHisto("pho_eta",100,-3.,3,"#eta",false,true);
   bookHisto("pho_sMaj",200,0,3,"sMaj",false,true);
@@ -79,7 +80,6 @@ void createHistos::bookHistosPhotons(){
   bookHisto("pho_r9",200,0.,1,"R_{9}",false,true);
   bookHisto("pho_siEtaiEtaNoZS",200,0.,0.07,"#sigma_{i#etai#eta}",false,true);
   bookHisto("pho_siEtaiEtaZS",200,0.,0.07,"#sigma_{i#etai#eta}",false,true);
-
 }
 
 
@@ -370,17 +370,35 @@ TLorentzVector* createHistos::createTLorentzVector(float pt, float eta, float ph
 
 
 void createHistos::createOutTree(){
+
+  outTreePhotons = new TTree("outTreePhotons","outTreePhotons");
+  outTreePhotons->Branch("phopt", &phopt_, "phopt");
+  outTreePhotons->Branch("phoe", &phoe_, "phoe");
+  outTreePhotons->Branch("phoeta", &phoeta_, "phoeta");
+  outTreePhotons->Branch("phophi", &phophi_, "phophi");
+  outTreePhotons->Branch("phor9", &phor9_, "phor9");
+  outTreePhotons->Branch("phoisConv", &phoisConv_, "phoisConv");
+  outTreePhotons->Branch("phosiEtaiEtaNoZS", &phosiEtaiEtaNoZS_, "phosiEtaiEtaNoZS");
+  outTreePhotons->Branch("phosiEtaiEtaZS", &phosiEtaiEtaZS_, "phosiEtaiEtaZS");
+  outTreePhotons->Branch("phoErecoOverEtrue", &phoErecoOverEtrue_, "phoErecoOverEtrue");
+  outTreePhotons->Branch("phoEseedOverEtrue", &phoEseedOverEtrue_, "phoEseedOverEtrue");
+  outTreePhotons->Branch("phoEtrue", &phoEtrue_, "phoEtrue");
+
   outTreeElectrons = new TTree("outTreeElectrons","outTreeElectrons");
   outTreeElectrons->Branch("elept", &elept_, "elept");
+  outTreeElectrons->Branch("elee", &elee_, "elee");
   outTreeElectrons->Branch("eleeta", &eleeta_, "eleeta");
   outTreeElectrons->Branch("elephi", &elephi_, "elephi");
   outTreeElectrons->Branch("eler9", &eler9_, "eler9");
   outTreeElectrons->Branch("elesiEtaiEtaNoZS", &elesiEtaiEtaNoZS_, "elesiEtaiEtaNoZS");
   outTreeElectrons->Branch("elesiEtaiEtaZS", &elesiEtaiEtaZS_, "elesiEtaiEtaZS");
+  outTreeElectrons->Branch("elefBrem", &elefBrem_, "elefBrem");
   outTreeElectrons->Branch("eleErecoOverEtrue", &eleErecoOverEtrue_, "eleErecoOverEtrue");
+  outTreeElectrons->Branch("eleEtrue", &eleEtrue_, "eleEtrue");
 
   outTreepfSC = new TTree("outTreepfSC","outTreepfSC");
   outTreepfSC->Branch("pfSCpt", &pfSCpt_, "pfSCpt");
+  outTreepfSC->Branch("pfSCe", &pfSCe_, "pfSCe");
   outTreepfSC->Branch("pfSCeta", &pfSCeta_, "pfSCeta");
   outTreepfSC->Branch("pfSCphi", &pfSCphi_, "pfSCphi");
   outTreepfSC->Branch("pfSCErecoOverEtrue", &pfSCErecoOverEtrue_, "pfSCErecoOverEtrue");
@@ -388,7 +406,8 @@ void createHistos::createOutTree(){
   outTreepfSC->Branch("pfSC_nXtalsTotal", &pfSC_nXtalsTotal_,"pfSC_nXtalsTotal");
   outTreepfSC->Branch("pfSC_nBCforSC", &pfSC_nBCforSC_,"pfSC_nBCforSC");
   outTreepfSC->Branch("pfSCEseedOverEtrue", &pfSCEseedOverEtrue_,"pfSCEseedOverEtrue");
-	
+  outTreepfSC->Branch("pfSCEtrue", &pfSCEtrue_,"pfSCEtrue");	
+  outTreepfSC->Branch("pfSCisEle", &pfSCisEle_,"pfSCisEle");	
 
 }
 
@@ -453,9 +472,7 @@ void createHistos::LoopElectrons(){
 	    drMatch=pfscp4->DeltaR(*(itGenEle));
 	  }
 	}//elen
-	if(indexMatchElectron>-1 ){
-	  indexEle.push_back(indexMatchElectron);
-	}
+	indexEle.push_back(indexMatchElectron);
 
       }//indexMatchpfSC      
 
@@ -514,11 +531,14 @@ void createHistos::LoopElectrons(){
 	pfSCpt_=(pfSCe[i]/cosh(pfSCeta[i]));
 	pfSCeta_=pfSCeta[i];
 	pfSCphi_=pfSCphi[i];
+	pfSCe_=pfSCe[i];
 	pfSCErecoOverEtrue_=pfSCe[i]/(gelept[iGen]*cosh(geleeta[iGen]));
 	pfSC_nXtalsSeed_=pfSCnXtalsSeed[i];
 	pfSC_nXtalsTotal_=pfSCnXtalsTotal[i];
 	pfSC_nBCforSC_=pfSCnBC[i];
 	pfSCEseedOverEtrue_=pfSCbcE[i][0]/(gelept[iGen]*cosh(geleeta[iGen]));
+	pfSCEtrue_=(gelept[iGen]*cosh(geleeta[iGen]));
+	pfSCisEle_=1;
 	outTreepfSC->Fill();
 
 	//rechits filling
@@ -535,6 +555,23 @@ void createHistos::LoopElectrons(){
     //loop on ele
     if(indexEle.size()>2) std::cout<<"something is wrong, found more than two matching electrons:"<<indexEle.size()<<" ele found"<<std::endl;
     for(int jj=0;jj<indexEle.size();++jj){
+      if(indexEle[jj]<0){
+	eleErecoOverEtrue_=-999;
+	eleeta_=-999;
+	elee_=-999;
+	elephi_=-999;
+	eler9_=-999;
+	elept_=-999;
+	elesiEtaiEtaNoZS_=-999;
+	elesiEtaiEtaZS_=-999;
+	elefBrem_=-999;
+	eleEtrue_=-999;
+
+	outTreeElectrons->Fill();
+
+
+	continue;
+      }
       int i=indexEle[jj];
       int iGen=indexGenEle[jj];
       eleErecoOverEtrue_=-1;
@@ -563,12 +600,15 @@ void createHistos::LoopElectrons(){
       fillHisto("ele_siEtaiEtaZS",elesiEtaiEtaZS[i],elep4);
       //filling outTree
       eleErecoOverEtrue_=elee[i]/(gelept[iGen]*cosh(geleeta[iGen]));
+      elee_=elee[i];
       eleeta_=eleeta[i];
       elephi_=elephi[i];
       eler9_=eler9[i];
       elept_=elept[i];
       elesiEtaiEtaNoZS_=elesiEtaiEtaNoZS[i];
       elesiEtaiEtaZS_=elesiEtaiEtaZS[i];
+      elefBrem_=gelefbrem80[iGen];
+      eleEtrue_=(gelept[iGen]*cosh(geleeta[iGen]));
 
       outTreeElectrons->Fill();
 
@@ -699,9 +739,8 @@ void createHistos::LoopPhotons(){
 	    drMatch=pfscp4->DeltaR(*(itGenPho));
 	  }
 	}//phon
-	if(indexMatchPhoton>-1 ){
-	  indexPho.push_back(indexMatchPhoton);
-	}
+	indexPho.push_back(indexMatchPhoton);
+
 
       }//indexMatchpfSC      
 
@@ -765,6 +804,8 @@ void createHistos::LoopPhotons(){
 	pfSC_nXtalsTotal_=pfSCnXtalsTotal[i];
 	pfSC_nBCforSC_=pfSCnBC[i];
 	pfSCEseedOverEtrue_=pfSCbcE[i][0]/(gphopt[iGen]*cosh(gphoeta[iGen]));
+	pfSCEtrue_=(gphopt[iGen]*cosh(gphoeta[iGen]));
+	pfSCisEle_=0;
 	outTreepfSC->Fill();
 
 
@@ -774,11 +815,35 @@ void createHistos::LoopPhotons(){
     //loop on pho
     if(indexPho.size()>2) std::cout<<"something is wrong, found more than two matching electrons:"<<indexPho.size()<<" ele found"<<std::endl;
     for(int jj=0;jj<indexPho.size();++jj){
+      if(indexPho[jj]<0){
+
+	phoErecoOverEtrue_=-999;
+	phoEseedOverEtrue_=-999;
+	phoe_=-999;
+	phoeta_=-999;
+	phophi_=-999;
+	phor9_=-999;
+	phopt_=-999;
+	phoe_=-999;
+	phosiEtaiEtaNoZS_=-999;
+	phosiEtaiEtaZS_=-999;
+	phoEtrue_=-999;
+	phoisConv_=-999;
+	outTreePhotons->Fill();
+	
+
+	continue;
+      }
       int i=indexPho[jj];
       int iGen=indexGenPho[jj];
 
       TLorentzVector* phop4=createTLorentzVector(phopt[i],phoeta[i],phophi[i],phoe[i]);
       fillHisto("pho_ErecoOverETrue",phop4->E()/(gphopt[iGen]*cosh(gphoeta[iGen])),phop4,gphoisConverted[iGen]);
+      if(phoR9[i]<0.94){
+	fillHisto("pho_EtestOverETrue",phop4->E()/(gphopt[iGen]*cosh(gphoeta[iGen])),phop4,gphoisConverted[iGen]);
+      }else{
+	fillHisto("pho_EtestOverETrue",pfSCbcE[indexpfSC[jj]][0]/(gphopt[iGen]*cosh(gphoeta[iGen])),phop4,gphoisConverted[iGen]);
+      }
       fillHisto2D("pho_isConvertedVsR9",phoR9[i],gphoisConverted[iGen],phop4);
       fillHisto("pho_sMaj",phosMajZS[i],phop4,gphoisConverted[iGen]);
       fillHisto("pho_sMin",phosMinZS[i],phop4,gphoisConverted[iGen]);
@@ -788,6 +853,22 @@ void createHistos::LoopPhotons(){
       fillHisto("pho_r9",phoR9[i],phop4,gphoisConverted[iGen]);
       fillHisto("pho_siEtaiEtaNoZS",phosiEtaiEtaNoZS[i],phop4,gphoisConverted[iGen]);
       fillHisto("pho_siEtaiEtaZS",phosiEtaiEtaZS[i],phop4,gphoisConverted[iGen]);
+
+      //filling outTree
+      phoErecoOverEtrue_=phoe[i]/(gphopt[iGen]*cosh(gphoeta[iGen]));
+      phoEseedOverEtrue_=pfSCbcE[indexpfSC[jj]][0]/(gphopt[iGen]*cosh(gphoeta[iGen]));
+      phoe_=phoe[i];
+      phoeta_=phoeta[i];
+      phophi_=phophi[i];
+      phor9_=phoR9[i];
+      phopt_=phopt[i];
+      phoe_=phoe[i];
+      phosiEtaiEtaNoZS_=phosiEtaiEtaNoZS[i];
+      phosiEtaiEtaZS_=phosiEtaiEtaZS[i];
+      phoEtrue_=(gphopt[iGen]*cosh(gphoeta[iGen]));
+      phoisConv_=gphoisConverted[iGen];
+      outTreePhotons->Fill();
+
 
 
     }
