@@ -21,6 +21,9 @@ public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
 
+   TFile* outFile_;
+
+
    // Declaration of leaf types
    Float_t         pfSCpt;
    Float_t         pfSCe;
@@ -32,7 +35,11 @@ public :
    Float_t         pfSC_nBCforSC;
    Float_t         pfSCEseedOverEtrue;
    Float_t         pfSCEtrue;
+   Float_t         pfSCptTrue;
    Float_t         pfSCisEle;
+   Float_t         pfSCisConv;
+   Float_t         pfSCfBrem;
+   Float_t         pfSCR9;
 
    // List of branches
    TBranch        *b_pfSCpt;   //!
@@ -45,7 +52,11 @@ public :
    TBranch        *b_pfSC_nBCforSC;   //!
    TBranch        *b_pfSCEseedOverEtrue;   //!
    TBranch        *b_pfSCEtrue;   //!
+   TBranch        *b_pfSCptTrue;   //!
    TBranch        *b_pfSCisEle;   //!
+   TBranch        *b_pfSCisConv;   //!
+   TBranch        *b_pfSCfBrem;   //!
+   TBranch        *b_pfSCR9;   //!
 
    resolutionPlotterpfSC(TTree *tree=0);
    virtual ~resolutionPlotterpfSC();
@@ -57,6 +68,9 @@ public :
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    Double_t effSigma(TH1 * hist);
+   void setOutFile(TString outFileName);
+
+
 };
 
 #endif
@@ -117,7 +131,7 @@ void resolutionPlotterpfSC::Init(TTree *tree)
    fChain = tree;
    fCurrent = -1;
    fChain->SetMakeClass(1);
-
+ 
    fChain->SetBranchAddress("pfSCpt", &pfSCpt, &b_pfSCpt);
    fChain->SetBranchAddress("pfSCe", &pfSCe, &b_pfSCe);
    fChain->SetBranchAddress("pfSCeta", &pfSCeta, &b_pfSCeta);
@@ -128,7 +142,12 @@ void resolutionPlotterpfSC::Init(TTree *tree)
    fChain->SetBranchAddress("pfSC_nBCforSC", &pfSC_nBCforSC, &b_pfSC_nBCforSC);
    fChain->SetBranchAddress("pfSCEseedOverEtrue", &pfSCEseedOverEtrue, &b_pfSCEseedOverEtrue);
    fChain->SetBranchAddress("pfSCEtrue", &pfSCEtrue, &b_pfSCEtrue);
+   fChain->SetBranchAddress("pfSCptTrue", &pfSCptTrue, &b_pfSCptTrue);
    fChain->SetBranchAddress("pfSCisEle", &pfSCisEle, &b_pfSCisEle);
+   fChain->SetBranchAddress("pfSCisConv", &pfSCisConv, &b_pfSCisConv);
+   fChain->SetBranchAddress("pfSCfBrem", &pfSCfBrem, &b_pfSCfBrem);
+   fChain->SetBranchAddress("pfSCR9", &pfSCR9, &b_pfSCR9);
+   
    Notify();
 }
 
@@ -157,4 +176,9 @@ Int_t resolutionPlotterpfSC::Cut(Long64_t entry)
 // returns -1 otherwise.
    return 1;
 }
+
+void resolutionPlotterpfSC::setOutFile(TString outFileName){
+  outFile_=TFile::Open(outFileName,"recreate");
+}
+
 #endif // #ifdef resolutionPlotterpfSC_cxx

@@ -14,7 +14,7 @@ int main( int argc, char* argv[] ) {
 
 
   if(argc<2 || argc>3) {
-    cout << "Usage:  ./tmp/runCreateHistos listfile outputfile\n"
+    cout << "Usage:  ./tmp/runResolutionPlotterpfSC inputFile outputfile\n"
 	 << "  listfile:    list of root files incusing protocol eg dcap:/// .....\n"
 	 << "  outputfile:  name of output root file  eg output.root\n"
 	 << endl;
@@ -22,34 +22,19 @@ int main( int argc, char* argv[] ) {
   }
 
 
-  
-  // Input list
-  char listName[500];
-  sprintf(listName,argv[1]); 
-  
+  TString inputFileName(argv[1]);
+  TFile * inputFile=TFile::Open(inputFileName);
+
   // Output filename (.root)  
   TString OutputFileName(argv[2]);
-  
-  // Name of input tree objects in (.root) files 
-  char treeName[100] = "outTreepfSC";
 
+    
   //creating  TChain
-  TChain *chain = new TChain(treeName);
-  char pName[500];
-  ifstream is(listName);
-  if(! is.good()) {
-    cout << "int main() >> ERROR : file " << listName << " not read" << endl;
-    is.close();
-    exit(-1);
-  }
-  cout << "Reading list : " << listName << " ......." << endl;
-  
-  while( is.getline(pName, 500, '\n') ) {
-    if (pName[0] == '#') continue;
-    chain->Add(pName); 
-  }
-  is.close();
-  resolutionPlotterpfSC t;
+  TTree *chain = (TTree*)inputFile->Get("outTreepfSC");
+
+ 
+  resolutionPlotterpfSC t(chain);
+  t.setOutFile(OutputFileName);
   t.Loop();
 
 }
