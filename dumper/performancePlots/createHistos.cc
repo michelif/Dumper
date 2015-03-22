@@ -407,8 +407,11 @@ void createHistos::createOutTree(){
   outTreepfSC->Branch("pfSC_nBCforSC", &pfSC_nBCforSC_,"pfSC_nBCforSC");
   outTreepfSC->Branch("pfSCEseedOverEtrue", &pfSCEseedOverEtrue_,"pfSCEseedOverEtrue");
   outTreepfSC->Branch("pfSCEtrue", &pfSCEtrue_,"pfSCEtrue");	
+  outTreepfSC->Branch("pfSCptTrue", &pfSCptTrue_, "pfSCptTrue");
   outTreepfSC->Branch("pfSCisEle", &pfSCisEle_,"pfSCisEle");	
-
+  outTreepfSC->Branch("pfSCisConv", &pfSCisConv_,"pfSCisConv");	
+  outTreepfSC->Branch("pfSCfBrem", &pfSCfBrem_,"pfSCfBrem");	
+  outTreepfSC->Branch("pfSCR9", &pfSCR9_,"pfSCR9");	
 }
 
 void createHistos::LoopElectrons(){
@@ -538,6 +541,12 @@ void createHistos::LoopElectrons(){
 	pfSC_nBCforSC_=pfSCnBC[i];
 	pfSCEseedOverEtrue_=pfSCbcE[i][0]/(gelept[iGen]*cosh(geleeta[iGen]));
 	pfSCEtrue_=(gelept[iGen]*cosh(geleeta[iGen]));
+	pfSCptTrue_=gelept[iGen];
+	pfSCisConv_=-999;
+	pfSCfBrem_=gelefbrem80[iGen];
+	if(indexEle[jj]>0){
+	  pfSCR9_=eler9[indexEle[jj]];
+	}
 	pfSCisEle_=1;
 	outTreepfSC->Fill();
 
@@ -799,12 +808,19 @@ void createHistos::LoopPhotons(){
 	pfSCpt_=(pfSCe[i]/cosh(pfSCeta[i]));
 	pfSCeta_=pfSCeta[i];
 	pfSCphi_=pfSCphi[i];
+	pfSCe_=pfSCe[i];
 	pfSCErecoOverEtrue_=pfSCe[i]/(gphopt[iGen]*cosh(gphoeta[iGen]));
 	pfSC_nXtalsSeed_=pfSCnXtalsSeed[i];
 	pfSC_nXtalsTotal_=pfSCnXtalsTotal[i];
 	pfSC_nBCforSC_=pfSCnBC[i];
 	pfSCEseedOverEtrue_=pfSCbcE[i][0]/(gphopt[iGen]*cosh(gphoeta[iGen]));
 	pfSCEtrue_=(gphopt[iGen]*cosh(gphoeta[iGen]));
+	pfSCptTrue_=gphopt[iGen];
+	pfSCisConv_=gphoisConverted[iGen];
+	pfSCfBrem_=-999;
+	if(indexPho[jj]>0){
+	  pfSCR9_=phoR9[indexPho[jj]];
+	}
 	pfSCisEle_=0;
 	outTreepfSC->Fill();
 
