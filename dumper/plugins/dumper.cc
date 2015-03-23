@@ -277,6 +277,10 @@ private:
 
   Float_t pfSC_eta[MAXSCTOSAVE];
   Float_t pfSC_phi[MAXSCTOSAVE];
+  Float_t pfSC_x[MAXSCTOSAVE];
+  Float_t pfSC_y[MAXSCTOSAVE];
+  Float_t pfSC_z[MAXSCTOSAVE];
+
   Float_t   pfSC_e[MAXSCTOSAVE];
   Int_t pfSC_nBC[MAXSCTOSAVE];
   Int_t pfSC_nXtalsSeed[MAXSCTOSAVE];
@@ -287,6 +291,9 @@ private:
 //bc info
   Float_t pfSC_bcEta[MAXSCTOSAVE][MAXBCTOSAVE];//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
   Float_t pfSC_bcPhi[MAXSCTOSAVE][MAXBCTOSAVE];
+  Float_t pfSC_bcX[MAXSCTOSAVE][MAXBCTOSAVE];
+  Float_t pfSC_bcY[MAXSCTOSAVE][MAXBCTOSAVE];
+  Float_t pfSC_bcZ[MAXSCTOSAVE][MAXBCTOSAVE];
   Float_t   pfSC_bcE[MAXSCTOSAVE][MAXBCTOSAVE];
   Int_t pfSC_bcNXtals[MAXSCTOSAVE][MAXBCTOSAVE];
 
@@ -1153,7 +1160,10 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 
       pfSC_eta[pfSC_n] = itSC->eta();
       pfSC_phi[pfSC_n] = itSC->phi();
-
+      pfSC_x[pfSC_n] = itSC->x();
+      pfSC_y[pfSC_n] = itSC->y();
+      pfSC_z[pfSC_n] = itSC->z();
+ 
       pfSC_e[pfSC_n] = itSC->energy();
       pfSC_nBC[pfSC_n] = itSC->clustersSize();
       pfSC_nXtalsSeed[pfSC_n] = itSC->seed()->size();
@@ -1184,6 +1194,9 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 	if((*bclus)->energy() > 0 && pfSC_nBC[pfSC_n]<MAXBCTOSAVE){
 	  pfSC_bcPhi[pfSC_n][nBC]=(*bclus)->phi();
 	  pfSC_bcEta[pfSC_n][nBC]=(*bclus)->eta(); 
+	  pfSC_bcX[pfSC_n][nBC]=(*bclus)->x();
+	  pfSC_bcY[pfSC_n][nBC]=(*bclus)->y(); 
+	  pfSC_bcZ[pfSC_n][nBC]=(*bclus)->z(); 
 	  pfSC_bcE[pfSC_n][nBC]=(*bclus)->energy(); 
 	  pfSC_bcNXtals[pfSC_n][nBC]=(*bclus)->size(); 
 	  pfSC_nXtalsTotal[pfSC_n] += pfSC_bcNXtals[pfSC_n][nBC];
@@ -1206,6 +1219,9 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
       
       pfSC_eta[pfSC_n] = itSC->eta();
       pfSC_phi[pfSC_n] = itSC->phi();
+      pfSC_x[pfSC_n] = itSC->x();
+      pfSC_y[pfSC_n] = itSC->y();
+      pfSC_z[pfSC_n] = itSC->z();
 
       pfSC_e[pfSC_n] = itSC->energy();
       pfSC_nBC[pfSC_n] = itSC->clustersSize();
@@ -1240,6 +1256,9 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 	if((*bclus)->energy() > 0 && pfSC_nBC[pfSC_n]<MAXBCTOSAVE){
 	  pfSC_bcPhi[pfSC_n][nBC]=(*bclus)->phi();
 	  pfSC_bcEta[pfSC_n][nBC]=(*bclus)->eta(); 
+	  pfSC_bcX[pfSC_n][nBC]=(*bclus)->x();
+	  pfSC_bcY[pfSC_n][nBC]=(*bclus)->y(); 
+	  pfSC_bcZ[pfSC_n][nBC]=(*bclus)->z(); 
 	  pfSC_bcE[pfSC_n][nBC]=(*bclus)->energy(); 
 	  pfSC_bcNXtals[pfSC_n][nBC]=(*bclus)->size(); 
 	  pfSC_nXtalsTotal[pfSC_n] += pfSC_bcNXtals[pfSC_n][nBC];
@@ -1540,13 +1559,13 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
       hybridscReco(hybridHandle);
 
       //JETS
-      edm::Handle<reco::PFJetCollection> ak4PFJetsCHSHandle;
-      event.getByLabel("ak4PFJetsCHS",ak4PFJetsCHSHandle);
-
-      edm::Handle<reco::GenJetCollection> ak4GenJetsHandle;
-      event.getByLabel("ak4GenJets",ak4GenJetsHandle);
-
-      jetReco(ak4PFJetsCHSHandle,ak4GenJetsHandle);
+//      edm::Handle<reco::PFJetCollection> ak4PFJetsCHSHandle;
+//      event.getByLabel("ak4PFJetsCHS",ak4PFJetsCHSHandle);
+//
+//      edm::Handle<reco::GenJetCollection> ak4GenJetsHandle;
+//      event.getByLabel("ak4GenJets",ak4GenJetsHandle);
+//
+//      jetReco(ak4PFJetsCHSHandle,ak4GenJetsHandle);
 
       
   }
@@ -1645,6 +1664,9 @@ void dumper::beginJob() {
     t->Branch("pfSCn",   &pfSC_n,   "pfSCn/I");
     t->Branch("pfSCeta", &pfSC_eta, "pfSCeta[pfSCn]/F");
     t->Branch("pfSCphi", &pfSC_phi, "pfSCphi[pfSCn]/F");
+    t->Branch("pfSCx", &pfSC_x, "pfSCx[pfSCn]/F");
+    t->Branch("pfSCy", &pfSC_y, "pfSCy[pfSCn]/F");
+    t->Branch("pfSCz", &pfSC_z, "pfSCz[pfSCn]/F");
     t->Branch("pfSCe", &pfSC_e, "pfSCe[pfSCn]/F");
     t->Branch("pfSCRecHitsSeedn",   &pfSCRecHitsSeed_n,   "pfSCRecHitsSeedn[pfSCn]/I");
     t->Branch("pfSCRecHitsFractionsSeed", &pfSC_RecHitsfractionsSeed, "pfSCRecHitsFractionsSeed[200][150]/F");
@@ -1656,6 +1678,9 @@ void dumper::beginJob() {
 
     t->Branch("pfSCbcEta", &pfSC_bcEta, "pfSCbcEta[200][200]/F");//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
     t->Branch("pfSCbcPhi", &pfSC_bcPhi, "pfSCbcPhi[200][200]/F");
+    t->Branch("pfSCbcX", &pfSC_bcX, "pfSCbcX[200][200]/F");
+    t->Branch("pfSCbcY", &pfSC_bcY, "pfSCbcY[200][200]/F");
+    t->Branch("pfSCbcZ", &pfSC_bcZ, "pfSCbcZ[200][200]/F");
     t->Branch("pfSCbcE", &pfSC_bcE, "pfSCbcE[200][200]/F");
     t->Branch("pfSCbcNXtals", &pfSC_bcNXtals, "pfSCbcNXtals[200][200]/I");
 
