@@ -153,18 +153,24 @@ int main( int argc, char* argv[] ) {
     TString name(fileName);
     if(!name.Contains("noPU"))histo->SetLineColor(kRed);
     histo->SetLineWidth(2);
-    if(out->first.Contains("OverETrue")){
+    if(out->first.Contains("OverETrue")||out->first.Contains("mass")){
      
       double effectiveSigma=effSigma(histo);
 
-      histo->GetXaxis()->SetRangeUser(0.4,1.6);
+      if(out->first.Contains("OverETrue")){
+	histo->GetXaxis()->SetRangeUser(0.4,1.6);
+      }else{
+	std::cout<<effectiveSigma<<std::endl;
+	effectiveSigma=effectiveSigma/histo->GetMean();
+	std::cout<<effectiveSigma<<std::endl;
+      }
       TString mean=Form("%.3f",histo->GetMean());
       TString sigma=Form("%.3f",effectiveSigma);
       pave->AddText("Mean:"+mean+" #sigma_{eff}:"+sigma);
       
     
       if(name.Contains("RelVal")|| name.Contains("dummy")){
-	histo->Rebin(5);
+	//	histo->Rebin(5);
       }
     }
 
