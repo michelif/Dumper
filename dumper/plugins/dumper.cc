@@ -67,6 +67,11 @@
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/Common/interface/FwdPtr.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+#include "DataFormats/JetReco/interface/PFJet.h"
+#include "DataFormats/JetReco/interface/PFJetCollection.h"
+#include "DataFormats/JetReco/interface/GenJet.h"
+#include "DataFormats/JetReco/interface/GenJetCollection.h"
+
 
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
@@ -125,6 +130,7 @@
 #include <iostream>
 #define MAXPARTICLESTOSAVE 100
 #define MAXPHOTONSTOSAVE 20
+#define MAXJETSTOSAVE 150
 #define MAXSCTOSAVE 200
 #define MAXBCTOSAVE 200
 #define MAXPFBCTOSAVE 2000
@@ -150,6 +156,7 @@ public:
   void multi5x5scReco(edm::Handle<reco::SuperClusterCollection> multi5x5Handle);
   void hybridscReco(edm::Handle<reco::SuperClusterCollection> hybridHandle);
   void recHitReco(const EERecHitCollection* rhitsee);
+  void jetReco(edm::Handle<reco::PFJetCollection> ak4PFJetsCHSHandle,edm::Handle<reco::GenJetCollection> ak4GenJetsHandle);
 private:
   virtual void beginRun(const edm::Run& run,const edm::EventSetup& setup);
   virtual void beginJob() ;
@@ -165,7 +172,7 @@ private:
   const CaloTopology *topology;
   
   Float_t rho;
-  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n, multi5x5SC_n, hybridSC_n, pfcandPho_n, pfcandEle_n, rechit_n, pfSCRecHitsSeed_n[MAXSCTOSAVE],pfBC_n;
+  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n, multi5x5SC_n, hybridSC_n, pfcandPho_n, pfcandEle_n, rechit_n, pfSCRecHitsSeed_n[MAXSCTOSAVE],pfBC_n,ak4GenJet_n,ak4PFJetsCHS_n;
 
 
   Float_t gp_pt[MAXPARTICLESTOSAVE];
@@ -180,6 +187,16 @@ private:
   Float_t gpho_phi[MAXPHOTONSTOSAVE];
   Int_t gpho_isConverted[MAXPHOTONSTOSAVE];
   Int_t gpho_index[MAXPHOTONSTOSAVE];
+
+  Float_t ak4GenJet_pt[MAXJETSTOSAVE];
+  Float_t ak4GenJet_eta[MAXJETSTOSAVE];
+  Float_t ak4GenJet_phi[MAXJETSTOSAVE];
+  Float_t ak4PFJetsCHS_pt[MAXJETSTOSAVE];
+  Float_t ak4PFJetsCHS_eta[MAXJETSTOSAVE];
+  Float_t ak4PFJetsCHS_phi[MAXJETSTOSAVE];
+  Int_t ak4PFJetsCHS_matchesGenJet[MAXJETSTOSAVE];
+  Float_t ak4PFJetsCHS_neutralEMFraction[MAXJETSTOSAVE];
+  Float_t ak4PFJetsCHS_chargedEMFraction[MAXJETSTOSAVE];
 
   Float_t gele_pt[MAXPHOTONSTOSAVE];
   Float_t gele_eta[MAXPHOTONSTOSAVE];
@@ -414,6 +431,19 @@ private:
   Float_t rnd_Phi[2];
   Float_t rnd_Eta[2];       
 
+  Float_t rnd_chargedEt2[2];
+  Float_t rnd_neutralHadEt2[2];
+  Float_t rnd_neutralEMEt2[2];
+  Float_t rnd_Phi2[2];
+  Float_t rnd_Eta2[2];       
+
+  Float_t rnd_chargedEt3[2];
+  Float_t rnd_neutralHadEt3[2];
+  Float_t rnd_neutralEMEt3[2];
+  Float_t rnd_Phi3[2];
+  Float_t rnd_Eta3[2];       
+
+
   bool isData;
   bool saveReco;
   int recHitNEvts;
@@ -506,6 +536,55 @@ void dumper::recHitReco(const EERecHitCollection* rhitsee){
   
 }
 
+void dumper::jetReco(edm::Handle<reco::PFJetCollection> ak4PFJetsCHSHandle, edm::Handle<reco::GenJetCollection> ak4GenJetsHandle){
+
+  ak4GenJet_n=0;
+  for(reco::GenJetCollection::const_iterator itGJet = ak4GenJetsHandle->begin();
+      itGJet != ak4GenJetsHandle->end(); ++itGJet){
+
+    if(itGJet->pt()<30 || ak4GenJet_n>MAXJETSTOSAVE)continue;
+    ak4GenJet_pt[ak4GenJet_n]=itGJet->pt();
+    ak4GenJet_eta[ak4GenJet_n]=itGJet->eta();
+    ak4GenJet_phi[ak4GenJet_n]=itGJet->phi();
+
+
+    ak4GenJet_n++;
+  }
+
+
+  ak4PFJetsCHS_n=0;
+  for(reco::PFJetCollection::const_iterator itJet = ak4PFJetsCHSHandle->begin();
+      itJet != ak4PFJetsCHSHandle->end(); ++itJet){
+    
+    if(itJet->pt()<30 || ak4PFJetsCHS_n>MAXJETSTOSAVE)continue;
+    ak4PFJetsCHS_pt[ak4PFJetsCHS_n]=itJet->pt();
+    ak4PFJetsCHS_eta[ak4PFJetsCHS_n]=itJet->eta();
+    ak4PFJetsCHS_phi[ak4PFJetsCHS_n]=itJet->phi();
+    ak4PFJetsCHS_matchesGenJet[ak4PFJetsCHS_n]=0;
+    ak4PFJetsCHS_neutralEMFraction[ak4PFJetsCHS_n]=itJet->neutralEmEnergyFraction();
+    ak4PFJetsCHS_chargedEMFraction[ak4PFJetsCHS_n]=itJet->chargedEmEnergyFraction();
+
+    float drMin=999;
+    for (int i=0;i<ak4GenJet_n;++i){
+      double deltaPhi= ak4GenJet_phi[i]-ak4PFJetsCHS_phi[ak4PFJetsCHS_n];
+      double deltaEta= ak4GenJet_eta[i]-ak4PFJetsCHS_eta[ak4PFJetsCHS_n];
+      
+      if (deltaPhi > Geom::pi()) deltaPhi -= 2.*Geom::pi();
+      if (deltaPhi < -Geom::pi()) deltaPhi += 2.*Geom::pi();
+      double deltaR = std::sqrt(deltaEta*deltaEta+deltaPhi*deltaPhi);
+      if(deltaR<drMin){
+	drMin=deltaR;
+      }
+    }
+    if(drMin<0.3) ak4PFJetsCHS_matchesGenJet[ak4PFJetsCHS_n]=1;    
+    ak4PFJetsCHS_n++;
+  }
+  
+
+}
+
+
+
 
 void dumper::recoPU(edm::Handle<reco::PFCandidateCollection>  PFCandidates){
   
@@ -515,6 +594,20 @@ void dumper::recoPU(edm::Handle<reco::PFCandidateCollection>  PFCandidates){
     rnd_neutralEMEt[i]=0.;
     rnd_Phi[i]=-100.;
     rnd_Eta[i]=-100.;
+
+    rnd_chargedEt2[i]=0.;
+    rnd_neutralHadEt2[i]=0.;
+    rnd_neutralEMEt2[i]=0.;
+    rnd_Phi2[i]=-100.;
+    rnd_Eta2[i]=-100.;
+
+    rnd_chargedEt3[i]=0.;
+    rnd_neutralHadEt3[i]=0.;
+    rnd_neutralEMEt3[i]=0.;
+    rnd_Phi3[i]=-100.;
+    rnd_Eta3[i]=-100.;
+
+
   }
 
   TRandom3 rand;
@@ -558,6 +651,17 @@ void dumper::recoPU(edm::Handle<reco::PFCandidateCollection>  PFCandidates){
 	  }
 	}
       }
+
+      if(jt->pdgId()==211 && (dist_vtx<0.5 && closestVertex==0) ){
+	rnd_chargedEt2[i]+=p4.Pt();
+      }
+      if(jt->pdgId()==130){
+	rnd_neutralHadEt2[i]+=p4.Pt();
+      }
+      if(jt->pdgId()==22){
+	rnd_neutralEMEt2[i]+=p4.Pt();
+      }
+
       if((id==reco::PFCandidate::h || id==reco::PFCandidate::e|| id==reco::PFCandidate::mu)&& (dist_vtx>0.5 || closestVertex!=0))continue;
       
       if(id==reco::PFCandidate::h || id==reco::PFCandidate::e|| id==reco::PFCandidate::mu )
@@ -1435,6 +1539,15 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
       //PFSUPERCLUSTERS
       hybridscReco(hybridHandle);
 
+      //JETS
+      edm::Handle<reco::PFJetCollection> ak4PFJetsCHSHandle;
+      event.getByLabel("ak4PFJetsCHS",ak4PFJetsCHSHandle);
+
+      edm::Handle<reco::GenJetCollection> ak4GenJetsHandle;
+      event.getByLabel("ak4GenJets",ak4GenJetsHandle);
+
+      jetReco(ak4PFJetsCHSHandle,ak4GenJetsHandle);
+
       
   }
   t->Fill();
@@ -1677,11 +1790,36 @@ void dumper::beginJob() {
     t->Branch("rndChargedEt", &rnd_chargedEt ,"rndChargedEt[2]/F" );
     t->Branch("rndneutralHadEt", &rnd_neutralHadEt,"rndneutralHadEt[2]/F");
     t->Branch("rndneutralEMEt", &rnd_neutralEMEt,"rndneutralEMEt[2]/F");
+    t->Branch("rndChargedEt2", &rnd_chargedEt2 ,"rndChargedEt2[2]/F" );
+    t->Branch("rndneutralHadEt2", &rnd_neutralHadEt2,"rndneutralHadEt2[2]/F");
+    t->Branch("rndneutralEMEt2", &rnd_neutralEMEt2,"rndneutralEMEt2[2]/F");
+    t->Branch("rndChargedEt3", &rnd_chargedEt3 ,"rndChargedEt3[2]/F" );
+    t->Branch("rndneutralHadEt3", &rnd_neutralHadEt3,"rndneutralHadEt3[2]/F");
+    t->Branch("rndneutralEMEt3", &rnd_neutralEMEt3,"rndneutralEMEt3[2]/F");
+
     t->Branch("rndPhi", &rnd_Phi,"rndPhi[2]/F");
     t->Branch("rndEta", &rnd_Eta,"rndEta[2]/F");
 
+    t->Branch("ak4GenJetn",   &ak4GenJet_n,   "ak4GenJetn/I");
+    t->Branch("ak4GenJept", &ak4GenJet_pt,"ak4GenJept[ak4GenJetn]/F");
+    t->Branch("ak4GenJeeta", &ak4GenJet_eta,"ak4GenJeeta[ak4GenJetn]/F");
+    t->Branch("ak4GenJephi", &ak4GenJet_phi,"ak4GenJephi[ak4GenJetn]/F");
+
+    t->Branch("ak4PFJetsCHSn",   &ak4PFJetsCHS_n,   "ak4PFJetsCHSn/I");
+    t->Branch("ak4PFJetsCHSpt", &ak4PFJetsCHS_pt,"ak4PFJetsCHSpt[ak4PFJetsCHSn]/F");
+    t->Branch("ak4PFJetsCHSeta", &ak4PFJetsCHS_eta,"ak4PFJetsCHSeta[ak4PFJetsCHSn]/F");
+    t->Branch("ak4PFJetsCHSphi", &ak4PFJetsCHS_phi,"ak4PFJetsCHSphi[ak4PFJetsCHSn]/F");
+    t->Branch("ak4PFJetsCHSmatchesGenJet", &ak4PFJetsCHS_matchesGenJet,"ak4PFJetsCHSmatchesGenJet[ak4PFJetsCHSn]/I");
+    t->Branch("ak4PFJetsCHSneutralEMFraction", &ak4PFJetsCHS_neutralEMFraction,"ak4PFJetsCHSneutralEMFraction[ak4PFJetsCHSn]/F");
+    t->Branch("ak4PFJetsCHSchargedEMFraction", &ak4PFJetsCHS_chargedEMFraction,"ak4PFJetsCHSchargedEMFraction[ak4PFJetsCHSn]/F");
+
+
+
 
   }   
+
+
+
       
   if (!isData) {
     t->Branch("gpn",   &gp_n,   "gpn/I");
