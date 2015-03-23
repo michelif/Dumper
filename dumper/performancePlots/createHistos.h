@@ -134,12 +134,18 @@ public :
    Int_t           pfSCn;
    Float_t         pfSCeta[MAXSCTOSAVE];   //[pfSCn]
    Float_t         pfSCphi[MAXSCTOSAVE];   //[pfSCn]
+   Float_t         pfSCx[MAXSCTOSAVE];   //[pfSCn]
+   Float_t         pfSCy[MAXSCTOSAVE];   //[pfSCn]
+   Float_t         pfSCz[MAXSCTOSAVE];   //[pfSCn]
    Float_t         pfSCe[MAXSCTOSAVE];   //[pfSCn]
    Int_t           pfSCnBC[MAXSCTOSAVE];   //[pfSCn]
    Int_t           pfSCnXtalsSeed[MAXSCTOSAVE];   //[pfSCn]
    Int_t           pfSCnXtalsTotal[MAXSCTOSAVE];   //[pfSCn]
    Float_t         pfSCbcEta[MAXSCTOSAVE][MAXBCTOSAVE];
    Float_t         pfSCbcPhi[MAXSCTOSAVE][MAXBCTOSAVE];
+   Float_t         pfSCbcX[MAXSCTOSAVE][MAXBCTOSAVE];
+   Float_t         pfSCbcY[MAXSCTOSAVE][MAXBCTOSAVE];
+   Float_t         pfSCbcZ[MAXSCTOSAVE][MAXBCTOSAVE];
    Float_t         pfSCbcE[MAXSCTOSAVE][MAXBCTOSAVE];
    Int_t           pfSCbcNXtals[MAXSCTOSAVE][MAXBCTOSAVE];
    Int_t           multi5x5SCn;
@@ -337,12 +343,18 @@ public :
    TBranch        *b_pfSCn;   //!
    TBranch        *b_pfSCeta;   //!
    TBranch        *b_pfSCphi;   //!
+   TBranch        *b_pfSCx;   //!
+   TBranch        *b_pfSCy;   //!
+   TBranch        *b_pfSCz;   //!
    TBranch        *b_pfSCe;   //!
    TBranch        *b_pfSCnBC;   //!
    TBranch        *b_pfSCnXtalsSeed;   //!
    TBranch        *b_pfSCnXtalsTotal;   //!
    TBranch        *b_pfSCbcEta;   //!
    TBranch        *b_pfSCbcPhi;   //!
+   TBranch        *b_pfSCbcX;   //!
+   TBranch        *b_pfSCbcY;   //!
+   TBranch        *b_pfSCbcZ;   //!
    TBranch        *b_pfSCbcE;   //!
    TBranch        *b_pfSCbcNXtals;   //!
    TBranch        *b_multi5x5SCn;   //!

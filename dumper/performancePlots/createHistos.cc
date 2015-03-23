@@ -70,6 +70,8 @@ void createHistos::bookHistosPhotons(){
   bookHisto2D("pfSC_DeltaPhiVslogEtBCVsBC",25,-2,2,20,0.,0.7,"log(E_{t}^{BC})","#Delta#phi_{BC}^{seed}",false);
   bookHisto2D("pho_isConvertedVsR9",20,0,1,2,-0.5,1.5,"R9","isConverted",false);
 
+
+
   bookHisto("pho_ErecoOverETrue",600,0,2,"E_{reco}/E_{true}",false,true);
   bookHisto("pho_EtestOverETrue",600,0,2,"E_{reco}/E_{true}",false,true);
   bookHisto("pho_pt",300,0,300,"p_{T}(GeV)",false,true);
@@ -695,6 +697,13 @@ void createHistos::LoopPhotons(){
   int nConv=0;
   int nUnConv=0;
 
+  TH1F* massPFSCUnconv=new TH1F("massPFSCUnconv","massPFSCUnconv",100,100.,150.);
+  TH1F* massPFSCConv=new TH1F("massPFSCConv","massPFSCConv",100,100.,150.);
+  
+  TH1F* massSeedUnconv=new TH1F("massSeedUnconv","massSeedUnconv",100,100.,150.);
+  TH1F* massSeedConv=new TH1F("massSeedConv","massSeedConv",100,100.,150.);
+
+
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
     //  for (Long64_t jentry=0; jentry<20;jentry++) {
     Long64_t ientry = LoadTree(jentry);
@@ -758,7 +767,19 @@ void createHistos::LoopPhotons(){
 
 
     //loop on pfSC
+
+
     if(indexpfSC.size()>2) std::cout<<"something is wrong, found more than two matching electrons:"<<indexpfSC.size()<<" ele found"<<std::endl;
+    TLorentzVector pho1p4,pho2p4;
+    TLorentzVector seed1p4,seed2p4;
+    TVector3 pho1p3,pho2p3;
+    TVector3 seed1p3,seed2p3;
+    int index1,index2;
+    int gIndex1,gIndex2;
+    int indexSeed1,indexSeed2;
+    int gIndexSeed1,gIndexSeed2;
+
+
     for(int jj=0;jj<indexpfSC.size();++jj){
       int i=indexpfSC[jj];
       int iGen=indexGenPho[jj];
@@ -771,9 +792,60 @@ void createHistos::LoopPhotons(){
       fillHisto("pfSC_nBCForSC",pfSCnBC[i],pfscp4,gphoisConverted[iGen]);
       fillHisto2D("pfSC_ErecoMinusEtrueVsEffectiveArea",rho*pfSCnXtalsTotal[i]/100.,(pfSCe[i]-(gphopt[iGen]*cosh(gphoeta[iGen])))/pfSCe[i],pfscp4);
       
+      //mass
+      if(indexpfSC.size()==2){
+	if(jj == 0 ){
+	  TVector3 posCluster;
+	  posCluster.SetXYZ(pfSCx[i],pfSCy[i],pfSCz[i]);
+	  
+	  TVector3 posVertex;
+	  posVertex.SetXYZ(vertexx[0],vertexy[0],vertexz[0]);
+	  pho1p3 = posCluster-posVertex;
+	  index1=i;
+	  gIndex1=iGen;
+	  //e1=pfSCe[i];
+	}else{
+	  TVector3 posCluster;
+	  posCluster.SetXYZ(pfSCx[i],pfSCy[i],pfSCz[i]);
+	  
+	  TVector3 posVertex;
+	  posVertex.SetXYZ(vertexx[0],vertexy[0],vertexz[0]);
+	  
+	  pho2p3 = posCluster-posVertex;
+	  index2=i;
+	  gIndex2=iGen;
+	  //	  e2=pfSCe[i];
+	}
+      }
+
       TLorentzVector seed;
       seed.SetPtEtaPhiE(pfSCbcE[i][0]/cosh(pfSCbcEta[i][0]),pfSCbcEta[i][0],pfSCbcPhi[i][0],pfSCbcE[i][0]);
       
+      //mass
+      if(indexpfSC.size()==2){
+	if(jj == 0 ){
+	  TVector3 posCluster;
+	  posCluster.SetXYZ(pfSCbcX[i][0],pfSCbcY[i][0],pfSCbcZ[i][0]);
+	  
+	  TVector3 posVertex;
+	  posVertex.SetXYZ(vertexx[0],vertexy[0],vertexz[0]);
+	  seed1p3 = posCluster-posVertex;
+	  indexSeed1=i;
+	  gIndexSeed1=iGen;
+	  //e1=pfSCe[i];
+	}else{
+	  TVector3 posCluster;
+	  posCluster.SetXYZ(pfSCbcX[i][0],pfSCbcY[i][0],pfSCbcZ[i][0]);
+	  
+	  TVector3 posVertex;
+	  posVertex.SetXYZ(vertexx[0],vertexy[0],vertexz[0]);
+	  
+	  seed2p3 = posCluster-posVertex;
+	  indexSeed2=i;
+	  gIndexSeed2=iGen;
+	  //	  e2=pfSCe[i];
+	}
+      }
       
 
       float maxDistR=0;
@@ -827,6 +899,26 @@ void createHistos::LoopPhotons(){
 
       }//pfscn
 
+    if(indexpfSC.size()==2){
+//      std::cout<<"pho1 pt"<<pho1p3.Pt()<<std::endl;
+//      std::cout<<"pho2 pt"<<pho2p3.Pt()<<std::endl;
+      pho1p4.SetPtEtaPhiM(pfSCe[index1]/cosh(pho1p3.Eta()),pho1p3.Eta(),pho1p3.Phi(),0.);
+      pho2p4.SetPtEtaPhiM(pfSCe[index2]/cosh(pho2p3.Eta()),pho2p3.Eta(),pho2p3.Phi(),0.);
+      seed1p4.SetPtEtaPhiM(pfSCbcE[index1][0]/cosh(seed1p3.Eta()),seed1p3.Eta(),seed1p3.Phi(),0.);
+      seed2p4.SetPtEtaPhiM(pfSCbcE[index2][0]/cosh(seed2p3.Eta()),seed2p3.Eta(),seed2p3.Phi(),0.);
+
+      if(TMath::Abs(pho1p4.Eta())>1.6 && TMath::Abs(pho1p4.Eta())<2.7 && TMath::Abs(pho2p4.Eta())>1.6 && TMath::Abs(pho2p4.Eta())<2.7  ){
+	if(gphoisConverted[gIndex1]==0 && gphoisConverted[gIndex2]==0){
+	  massPFSCUnconv->Fill((pho1p4+pho2p4).M());
+	  massSeedUnconv->Fill((seed1p4+seed2p4).M());
+	}else{
+	  massPFSCConv->Fill((pho1p4+pho2p4).M());
+	  massSeedConv->Fill((seed1p4+seed2p4).M());
+	}
+
+      }
+
+    }
 
     //loop on pho
     if(indexPho.size()>2) std::cout<<"something is wrong, found more than two matching electrons:"<<indexPho.size()<<" ele found"<<std::endl;
@@ -892,6 +984,14 @@ void createHistos::LoopPhotons(){
     
     
   }
+  //  TFile* massFile=TFile::Open("massFile.root","recreate");
+  //  massFile->cd();
+  massPFSCUnconv->Write();
+  massSeedUnconv->Write();
+  massPFSCConv->Write();
+  massSeedConv->Write();
+  //  massFile->Write();
+  //  massFile->Close();
   std::cout<<"nConv:"<<nConv<<" "<<(float)100*nConv/(nConv+nUnConv)<<"%"<<std::endl;
   std::cout<<"nUnConv:"<<nUnConv<<" "<<(float)100*nUnConv/(nConv+nUnConv)<<"%"<<std::endl;
 }
@@ -1018,12 +1118,18 @@ void createHistos::Init(TTree *tree)
    fChain->SetBranchAddress("pfSCn", &pfSCn, &b_pfSCn);
    fChain->SetBranchAddress("pfSCeta", pfSCeta, &b_pfSCeta);
    fChain->SetBranchAddress("pfSCphi", pfSCphi, &b_pfSCphi);
+   fChain->SetBranchAddress("pfSCx", pfSCx, &b_pfSCx);
+   fChain->SetBranchAddress("pfSCy", pfSCy, &b_pfSCy);
+   fChain->SetBranchAddress("pfSCz", pfSCz, &b_pfSCz);
    fChain->SetBranchAddress("pfSCe", pfSCe, &b_pfSCe);
    fChain->SetBranchAddress("pfSCnBC", pfSCnBC, &b_pfSCnBC);
    fChain->SetBranchAddress("pfSCnXtalsSeed", pfSCnXtalsSeed, &b_pfSCnXtalsSeed);
    fChain->SetBranchAddress("pfSCnXtalsTotal", pfSCnXtalsTotal, &b_pfSCnXtalsTotal);
    fChain->SetBranchAddress("pfSCbcEta", pfSCbcEta, &b_pfSCbcEta);
    fChain->SetBranchAddress("pfSCbcPhi", pfSCbcPhi, &b_pfSCbcPhi);
+   fChain->SetBranchAddress("pfSCbcX", pfSCbcX, &b_pfSCbcX);
+   fChain->SetBranchAddress("pfSCbcY", pfSCbcY, &b_pfSCbcY);
+   fChain->SetBranchAddress("pfSCbcZ", pfSCbcZ, &b_pfSCbcZ);
    fChain->SetBranchAddress("pfSCbcE", pfSCbcE, &b_pfSCbcE);
    fChain->SetBranchAddress("pfSCbcNXtals", pfSCbcNXtals, &b_pfSCbcNXtals);
    fChain->SetBranchAddress("multi5x5SCn", &multi5x5SCn, &b_multi5x5SCn);
