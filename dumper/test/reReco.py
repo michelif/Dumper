@@ -26,12 +26,12 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source("PoolSource",
     secondaryFileNames = cms.untracked.vstring(),
+                            fileNames = cms.untracked.vstring('root://xrootd.unl.edu//store/mc/TP2023SHCALDR/DYToEE_M-20_TuneZ2star_14TeV-pythia6-tauola/GEN-SIM-RECO/SHCALJan23_NoPU_PH2_1K_FB_V6-v1/10000/0A43CD37-29C6-E411-A16F-0025905B8598.root')
 #    fileNames = cms.untracked.vstring('/store/relval/CMSSW_6_2_0_SLHC23_patch1/RelValDYToLL_M_50_TuneZ2star_14TeV/GEN-SIM-RECO/PH2_1K_FB_V6_UPG23SHNoTaper-v1/00000/0046E050-2AA0-E411-9AD1-02163E00E959.root')
-    fileNames = cms.untracked.vstring('/store/relval/CMSSW_6_2_0_SLHC23_patch1/RelValDYToLL_M_50_TuneZ2star_14TeV/GEN-SIM-RECO/PU_PH2_1K_FB_V6_SHNoTapPU140-v1/00000/02D81807-B6A0-E411-9B26-02163E00EB60.root')
+#    fileNames = cms.untracked.vstring('/store/relval/CMSSW_6_2_0_SLHC23_patch1/RelValDYToLL_M_50_TuneZ2star_14TeV/GEN-SIM-RECO/PU_PH2_1K_FB_V6_SHNoTapPU140-v1/00000/02D81807-B6A0-E411-9B26-02163E00EB60.root')
 )
 
 process.options = cms.untracked.PSet(
-
 )
 
 # Production Info
@@ -42,17 +42,17 @@ process.configurationMetadata = cms.untracked.PSet(
 )
 
 # Output definition
-
-process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
-    splitLevel = cms.untracked.int32(0),
-    eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    outputCommands = process.RECOSIMEventContent.outputCommands,
-    fileName = cms.untracked.string('reRECO.root'),
-    dataset = cms.untracked.PSet(
-        filterName = cms.untracked.string(''),
-        dataTier = cms.untracked.string('')
-    )
-)
+#process.FEVTDEBUGEventContent.outputCommands.append('drop *_*_*_RECO')
+#process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
+#    splitLevel = cms.untracked.int32(0),
+#    eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
+#    outputCommands = process.FEVTDEBUGEventContent.outputCommands,
+#    fileName = cms.untracked.string('reRECO.root'),
+#    dataset = cms.untracked.PSet(
+#        filterName = cms.untracked.string(''),
+#        dataTier = cms.untracked.string('')
+#    )
+#)
 
 # Additional output definition
 
@@ -62,11 +62,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'PH2_1K_FB_V6::All', '')
 
 from SLHCUpgradeSimulations.Configuration.combinedCustoms import *
 
-process.particleFlowRecHitHBHE.producers[0].src=cms.InputTag("hbheUpgradeReco","")
-process.particleFlowRecHitHF.producers[0].src=cms.InputTag("hfUpgradeReco","")
-process.muons1stStep.TrackAssociatorParameters.HBHERecHitCollectionLabel = cms.InputTag("hbheUpgradeReco")
-process.hfEMClusters.hits = cms.InputTag("hfUpgradeReco")
-
+process.reconstruction_step = cms.Path()
 process=cust_2023Muon(process)
 process=customise_shashlikElectronHOverE(process)
 process.ecalRecHit.EEuncalibRecHitCollection = cms.InputTag("","")
@@ -150,12 +146,9 @@ process.uncleanedOnlyGsfElectrons.endcapRecHitCollectionTag = cms.InputTag("ecal
 # Path and EndPath definitions
 process.reReco=cms.Sequence(process.trackerlocalreco*process.muonGlobalReco*process.trackingGlobalReco*process.particleFlowCluster*process.ecalClusters*process.egammaGlobalReco*process.pfTrackingGlobalReco*process.egammaHighLevelRecoPrePF*process.particleFlowReco*process.egammaHighLevelRecoPostPF)
 
-process.reconstruction_step = cms.Path(process.reReco)
-
-
-
+process.reconstruction_step *= process.reReco
 process.endjob_step = cms.EndPath(process.endOfProcess)
-process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
+#process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
 
 process.dumper = cms.EDAnalyzer('dumper',
                                    OutputFileName = cms.string("outDumper.root"),
@@ -166,6 +159,9 @@ process.dumper = cms.EDAnalyzer('dumper',
                                 )
 process.dumper_step = cms.EndPath(process.dumper)
 
+
+
 # Schedule definition
-process.schedule = cms.Schedule(process.reconstruction_step,process.endjob_step,process.RECOSIMoutput_step, process.dumper_step)
+process.schedule = cms.Schedule(process.reconstruction_step,process.endjob_step,process.dumper_step)
+
 
