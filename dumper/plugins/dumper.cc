@@ -117,6 +117,7 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/ParticleFlowReco/interface/PFSuperCluster.h"
 #include "DataFormats/ParticleFlowReco/interface/PFClusterFwd.h"
+#include "DataFormats/Math/interface/deltaR.h"
 //#include "Dumper/dumper/interface/EcalClusterTools.h"
 
 #include "TLorentzVector.h"
@@ -152,7 +153,7 @@ public:
   void recoPU(edm::Handle<reco::PFCandidateCollection>  PFCandidates);
   void eleReco(edm::Handle<reco::GsfElectronCollection> ElectronHandle,edm::Handle<reco::ConversionCollection> hConversions, edm::Handle<reco::BeamSpot> recoBeamSpotHandle, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee,edm::Handle<reco::PFCandidateCollection>  PFCandidates);
   void scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHandle, edm::Handle<reco::SuperClusterCollection> superClustersEEHandlee, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee);
-  void bcReco(edm::Handle<reco::PFClusterCollection> clustersHandle);
+  void bcReco(edm::Handle<reco::PFClusterCollection> clustersHandle, const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee);
   void multi5x5scReco(edm::Handle<reco::SuperClusterCollection> multi5x5Handle);
   void hybridscReco(edm::Handle<reco::SuperClusterCollection> hybridHandle);
   void recHitReco(const EERecHitCollection* rhitsee);
@@ -273,6 +274,16 @@ private:
   Float_t pfBC_eta[MAXPFBCTOSAVE];
   Float_t pfBC_phi[MAXPFBCTOSAVE];
   Float_t   pfBC_e[MAXPFBCTOSAVE];
+  Float_t   pfBC_E2x2NOZS[MAXPFBCTOSAVE];
+  Float_t   pfBC_E3x3NOZS[MAXPFBCTOSAVE];
+  Float_t   pfBC_E5x5NOZS[MAXPFBCTOSAVE];
+  Float_t   pfBC_EMaxNOZS[MAXPFBCTOSAVE];
+  Float_t   pfBC_E2ndNOZS[MAXPFBCTOSAVE];
+  Float_t   pfBC_E2x2ZS[MAXPFBCTOSAVE];
+  Float_t   pfBC_E3x3ZS[MAXPFBCTOSAVE];
+  Float_t   pfBC_E5x5ZS[MAXPFBCTOSAVE];
+  Float_t   pfBC_EMaxZS[MAXPFBCTOSAVE];
+  Float_t   pfBC_E2ndZS[MAXPFBCTOSAVE];
   Int_t   pfBC_nXtals[MAXPFBCTOSAVE];
 
   Float_t pfSC_eta[MAXSCTOSAVE];
@@ -284,11 +295,69 @@ private:
   Float_t   pfSC_e[MAXSCTOSAVE];
   Int_t pfSC_nBC[MAXSCTOSAVE];
   Int_t pfSC_nXtalsSeed[MAXSCTOSAVE];
+  //regression variables
+  Float_t pfSC_phoR9[MAXSCTOSAVE]; 
+  Float_t pfSC_phoE5x5OverE[MAXSCTOSAVE];
+  Float_t pfSC_phohadronicOverEm[MAXSCTOSAVE];
+
+  Float_t pfSC_rawEenergy[MAXSCTOSAVE];
+  Float_t pfSC_e5x5OverE[MAXSCTOSAVE];
+
+  Float_t pfSC_etaWidth[MAXSCTOSAVE];
+  Float_t pfSC_phiWidth[MAXSCTOSAVE];
+  //regression variables seed
+  Float_t pfSC_SeeddEtaSCBC[MAXSCTOSAVE];
+  Float_t pfSC_SeeddPhiSCBC[MAXSCTOSAVE];
+  Float_t pfSC_SeedEOverRaw[MAXSCTOSAVE];
+  Float_t pfSC_SeedE3x3OverE[MAXSCTOSAVE];
+  Float_t pfSC_SeedE5x5OverE[MAXSCTOSAVE];
+  Float_t pfSC_SeedSiEtaiEta[MAXSCTOSAVE];
+  Float_t pfSC_SeedSiPhiiPhi[MAXSCTOSAVE];
+  Float_t pfSC_SeedSiEtaiPhi[MAXSCTOSAVE];
+  Float_t pfSC_SeedBeMax[MAXSCTOSAVE];
+  Float_t pfSC_SeedBe2nd[MAXSCTOSAVE];
+  Float_t pfSC_SeedBeTop[MAXSCTOSAVE];
+  Float_t pfSC_SeedBeBottom[MAXSCTOSAVE];
+  Float_t pfSC_SeedBeLeft[MAXSCTOSAVE];
+  Float_t pfSC_SeedBeRight[MAXSCTOSAVE];
+  Float_t pfSC_SeedBeTopBottom[MAXSCTOSAVE];
+  Float_t pfSC_SeedBeLeftRight[MAXSCTOSAVE];
+  Float_t pfSC_bc2dEtaSCBC[MAXSCTOSAVE];
+  Float_t pfSC_bc2dPhiSCBC[MAXSCTOSAVE]; 
+  Float_t pfSC_bc2EOverRaw[MAXSCTOSAVE];
+  Float_t pfSC_bc2E3x3OverE[MAXSCTOSAVE];
+  Float_t pfSC_bc2E5x5OverE[MAXSCTOSAVE];
+  Float_t pfSC_bc2SiEtaiEta[MAXSCTOSAVE];
+  Float_t pfSC_bc2SiPhiiPhi[MAXSCTOSAVE];  
+  Float_t pfSC_bc2SiEtaiPhi[MAXSCTOSAVE];  
+  Float_t pfSC_bc2BeMax[MAXSCTOSAVE];	    
+  Float_t pfSC_bc2Be2nd[MAXSCTOSAVE];	    
+  Float_t pfSC_bc2BeTop[MAXSCTOSAVE];	    
+  Float_t pfSC_bc2BeBottom[MAXSCTOSAVE];   
+  Float_t pfSC_bc2BeLeft[MAXSCTOSAVE];	    
+  Float_t pfSC_bc2BeRight[MAXSCTOSAVE];    
+  Float_t pfSC_bc2BeTopBottom[MAXSCTOSAVE];
+  Float_t pfSC_bc2BeLeftRight[MAXSCTOSAVE];
+  Float_t pfSC_bcLastdEtaSCBC[MAXSCTOSAVE];
+  Float_t pfSC_bcLastdPhiSCBC[MAXSCTOSAVE]; 
+  Float_t pfSC_bcLastEOverRaw[MAXSCTOSAVE];
+  Float_t pfSC_bcLastE3x3OverE[MAXSCTOSAVE];
+  Float_t pfSC_bcLastE5x5OverE[MAXSCTOSAVE];
+  Float_t pfSC_bcLastSiEtaiPhi[MAXSCTOSAVE];  
+  Float_t pfSC_bcLast2dEtaSCBC[MAXSCTOSAVE];
+  Float_t pfSC_bcLast2dPhiSCBC[MAXSCTOSAVE]; 
+  Float_t pfSC_bcLast2EOverRaw[MAXSCTOSAVE];
+  Float_t pfSC_bcLast2E3x3OverE[MAXSCTOSAVE];
+  Float_t pfSC_bcLast2E5x5OverE[MAXSCTOSAVE];
+  Float_t pfSC_bcLast2SiEtaiPhi[MAXSCTOSAVE];  
+
+
   Float_t pfSC_RecHitsfractionsSeed[MAXSCTOSAVE][MAXPFRECHITTOSAVE];
   Float_t pfSC_RecHitsEnergySeed[MAXSCTOSAVE][MAXPFRECHITTOSAVE];
   Float_t pfSC_RecHitsTimeSeed[MAXSCTOSAVE][MAXPFRECHITTOSAVE];
   Int_t pfSC_nXtalsTotal[MAXSCTOSAVE];  
-//bc info
+
+  //bc info
   Float_t pfSC_bcEta[MAXSCTOSAVE][MAXBCTOSAVE];//note:for bidimensional arrays in root the dimension is hardcoded. check if you change a maxdim used by a 2d array
   Float_t pfSC_bcPhi[MAXSCTOSAVE][MAXBCTOSAVE];
   Float_t pfSC_bcX[MAXSCTOSAVE][MAXBCTOSAVE];
@@ -431,6 +500,11 @@ private:
   Float_t vertex_x[200];
   Float_t vertex_y[200];
   Float_t vertex_z[200];
+
+  Float_t vertexTrue_x;
+  Float_t vertexTrue_y;
+  Float_t vertexTrue_z;
+
 
   Float_t rnd_chargedEt[2];
   Float_t rnd_neutralHadEt[2];
@@ -1132,7 +1206,7 @@ void dumper::hybridscReco(edm::Handle<reco::SuperClusterCollection> hybridHandle
 
 }
 
-void dumper::bcReco(edm::Handle<reco::PFClusterCollection> clustersHandle){
+void dumper::bcReco(edm::Handle<reco::PFClusterCollection> clustersHandle,const EBRecHitCollection* rhitseb,const EERecHitCollection* rhitsee){
 
   pfBC_n=0;
 
@@ -1143,6 +1217,18 @@ void dumper::bcReco(edm::Handle<reco::PFClusterCollection> clustersHandle){
       pfBC_phi[pfBC_n] = itBC->phi();
       pfBC_e[pfBC_n] = itBC->energy();
       pfBC_nXtals[pfBC_n]=itBC->size(); 
+      const EBRecHitCollection* rechits = (TMath::Abs(itBC->eta())<1.5) ? rhitseb : rhitsee;
+      pfBC_E2x2NOZS[pfBC_n]=myClusterTools::noZSEcalClusterTools::e2x2(*itBC,&(*rechits),&(*topology));
+      pfBC_E3x3NOZS[pfBC_n]=myClusterTools::noZSEcalClusterTools::e3x3(*itBC,&(*rechits),&(*topology));
+      pfBC_E5x5NOZS[pfBC_n]=myClusterTools::noZSEcalClusterTools::e5x5(*itBC,&(*rechits),&(*topology));
+      pfBC_EMaxNOZS[pfBC_n]=myClusterTools::noZSEcalClusterTools::eMax(*itBC,&(*rechits));
+      pfBC_E2ndNOZS[pfBC_n]=myClusterTools::noZSEcalClusterTools::e2nd(*itBC,&(*rechits));
+      pfBC_E2x2ZS[pfBC_n]=myClusterTools::EcalClusterTools::e2x2(*itBC,&(*rechits),&(*topology));
+      pfBC_E3x3ZS[pfBC_n]=myClusterTools::EcalClusterTools::e3x3(*itBC,&(*rechits),&(*topology));
+      pfBC_E5x5ZS[pfBC_n]=myClusterTools::EcalClusterTools::e5x5(*itBC,&(*rechits),&(*topology));
+      pfBC_EMaxZS[pfBC_n]=myClusterTools::EcalClusterTools::eMax(*itBC,&(*rechits));
+      pfBC_E2ndZS[pfBC_n]=myClusterTools::EcalClusterTools::e2nd(*itBC,&(*rechits));
+
       pfBC_n++;
     }
   }
@@ -1169,6 +1255,143 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
       pfSC_nXtalsSeed[pfSC_n] = itSC->seed()->size();
       pfSC_nXtalsTotal[pfSC_n] = 0;
 
+      //fill regression variables
+      const EBRecHitCollection* rechits = (TMath::Abs(itSC->eta())<1.5) ? rhitseb : rhitsee;
+
+      float drMin=999;
+      int indexPho=-1;
+      for (int i=0;i<pho_n;++i){
+	  double deltaPhi= pho_phi[i]-pfSC_phi[pfSC_n];
+	  double deltaEta= pho_eta[i]-pfSC_eta[pfSC_n];
+	  
+	  if (deltaPhi > Geom::pi()) deltaPhi -= 2.*Geom::pi();
+	  if (deltaPhi < -Geom::pi()) deltaPhi += 2.*Geom::pi();
+	  double deltaR = std::sqrt(deltaEta*deltaEta+deltaPhi*deltaPhi);
+	  if(deltaR<drMin){
+	    drMin=deltaR;
+	    indexPho=i;
+	  }
+	}
+
+      if(indexPho!=-1){
+	pfSC_phoR9[pfSC_n]= pho_R9[indexPho]; 
+	pfSC_phoE5x5OverE[pfSC_n]= pho_E25[indexPho]/pho_e[indexPho];
+	pfSC_phohadronicOverEm[pfSC_n]=pho_HoverE[indexPho];
+      }
+      
+
+      const reco::CaloClusterPtr b = itSC->seed(); //seed  basic cluster
+      
+      //highest energy basic cluster excluding seed basic cluster
+      reco::CaloClusterPtr b2;
+      Double_t ebcmax = -99.;
+      for (reco::CaloCluster_iterator bit = itSC->clustersBegin(); bit!=itSC->clustersEnd(); ++bit) {
+	const reco::CaloClusterPtr bc = *bit;
+	if (bc->energy() > ebcmax && bc !=b) {
+	  b2 = bc;
+	  ebcmax = bc->energy();
+	}
+      }
+      
+      //lowest energy basic cluster excluding seed (for pileup mitigation)
+      reco::CaloClusterPtr bclast;
+      Double_t ebcmin = 1e6;
+      for (reco::CaloCluster_iterator bit = itSC->clustersBegin(); bit!=itSC->clustersEnd(); ++bit) {
+	const reco::CaloClusterPtr bc = *bit;
+	if (bc->energy() < ebcmin && bc !=b) {
+	  bclast = bc;
+	  ebcmin = bc->energy();
+	}
+      }
+      
+      //2nd lowest energy basic cluster excluding seed (for pileup mitigation)
+      reco::CaloClusterPtr bclast2;
+      ebcmin = 1e6;
+      for (reco::CaloCluster_iterator bit = itSC->clustersBegin(); bit!=itSC->clustersEnd(); ++bit) {
+	const reco::CaloClusterPtr bc = *bit;
+	if (bc->energy() < ebcmin && bc !=b && bc!=bclast) {
+	  bclast2 = bc;
+	  ebcmin = bc->energy();
+	}
+      }
+      
+      Bool_t hasbc2 = b2.isNonnull() && b2->energy()>0.;
+      Bool_t hasbclast = bclast.isNonnull() && bclast->energy()>0.;
+      Bool_t hasbclast2 = bclast2.isNonnull() && bclast2->energy()>0.;
+
+      double bemax = myClusterTools::noZSEcalClusterTools::eMax(*b,&(*rechits));
+      double be2nd = myClusterTools::noZSEcalClusterTools::e2nd(*b,&(*rechits));
+      double betop = myClusterTools::noZSEcalClusterTools::eTop(*b,&(*rechits), &(*topology));
+      double bebottom = myClusterTools::noZSEcalClusterTools::eBottom(*b,&(*rechits), &(*topology));
+      double beleft = myClusterTools::noZSEcalClusterTools::eLeft(*b,&(*rechits), &(*topology));
+      double beright = myClusterTools::noZSEcalClusterTools::eRight(*b,&(*rechits), &(*topology));
+
+
+      pfSC_rawEenergy[pfSC_n]= itSC->rawEnergy();
+      pfSC_etaWidth[pfSC_n] = itSC->etaWidth();
+      pfSC_phiWidth[pfSC_n] = itSC->phiWidth();
+
+      pfSC_SeeddEtaSCBC[pfSC_n]    = b->eta()-itSC->eta();								  
+      pfSC_SeeddPhiSCBC[pfSC_n]    = reco::deltaPhi(b->phi(),itSC->phi());						  
+      pfSC_SeedEOverRaw[pfSC_n]    = b->energy()/itSC->rawEnergy();							  
+      pfSC_SeedE3x3OverE[pfSC_n]   = myClusterTools::noZSEcalClusterTools::e3x3(*b,&(*rechits), &(*topology))/b->energy();					  
+      pfSC_SeedE5x5OverE[pfSC_n]   =myClusterTools::noZSEcalClusterTools::e5x5(*b,&(*rechits), &(*topology))/b->energy();						  
+      pfSC_SeedSiEtaiEta[pfSC_n]   = sqrt(myClusterTools::noZSEcalClusterTools::localCovariances(*b,&(*rechits), &(*topology))[0]); //sigietaieta			  
+      pfSC_SeedSiPhiiPhi[pfSC_n]   = sqrt(myClusterTools::noZSEcalClusterTools::localCovariances(*b,&(*rechits), &(*topology))[2]); //sigiphiiphi			  
+      pfSC_SeedSiEtaiPhi[pfSC_n]   = myClusterTools::noZSEcalClusterTools::localCovariances(*b,&(*rechits), &(*topology))[1];       //sigietaiphi			  
+      pfSC_SeedBeMax[pfSC_n]	    = bemax/b->energy();                       //crystal energy ratio gap variables	  
+
+      pfSC_SeedBe2nd[pfSC_n]	    = (bemax > 0 && be2nd>0) ? log(be2nd/bemax) : 0;								  
+      pfSC_SeedBeTop[pfSC_n]	    = (bemax > 0 && betop>0) ? log(betop/bemax) : 0;								  
+      pfSC_SeedBeBottom[pfSC_n]    = (bemax > 0 && bebottom>0) ? log(bebottom/bemax) : 0;								  
+      pfSC_SeedBeLeft[pfSC_n]	    = (bemax > 0 && beleft>0) ? log(beleft/bemax) : 0;								  
+      pfSC_SeedBeRight[pfSC_n]	    = (bemax > 0 && beright>0) ? log(beright/bemax) : 0;								  
+      pfSC_SeedBeTopBottom[pfSC_n] = ((betop+bebottom) > 0 ) ? (betop-bebottom)/(betop+bebottom) : 0;						  
+      pfSC_SeedBeLeftRight[pfSC_n] = ((beleft+beright) > 0 ) ? (beleft-beright)/(beleft+beright) : 0;                                               
+
+
+      double bc2emax = hasbc2 ? myClusterTools::noZSEcalClusterTools::eMax(*b2,&(*rechits)) : 0.;
+      double bc2e2nd = hasbc2 ? myClusterTools::noZSEcalClusterTools::e2nd(*b2,&(*rechits)) : 0.;
+      double bc2etop = hasbc2 ? myClusterTools::noZSEcalClusterTools::eTop(*b2,&(*rechits), &(*topology)) : 0.;
+      double bc2ebottom = hasbc2 ? myClusterTools::noZSEcalClusterTools::eBottom(*b2,&(*rechits), &(*topology)) : 0.;
+      double bc2eleft = hasbc2 ? myClusterTools::noZSEcalClusterTools::eLeft(*b2,&(*rechits), &(*topology)) : 0.;
+      double bc2eright = hasbc2 ? myClusterTools::noZSEcalClusterTools::eRight(*b2,&(*rechits), &(*topology)) : 0.;
+
+
+
+      pfSC_bc2dEtaSCBC[pfSC_n]   = hasbc2 ? (b2->eta()-itSC->eta()) : 0.;				 
+      pfSC_bc2dPhiSCBC[pfSC_n]   = hasbc2 ? reco::deltaPhi(b2->phi(),itSC->phi()) : 0.;		 
+      pfSC_bc2EOverRaw[pfSC_n]	 = hasbc2 ? b2->energy()/itSC->rawEnergy() : 0.;			 
+      pfSC_bc2E3x3OverE[pfSC_n]  = hasbc2 ? myClusterTools::noZSEcalClusterTools::e3x3(*b2,&(*rechits), &(*topology))/b2->energy() : 0.;		 
+      pfSC_bc2E5x5OverE[pfSC_n]  = hasbc2 ? myClusterTools::noZSEcalClusterTools::e5x5(*b2,&(*rechits), &(*topology))/b2->energy() : 0.;		 
+      pfSC_bc2SiEtaiEta[pfSC_n]  = hasbc2 ? sqrt(myClusterTools::noZSEcalClusterTools::localCovariances(*b2,&(*rechits), &(*topology))[0]) : 0.;	 
+      pfSC_bc2SiPhiiPhi[pfSC_n]  = hasbc2 ? sqrt(myClusterTools::noZSEcalClusterTools::localCovariances(*b2,&(*rechits), &(*topology))[2]) : 0.;	 
+      pfSC_bc2SiEtaiPhi[pfSC_n]  = hasbc2 ? myClusterTools::noZSEcalClusterTools::localCovariances(*b2,&(*rechits), &(*topology))[1] : 0.;		 
+      pfSC_bc2BeMax[pfSC_n]	  = hasbc2 ? bc2emax/b2->energy() : 0.;				   
+      pfSC_bc2Be2nd[pfSC_n]	  = hasbc2 ? log(bc2e2nd/bc2emax) : 0.;				   
+      pfSC_bc2BeTop[pfSC_n]	  = hasbc2 ? log(bc2etop/bc2emax) : 0.;				   
+      pfSC_bc2BeBottom[pfSC_n]   = hasbc2 ? log(bc2ebottom/bc2emax) : 0.;			 
+      pfSC_bc2BeLeft[pfSC_n]	  = hasbc2 ? log(bc2eleft/bc2emax) : 0.;				   
+      pfSC_bc2BeRight[pfSC_n]    = hasbc2 ? log(bc2eright/bc2emax) : 0.;				 
+      pfSC_bc2BeTopBottom[pfSC_n]= hasbc2 ? (bc2etop-bc2ebottom)/(bc2etop+bc2ebottom) : 0.;	 
+      pfSC_bc2BeLeftRight[pfSC_n]= hasbc2 ? (bc2eleft-bc2eright)/(bc2eleft+bc2eright) : 0.;       
+
+      pfSC_bcLastdEtaSCBC[pfSC_n]  =   hasbclast ? (b2->eta()-itSC->eta()) : 0.;				 						
+      pfSC_bcLastdPhiSCBC[pfSC_n]  =   hasbclast ? reco::deltaPhi(b2->phi(),itSC->phi()) : 0.;		 						
+      pfSC_bcLastEOverRaw[pfSC_n]  =   hasbclast ? b2->energy()/itSC->rawEnergy() : 0.;			 						
+      pfSC_bcLastE3x3OverE[pfSC_n] =  hasbclast ? myClusterTools::noZSEcalClusterTools::e3x3(*b2,&(*rechits), &(*topology))/b2->energy() : 0.;	
+      pfSC_bcLastE5x5OverE[pfSC_n] =  hasbclast ? myClusterTools::noZSEcalClusterTools::e5x5(*b2,&(*rechits), &(*topology))/b2->energy() : 0.;	
+      pfSC_bcLastSiEtaiPhi[pfSC_n] =  hasbclast ? sqrt(myClusterTools::noZSEcalClusterTools::localCovariances(*b2,&(*rechits), &(*topology))[0]) : 0.; 
+				     
+      pfSC_bcLast2dEtaSCBC[pfSC_n]    =   hasbclast2 ? (b2->eta()-itSC->eta()) : 0.;				 					       
+      pfSC_bcLast2dPhiSCBC[pfSC_n]    =   hasbclast2 ? reco::deltaPhi(b2->phi(),itSC->phi()) : 0.;		 					       
+      pfSC_bcLast2EOverRaw[pfSC_n]    =   hasbclast2 ? b2->energy()/itSC->rawEnergy() : 0.;			 					       
+      pfSC_bcLast2E3x3OverE[pfSC_n]   =  hasbclast2 ? myClusterTools::noZSEcalClusterTools::e3x3(*b2,&(*rechits), &(*topology))/b2->energy() : 0.;	       
+      pfSC_bcLast2E5x5OverE[pfSC_n]   =  hasbclast2 ? myClusterTools::noZSEcalClusterTools::e5x5(*b2,&(*rechits), &(*topology))/b2->energy() : 0.;	       
+      pfSC_bcLast2SiEtaiPhi[pfSC_n]   =  hasbclast2 ? sqrt(myClusterTools::noZSEcalClusterTools::localCovariances(*b2,&(*rechits), &(*topology))[0]) : 0.; 
+      
+
+
       //rechit variables
       pfSCRecHitsSeed_n[pfSC_n]=0;
       std::vector<std::pair<DetId,float> > scDetIds = itSC->seed()->hitsAndFractions();
@@ -1188,23 +1411,6 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 	}
       }
 
-      //basicClusters
-      int nBC=0;
-      for (reco::CaloCluster_iterator bclus = (itSC->clustersBegin()); bclus != (itSC->clustersEnd()); ++bclus) {
-	if((*bclus)->energy() > 0 && pfSC_nBC[pfSC_n]<MAXBCTOSAVE){
-	  pfSC_bcPhi[pfSC_n][nBC]=(*bclus)->phi();
-	  pfSC_bcEta[pfSC_n][nBC]=(*bclus)->eta(); 
-	  pfSC_bcX[pfSC_n][nBC]=(*bclus)->x();
-	  pfSC_bcY[pfSC_n][nBC]=(*bclus)->y(); 
-	  pfSC_bcZ[pfSC_n][nBC]=(*bclus)->z(); 
-	  pfSC_bcE[pfSC_n][nBC]=(*bclus)->energy(); 
-	  pfSC_bcNXtals[pfSC_n][nBC]=(*bclus)->size(); 
-	  pfSC_nXtalsTotal[pfSC_n] += pfSC_bcNXtals[pfSC_n][nBC];
-	  //	  std::cout<<"pfSC "<<pfSC_n<<" : "<<nBC<<" : "<< pfSC_nBC[pfSC_n]<< " en: "<<pfSC_bcE[pfSC_n][nBC]<<std::endl;
-	  nBC++;
-	}
-
-      }
 
       pfSC_n++;
     }
@@ -1247,6 +1453,141 @@ void dumper::scReco(edm::Handle<reco::SuperClusterCollection> superClustersEBHan
 	  pfSCRecHitsSeed_n[pfSC_n]++;
 	}
       }
+
+      //fill regression variables
+      const EERecHitCollection* rechits = (TMath::Abs(itSC->eta())<1.5) ? rhitseb : rhitsee;
+
+      float drMin=999;
+      int indexPho=-1;
+      for (int i=0;i<pho_n;++i){
+	  double deltaPhi= pho_phi[i]-pfSC_phi[pfSC_n];
+	  double deltaEta= pho_eta[i]-pfSC_eta[pfSC_n];
+	  
+	  if (deltaPhi > Geom::pi()) deltaPhi -= 2.*Geom::pi();
+	  if (deltaPhi < -Geom::pi()) deltaPhi += 2.*Geom::pi();
+	  double deltaR = std::sqrt(deltaEta*deltaEta+deltaPhi*deltaPhi);
+	  if(deltaR<drMin){
+	    drMin=deltaR;
+	    indexPho=i;
+	  }
+	}
+
+      if(indexPho!=-1){
+	pfSC_phoR9[pfSC_n]= pho_R9[indexPho]; 
+	pfSC_phoE5x5OverE[pfSC_n]= pho_E25[indexPho]/pho_e[indexPho];
+	pfSC_phohadronicOverEm[pfSC_n]=pho_HoverE[indexPho];
+      }
+      
+
+      const reco::CaloClusterPtr b = itSC->seed(); //seed  basic cluster
+      
+      //highest energy basic cluster excluding seed basic cluster
+      reco::CaloClusterPtr b2;
+      Double_t ebcmax = -99.;
+      for (reco::CaloCluster_iterator bit = itSC->clustersBegin(); bit!=itSC->clustersEnd(); ++bit) {
+	const reco::CaloClusterPtr bc = *bit;
+	if (bc->energy() > ebcmax && bc !=b) {
+	  b2 = bc;
+	  ebcmax = bc->energy();
+	}
+      }
+      
+      //lowest energy basic cluster excluding seed (for pileup mitigation)
+      reco::CaloClusterPtr bclast;
+      Double_t ebcmin = 1e6;
+      for (reco::CaloCluster_iterator bit = itSC->clustersBegin(); bit!=itSC->clustersEnd(); ++bit) {
+	const reco::CaloClusterPtr bc = *bit;
+	if (bc->energy() < ebcmin && bc !=b) {
+	  bclast = bc;
+	  ebcmin = bc->energy();
+	}
+      }
+      
+      //2nd lowest energy basic cluster excluding seed (for pileup mitigation)
+      reco::CaloClusterPtr bclast2;
+      ebcmin = 1e6;
+      for (reco::CaloCluster_iterator bit = itSC->clustersBegin(); bit!=itSC->clustersEnd(); ++bit) {
+	const reco::CaloClusterPtr bc = *bit;
+	if (bc->energy() < ebcmin && bc !=b && bc!=bclast) {
+	  bclast2 = bc;
+	  ebcmin = bc->energy();
+	}
+      }
+      
+      Bool_t hasbc2 = b2.isNonnull() && b2->energy()>0.;
+      Bool_t hasbclast = bclast.isNonnull() && bclast->energy()>0.;
+      Bool_t hasbclast2 = bclast2.isNonnull() && bclast2->energy()>0.;
+
+      double bemax = myClusterTools::noZSEcalClusterTools::eMax(*b,&(*rechits));
+      double be2nd = myClusterTools::noZSEcalClusterTools::e2nd(*b,&(*rechits));
+      double betop = myClusterTools::noZSEcalClusterTools::eTop(*b,&(*rechits), &(*topology));
+      double bebottom = myClusterTools::noZSEcalClusterTools::eBottom(*b,&(*rechits), &(*topology));
+      double beleft = myClusterTools::noZSEcalClusterTools::eLeft(*b,&(*rechits), &(*topology));
+      double beright = myClusterTools::noZSEcalClusterTools::eRight(*b,&(*rechits), &(*topology));
+
+
+      pfSC_rawEenergy[pfSC_n]= itSC->rawEnergy();
+      pfSC_etaWidth[pfSC_n] = itSC->etaWidth();
+      pfSC_phiWidth[pfSC_n] = itSC->phiWidth();
+
+      pfSC_SeeddEtaSCBC[pfSC_n]    = b->eta()-itSC->eta();								  
+      pfSC_SeeddPhiSCBC[pfSC_n]    = reco::deltaPhi(b->phi(),itSC->phi());						  
+      pfSC_SeedEOverRaw[pfSC_n]    = b->energy()/itSC->rawEnergy();							  
+      pfSC_SeedE3x3OverE[pfSC_n]   = myClusterTools::noZSEcalClusterTools::e3x3(*b,&(*rechits), &(*topology))/b->energy();					  
+      pfSC_SeedE5x5OverE[pfSC_n]   =myClusterTools::noZSEcalClusterTools::e5x5(*b,&(*rechits), &(*topology))/b->energy();						  
+      pfSC_SeedSiEtaiEta[pfSC_n]   = sqrt(myClusterTools::noZSEcalClusterTools::localCovariances(*b,&(*rechits), &(*topology))[0]); //sigietaieta			  
+      pfSC_SeedSiPhiiPhi[pfSC_n]   = sqrt(myClusterTools::noZSEcalClusterTools::localCovariances(*b,&(*rechits), &(*topology))[2]); //sigiphiiphi			  
+      pfSC_SeedSiEtaiPhi[pfSC_n]   = myClusterTools::noZSEcalClusterTools::localCovariances(*b,&(*rechits), &(*topology))[1];       //sigietaiphi			  
+      pfSC_SeedBeMax[pfSC_n]	    = bemax/b->energy();                       //crystal energy ratio gap variables	  
+      pfSC_SeedBe2nd[pfSC_n]	    = log(be2nd/bemax);								  
+      pfSC_SeedBeTop[pfSC_n]	    = log(betop/bemax);								  
+      pfSC_SeedBeBottom[pfSC_n]    = log(bebottom/bemax);								  
+      pfSC_SeedBeLeft[pfSC_n]	    = log(beleft/bemax);								  
+      pfSC_SeedBeRight[pfSC_n]	    = log(beright/bemax);								  
+      pfSC_SeedBeTopBottom[pfSC_n] = (betop-bebottom)/(betop+bebottom);						  
+      pfSC_SeedBeLeftRight[pfSC_n] = (beleft-beright)/(beleft+beright);                                               
+
+
+      double bc2emax = hasbc2 ? myClusterTools::noZSEcalClusterTools::eMax(*b2,&(*rechits)) : 0.;
+      double bc2e2nd = hasbc2 ? myClusterTools::noZSEcalClusterTools::e2nd(*b2,&(*rechits)) : 0.;
+      double bc2etop = hasbc2 ? myClusterTools::noZSEcalClusterTools::eTop(*b2,&(*rechits), &(*topology)) : 0.;
+      double bc2ebottom = hasbc2 ? myClusterTools::noZSEcalClusterTools::eBottom(*b2,&(*rechits), &(*topology)) : 0.;
+      double bc2eleft = hasbc2 ? myClusterTools::noZSEcalClusterTools::eLeft(*b2,&(*rechits), &(*topology)) : 0.;
+      double bc2eright = hasbc2 ? myClusterTools::noZSEcalClusterTools::eRight(*b2,&(*rechits), &(*topology)) : 0.;
+
+
+
+      pfSC_bc2dEtaSCBC[pfSC_n]   = hasbc2 ? (b2->eta()-itSC->eta()) : 0.;				 
+      pfSC_bc2dPhiSCBC[pfSC_n]   = hasbc2 ? reco::deltaPhi(b2->phi(),itSC->phi()) : 0.;		 
+      pfSC_bc2EOverRaw[pfSC_n]	 = hasbc2 ? b2->energy()/itSC->rawEnergy() : 0.;			 
+      pfSC_bc2E3x3OverE[pfSC_n]  = hasbc2 ? myClusterTools::noZSEcalClusterTools::e3x3(*b2,&(*rechits), &(*topology))/b2->energy() : 0.;		 
+      pfSC_bc2E5x5OverE[pfSC_n]  = hasbc2 ? myClusterTools::noZSEcalClusterTools::e5x5(*b2,&(*rechits), &(*topology))/b2->energy() : 0.;		 
+      pfSC_bc2SiEtaiEta[pfSC_n]  = hasbc2 ? sqrt(myClusterTools::noZSEcalClusterTools::localCovariances(*b2,&(*rechits), &(*topology))[0]) : 0.;	 
+      pfSC_bc2SiPhiiPhi[pfSC_n]  = hasbc2 ? sqrt(myClusterTools::noZSEcalClusterTools::localCovariances(*b2,&(*rechits), &(*topology))[2]) : 0.;	 
+      pfSC_bc2SiEtaiPhi[pfSC_n]  = hasbc2 ? myClusterTools::noZSEcalClusterTools::localCovariances(*b2,&(*rechits), &(*topology))[1] : 0.;		 
+      pfSC_bc2BeMax[pfSC_n]	  = hasbc2 ? bc2emax/b2->energy() : 0.;				   
+      pfSC_bc2Be2nd[pfSC_n]	  = hasbc2 ? log(bc2e2nd/bc2emax) : 0.;				   
+      pfSC_bc2BeTop[pfSC_n]	  = hasbc2 ? log(bc2etop/bc2emax) : 0.;				   
+      pfSC_bc2BeBottom[pfSC_n]   = hasbc2 ? log(bc2ebottom/bc2emax) : 0.;			 
+      pfSC_bc2BeLeft[pfSC_n]	  = hasbc2 ? log(bc2eleft/bc2emax) : 0.;				   
+      pfSC_bc2BeRight[pfSC_n]    = hasbc2 ? log(bc2eright/bc2emax) : 0.;				 
+      pfSC_bc2BeTopBottom[pfSC_n]= hasbc2 ? (bc2etop-bc2ebottom)/(bc2etop+bc2ebottom) : 0.;	 
+      pfSC_bc2BeLeftRight[pfSC_n]= hasbc2 ? (bc2eleft-bc2eright)/(bc2eleft+bc2eright) : 0.;       
+
+      pfSC_bcLastdEtaSCBC[pfSC_n]  =   hasbclast ? (b2->eta()-itSC->eta()) : 0.;				 						
+      pfSC_bcLastdPhiSCBC[pfSC_n]  =   hasbclast ? reco::deltaPhi(b2->phi(),itSC->phi()) : 0.;		 						
+      pfSC_bcLastEOverRaw[pfSC_n]  =   hasbclast ? b2->energy()/itSC->rawEnergy() : 0.;			 						
+      pfSC_bcLastE3x3OverE[pfSC_n] =  hasbclast ? myClusterTools::noZSEcalClusterTools::e3x3(*b2,&(*rechits), &(*topology))/b2->energy() : 0.;	
+      pfSC_bcLastE5x5OverE[pfSC_n] =  hasbclast ? myClusterTools::noZSEcalClusterTools::e5x5(*b2,&(*rechits), &(*topology))/b2->energy() : 0.;	
+      pfSC_bcLastSiEtaiPhi[pfSC_n] =  hasbclast ? sqrt(myClusterTools::noZSEcalClusterTools::localCovariances(*b2,&(*rechits), &(*topology))[0]) : 0.; 
+				     
+      pfSC_bcLast2dEtaSCBC[pfSC_n]    =   hasbclast2 ? (b2->eta()-itSC->eta()) : 0.;				 					       
+      pfSC_bcLast2dPhiSCBC[pfSC_n]    =   hasbclast2 ? reco::deltaPhi(b2->phi(),itSC->phi()) : 0.;		 					       
+      pfSC_bcLast2EOverRaw[pfSC_n]    =   hasbclast2 ? b2->energy()/itSC->rawEnergy() : 0.;			 					       
+      pfSC_bcLast2E3x3OverE[pfSC_n]   =  hasbclast2 ? myClusterTools::noZSEcalClusterTools::e3x3(*b2,&(*rechits), &(*topology))/b2->energy() : 0.;	       
+      pfSC_bcLast2E5x5OverE[pfSC_n]   =  hasbclast2 ? myClusterTools::noZSEcalClusterTools::e5x5(*b2,&(*rechits), &(*topology))/b2->energy() : 0.;	       
+      pfSC_bcLast2SiEtaiPhi[pfSC_n]   =  hasbclast2 ? sqrt(myClusterTools::noZSEcalClusterTools::localCovariances(*b2,&(*rechits), &(*topology))[0]) : 0.; 
+
 
 
 
@@ -1417,6 +1758,16 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
   
   edm::Handle<reco::VertexCollection> VertexHandle;
   event.getByLabel("offlinePrimaryVerticesWithBS", VertexHandle);
+
+  edm::Handle<edm::SimVertexContainer> simVert_h;
+  const edm::SimVertexContainer* simVertices;
+  event.getByLabel("g4SimHits", simVert_h);
+  simVertices = (simVert_h.isValid()) ? simVert_h.product() : 0;
+  SimVertex const& vtx = (*simVertices)[0];
+  vertexTrue_x=vtx.position().x();
+  vertexTrue_y=vtx.position().y();
+  vertexTrue_z=vtx.position().z();
+
   // Get the primary vertex coordinates
   nvtx=0;
   for (reco::VertexCollection::const_iterator it = VertexHandle->begin(); 
@@ -1528,7 +1879,7 @@ void dumper::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
       //PFBCCLUSTERS
       edm::Handle<reco::PFClusterCollection> clustersHandle;
       event.getByLabel("particleFlowClusterECAL",clustersHandle);
-      bcReco(clustersHandle);
+      bcReco(clustersHandle,rhitseb,rhitsee);
 
 
       //pfsuperclusters
@@ -1581,6 +1932,11 @@ void dumper::beginJob() {
   t->Branch("vertexx", &vertex_x, "vertexx[nvtx]/F");
   t->Branch("vertexy", &vertex_y, "vertexy[nvtx]/F");
   t->Branch("vertexz", &vertex_z, "vertexz[nvtx]/F");
+  t->Branch("vertexTruex", &vertexTrue_x, "vertexTruex/F");
+  t->Branch("vertexTruey", &vertexTrue_y, "vertexTruey/F");
+  t->Branch("vertexTruez", &vertexTrue_z, "vertexTruez/F");
+
+
   t->Branch("rho",  &rho, "rho/F");
   
 
@@ -1660,6 +2016,18 @@ void dumper::beginJob() {
     t->Branch("pfBCphi", &pfBC_phi, "pfBCphi[pfBCn]/F");
     t->Branch("pfBCe", &pfBC_e, "pfBCe[pfBCn]/F");
     t->Branch("pfBCnXtals", &pfBC_nXtals, "pfBCnXtals[pfBCn]/I");
+    t->Branch("pfBC_E2x2NOZS", &pfBC_E2x2NOZS, "pfBC_E2x2NOZS[pfBCn]/F");
+    t->Branch("pfBC_E3x3NOZS", &pfBC_E3x3NOZS, "pfBC_E3x3NOZS[pfBCn]/F");
+    t->Branch("pfBC_E5x5NOZS", &pfBC_E5x5NOZS, "pfBC_E5x5NOZS[pfBCn]/F");
+    t->Branch("pfBC_EMaxNOZS", &pfBC_EMaxNOZS, "pfBC_EMaxNOZS[pfBCn]/F");
+    t->Branch("pfBC_E2ndNOZS", &pfBC_E2ndNOZS, "pfBC_E2ndNOZS[pfBCn]/F");
+    t->Branch("pfBC_E2x2ZS", &pfBC_E2x2ZS, "pfBC_E2x2ZS[pfBCn]/F");
+    t->Branch("pfBC_E3x3ZS", &pfBC_E3x3ZS, "pfBC_E3x3ZS[pfBCn]/F");
+    t->Branch("pfBC_E5x5ZS", &pfBC_E5x5ZS, "pfBC_E5x5ZS[pfBCn]/F");
+    t->Branch("pfBC_EMaxZS", &pfBC_EMaxZS, "pfBC_EMaxZS[pfBCn]/F");
+    t->Branch("pfBC_E2ndZS", &pfBC_E2ndZS, "pfBC_E2ndZS[pfBCn]/F");
+
+
 
     t->Branch("pfSCn",   &pfSC_n,   "pfSCn/I");
     t->Branch("pfSCeta", &pfSC_eta, "pfSCeta[pfSCn]/F");
@@ -1668,6 +2036,64 @@ void dumper::beginJob() {
     t->Branch("pfSCy", &pfSC_y, "pfSCy[pfSCn]/F");
     t->Branch("pfSCz", &pfSC_z, "pfSCz[pfSCn]/F");
     t->Branch("pfSCe", &pfSC_e, "pfSCe[pfSCn]/F");
+
+    t->Branch("pfSC_phoR9",   &pfSC_phoR9, "pfSC_phoR9[pfSCn]/F");
+    t->Branch("pfSC_phoE5x5OverE",  &pfSC_phoE5x5OverE, "pfSC_phoE5x5OverE[pfSCn]/F");
+    t->Branch("pfSC_phohadronicOverEm",  &pfSC_phohadronicOverEm, "pfSC_phohadronicOverEm[pfSCn]/F");
+
+    t->Branch("pfSC_rawEenergy",  &pfSC_rawEenergy, "pfSC_rawEenergy[pfSCn]/F");
+    t->Branch("pfSC_e5x5OverE",  &pfSC_e5x5OverE, "pfSC_e5x5OverE[pfSCn]/F");
+
+    t->Branch("pfSC_etaWidth",  &pfSC_etaWidth, "pfSC_etaWidth[pfSCn]/F");
+    t->Branch("pfSC_phiWidth",  &pfSC_phiWidth, "pfSC_phiWidth[pfSCn]/F");
+  //regression variables seed
+    t->Branch("pfSC_SeeddEtaSCBC",  &pfSC_SeeddEtaSCBC, "pfSC_SeeddEtaSCBC[pfSCn]/F");
+    t->Branch("pfSC_SeeddPhiSCBC",  &pfSC_SeeddPhiSCBC, "pfSC_SeeddPhiSCBC[pfSCn]/F");
+    t->Branch("pfSC_SeedEOverRaw",  &pfSC_SeedEOverRaw, "pfSC_SeedEOverRaw[pfSCn]/F");
+    t->Branch("pfSC_SeedE3x3OverE",  &pfSC_SeedE3x3OverE, "pfSC_SeedE3x3OverE[pfSCn]/F");
+    t->Branch("pfSC_SeedE5x5OverE",  &pfSC_SeedE5x5OverE, "pfSC_SeedE5x5OverE[pfSCn]/F");
+    t->Branch("pfSC_SeedSiEtaiEta",  &pfSC_SeedSiEtaiEta, "pfSC_SeedSiEtaiEta[pfSCn]/F");
+    t->Branch("pfSC_SeedSiPhiiPhi",  &pfSC_SeedSiPhiiPhi, "pfSC_SeedSiPhiiPhi[pfSCn]/F");
+    t->Branch("pfSC_SeedSiEtaiPhi",  &pfSC_SeedSiEtaiPhi, "pfSC_SeedSiEtaiPhi[pfSCn]/F");
+    t->Branch("pfSC_SeedBeMax",  &pfSC_SeedBeMax, "pfSC_SeedBeMax[pfSCn]/F");
+    t->Branch("pfSC_SeedBe2nd",  &pfSC_SeedBe2nd, "pfSC_SeedBe2nd[pfSCn]/F");
+    t->Branch("pfSC_SeedBeTop",  &pfSC_SeedBeTop, "pfSC_SeedBeTop[pfSCn]/F");
+    t->Branch("pfSC_SeedBeBottom",  &pfSC_SeedBeBottom, "pfSC_SeedBeBottom[pfSCn]/F");
+    t->Branch("pfSC_SeedBeLeft",  &pfSC_SeedBeLeft, "pfSC_SeedBeLeft[pfSCn]/F");
+    t->Branch("pfSC_SeedBeRight",  &pfSC_SeedBeRight, "pfSC_SeedBeRight[pfSCn]/F");
+    t->Branch("pfSC_SeedBeTopBottom",  &pfSC_SeedBeTopBottom, "pfSC_SeedBeTopBottom[pfSCn]/F");
+    t->Branch("pfSC_SeedBeLeftRight",  &pfSC_SeedBeLeftRight, "pfSC_SeedBeLeftRight[pfSCn]/F");
+    t->Branch("pfSC_bc2dEtaSCBC",  &pfSC_bc2dEtaSCBC, "pfSC_bc2dEtaSCBC[pfSCn]/F");
+    t->Branch("pfSC_bc2dPhiSCBC",   &pfSC_bc2dPhiSCBC, "pfSC_bc2dPhiSCBC[pfSCn]/F");
+    t->Branch("pfSC_bc2EOverRaw",  &pfSC_bc2EOverRaw, "pfSC_bc2EOverRaw[pfSCn]/F");
+    t->Branch("pfSC_bc2E3x3OverE",  &pfSC_bc2E3x3OverE, "pfSC_bc2E3x3OverE[pfSCn]/F");
+    t->Branch("pfSC_bc2E5x5OverE",  &pfSC_bc2E5x5OverE, "pfSC_bc2E5x5OverE[pfSCn]/F");
+    t->Branch("pfSC_bc2SiEtaiEta",  &pfSC_bc2SiEtaiEta, "pfSC_bc2SiEtaiEta[pfSCn]/F");
+    t->Branch("pfSC_bc2SiPhiiPhi",    &pfSC_bc2SiPhiiPhi, "pfSC_bc2SiPhiiPhi[pfSCn]/F");
+    t->Branch("pfSC_bc2SiEtaiPhi",    &pfSC_bc2SiEtaiPhi, "pfSC_bc2SiEtaiPhi[pfSCn]/F");
+    t->Branch("pfSC_bc2BeMax",  	    &pfSC_bc2BeMax, "pfSC_bc2BeMax[pfSCn]/F");
+    t->Branch("pfSC_bc2Be2nd",  	    &pfSC_bc2Be2nd, "pfSC_bc2Be2nd[pfSCn]/F");
+    t->Branch("pfSC_bc2BeTop",  	    &pfSC_bc2BeTop, "pfSC_bc2BeTop[pfSCn]/F");
+    t->Branch("pfSC_bc2BeBottom",     &pfSC_bc2BeBottom, "pfSC_bc2BeBottom[pfSCn]/F");
+    t->Branch("pfSC_bc2BeLeft",  	    &pfSC_bc2BeLeft, "pfSC_bc2BeLeft[pfSCn]/F");
+    t->Branch("pfSC_bc2BeRight",      &pfSC_bc2BeRight, "pfSC_bc2BeRight[pfSCn]/F");
+    t->Branch("pfSC_bc2BeTopBottom",  &pfSC_bc2BeTopBottom, "pfSC_bc2BeTopBottom[pfSCn]/F");
+    t->Branch("pfSC_bc2BeLeftRight",  &pfSC_bc2BeLeftRight, "pfSC_bc2BeLeftRight[pfSCn]/F");
+    t->Branch("pfSC_bcLastdEtaSCBC",  &pfSC_bcLastdEtaSCBC, "pfSC_bcLastdEtaSCBC[pfSCn]/F");
+    t->Branch("pfSC_bcLastdPhiSCBC",   &pfSC_bcLastdPhiSCBC, "pfSC_bcLastdPhiSCBC[pfSCn]/F");
+    t->Branch("pfSC_bcLastEOverRaw",  &pfSC_bcLastEOverRaw, "pfSC_bcLastEOverRaw[pfSCn]/F");
+    t->Branch("pfSC_bcLastE3x3OverE",  &pfSC_bcLastE3x3OverE, "pfSC_bcLastE3x3OverE[pfSCn]/F");
+    t->Branch("pfSC_bcLastE5x5OverE",  &pfSC_bcLastE5x5OverE, "pfSC_bcLastE5x5OverE[pfSCn]/F");
+    t->Branch("pfSC_bcLastSiEtaiPhi",    &pfSC_bcLastSiEtaiPhi, "pfSC_bcLastSiEtaiPhi[pfSCn]/F");
+    t->Branch("pfSC_bcLast2dEtaSCBC",  &pfSC_bcLast2dEtaSCBC, "pfSC_bcLast2dEtaSCBC[pfSCn]/F");
+    t->Branch("pfSC_bcLast2dPhiSCBC",   &pfSC_bcLast2dPhiSCBC, "pfSC_bcLast2dPhiSCBC[pfSCn]/F");
+    t->Branch("pfSC_bcLast2EOverRaw",  &pfSC_bcLast2EOverRaw, "pfSC_bcLast2EOverRaw[pfSCn]/F");
+    t->Branch("pfSC_bcLast2E3x3OverE",  &pfSC_bcLast2E3x3OverE, "pfSC_bcLast2E3x3OverE[pfSCn]/F");
+    t->Branch("pfSC_bcLast2E5x5OverE",  &pfSC_bcLast2E5x5OverE, "pfSC_bcLast2E5x5OverE[pfSCn]/F");
+    t->Branch("pfSC_bcLast2SiEtaiPhi",    &pfSC_bcLast2SiEtaiPhi, "pfSC_bcLast2SiEtaiPhi[pfSCn]/F");
+
+
+
     t->Branch("pfSCRecHitsSeedn",   &pfSCRecHitsSeed_n,   "pfSCRecHitsSeedn[pfSCn]/I");
     t->Branch("pfSCRecHitsFractionsSeed", &pfSC_RecHitsfractionsSeed, "pfSCRecHitsFractionsSeed[200][150]/F");
     t->Branch("pfSCRecHitsTimeSeed", &pfSC_RecHitsTimeSeed, "pfSCRecHitsTimeSeed[200][150]/F");
