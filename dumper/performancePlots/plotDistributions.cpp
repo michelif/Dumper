@@ -149,7 +149,7 @@ int main( int argc, char* argv[] ) {
     pave->SetTextSize(0.030);
     pave->SetTextAlign(22);
     pave->SetTextFont(62);
-    TH1F* histo=out->second;
+    TH1F* histo=(TH1F*)out->second->Clone(out->first+"_clone");
     TString name(fileName);
     if(!name.Contains("noPU"))histo->SetLineColor(kRed);
     histo->SetLineWidth(2);
@@ -160,10 +160,30 @@ int main( int argc, char* argv[] ) {
       if(out->first.Contains("OverETrue")){
 	histo->GetXaxis()->SetRangeUser(0.4,1.6);
       }else{
+	float scale=125./histo->GetMean();
 	std::cout<<effectiveSigma<<std::endl;
-	effectiveSigma=effectiveSigma/histo->GetMean();
+	effectiveSigma=effectiveSigma/125;
 	std::cout<<effectiveSigma<<std::endl;
+	std::cout<<"scale:"<<scale<<std::endl;
+
+	TH1F* histonew=(TH1F*) histo->Clone();
+	  for(int i=1;i<=histo->GetXaxis()->GetNbins();i++){
+	    histonew->SetBinContent(i,0.);
+	  }
+	  for(int i=1;i<=histo->GetXaxis()->GetNbins();i++){
+	    //	    histonew->SetBinContent(i,0.);
+	    float oldContent=histo->GetBinContent(i);
+	    float newBinX=histo->GetBinCenter(i)*scale;
+	    float oldBinX=histo->GetBinCenter(i);
+	    std::cout<<"i:"<<i<<" old:"<<oldBinX<<" newBinX:"<<newBinX;
+	    int newBin = histo->GetXaxis()->FindBin(newBinX);
+	    std::cout<<" "<<newBin<<" "<<oldContent<<std::endl;
+	    if(newBin<=histo->GetNbinsX())	    histonew->SetBinContent(newBin,oldContent);
+	  }
+	  histo=(TH1F*)histonew->Clone();
+
       }
+
       TString mean=Form("%.3f",histo->GetMean());
       TString sigma=Form("%.3f",effectiveSigma);
       pave->AddText("Mean:"+mean+" #sigma_{eff}:"+sigma);
@@ -180,9 +200,21 @@ int main( int argc, char* argv[] ) {
       c1->cd();
       histo->Draw();
       pave->Draw("same");
-      c1->SaveAs("plots_splitted/"+outName+out->first+".png");
+
+      if(name.Contains("noPU")){
+	c1->SaveAs("plots_splitted/"+outName+out->first+".png");
+	histo->Write("noPU"+(TString)histo->GetName());
+	c1->Write("canvas_noPU"+out->first);
+      }else{
+	c1->SaveAs("plots_splitted/"+outName+out->first+".png");
+	histo->Write("PU"+(TString)histo->GetName());
+	c1->Write("canvas_PU"+out->first);
+      }
+
 
   }
+  outfile->Write();
+  outfile->Close();
 }
 
 
