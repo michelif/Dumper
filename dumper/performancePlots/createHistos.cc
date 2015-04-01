@@ -697,11 +697,33 @@ void createHistos::LoopPhotons(){
   int nConv=0;
   int nUnConv=0;
 
+  TH1F* vertexRightChoiceUnconv = new TH1F("vertexRightChoiceUnconv","vertexRightChoiceUnconv",2,-0.5,1.5);
+  TH1F* vertexRightChoiceConv = new TH1F("vertexRightChoiceConv","vertexRightChoiceConv",2,-0.5,1.5);
+
   TH1F* massPFSCUnconv=new TH1F("massPFSCUnconv","massPFSCUnconv",100,100.,150.);
   TH1F* massPFSCConv=new TH1F("massPFSCConv","massPFSCConv",100,100.,150.);
+
+  TH1F* massPFSCPt40Unconv=new TH1F("massPFSCPt40Unconv","massPFSCPt40Unconv",100,100.,150.);
+  TH1F* massPFSCPt40Conv=new TH1F("massPFSCPt40Conv","massPFSCPt40Conv",100,100.,150.);
+
+  TH1F* massPFSCVertexZeroUnconv=new TH1F("massPFSCVertexZeroUnconv","massPFSCVertexZeroUnconv",100,100.,150.);
+  TH1F* massPFSCVertexZeroConv=new TH1F("massPFSCVertexZeroConv","massPFSCVertexZeroConv",100,100.,150.);
+
+  TH1F* massPFSCVertexCMSCenterUnconv=new TH1F("massPFSCVertexCMSCenterUnconv","massPFSCVertexCMSCenterUnconv",100,100.,150.);
+  TH1F* massPFSCVertexCMSCenterConv=new TH1F("massPFSCVertexCMSCenterConv","massPFSCVertexCMSCenterConv",100,100.,150.);
+
   
   TH1F* massSeedUnconv=new TH1F("massSeedUnconv","massSeedUnconv",100,100.,150.);
   TH1F* massSeedConv=new TH1F("massSeedConv","massSeedConv",100,100.,150.);
+
+  TH1F* massSeedPt40Unconv=new TH1F("massSeedPt40Unconv","massSeedPt40Unconv",100,100.,150.);
+  TH1F* massSeedPt40Conv=new TH1F("massSeedPt40Conv","massSeedPt40Conv",100,100.,150.);
+
+  TH1F* massSeedVertexZeroUnconv=new TH1F("massSeedVertexZeroUnconv","massSeedVertexZeroUnconv",100,100.,150.);
+  TH1F* massSeedVertexZeroConv=new TH1F("massSeedVertexZeroConv","massSeedVertexZeroConv",100,100.,150.);
+
+  TH1F* massSeedVertexCMSCenterUnconv=new TH1F("massSeedVertexCMSCenterUnconv","massSeedVertexCMSCenterUnconv",100,100.,150.);
+  TH1F* massSeedVertexCMSCenterConv=new TH1F("massSeedVertexCMSCenterConv","massSeedVertexCMSCenterConv",100,100.,150.);
 
 
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
@@ -774,6 +796,18 @@ void createHistos::LoopPhotons(){
     TLorentzVector seed1p4,seed2p4;
     TVector3 pho1p3,pho2p3;
     TVector3 seed1p3,seed2p3;
+
+    TLorentzVector phoVertexZero1p4,phoVertexZero2p4;
+    TLorentzVector seedVertexZero1p4,seedVertexZero2p4;
+    TVector3 phoVertexZero1p3,phoVertexZero2p3;
+    TVector3 seedVertexZero1p3,seedVertexZero2p3;
+
+    TLorentzVector phoVertexCMSCenter1p4,phoVertexCMSCenter2p4;
+    TLorentzVector seedVertexCMSCenter1p4,seedVertexCMSCenter2p4;
+    TVector3 phoVertexCMSCenter1p3,phoVertexCMSCenter2p3;
+    TVector3 seedVertexCMSCenter1p3,seedVertexCMSCenter2p3;
+
+
     int index1,index2;
     int gIndex1,gIndex2;
     int indexSeed1,indexSeed2;
@@ -799,22 +833,49 @@ void createHistos::LoopPhotons(){
 	  posCluster.SetXYZ(pfSCx[i],pfSCy[i],pfSCz[i]);
 	  
 	  TVector3 posVertex;
-	  posVertex.SetXYZ(vertexx[0],vertexy[0],vertexz[0]);
+	  posVertex.SetXYZ(vertexTruex,vertexTruey,vertexTruez);
 	  pho1p3 = posCluster-posVertex;
 	  index1=i;
 	  gIndex1=iGen;
-	  //e1=pfSCe[i];
+
+	  TVector3 posVertexZero;
+	  posVertexZero.SetXYZ(vertexx[0],vertexy[0],vertexz[0]);
+	  phoVertexZero1p3= posCluster-posVertexZero;
+
+//	  std::cout<<"pho: "<<pho1p3.X()<<" "<<phoVertexZero1p3.X()<<std::endl;
+//	  std::cout<<vertexTruex<<" "<<vertexx[0]<<" "<<posVertex.X()<<" "<<posVertexZero.X()<<std::endl;
+
+
+	  TVector3 posVertexCMSCenter;
+	  posVertexCMSCenter.SetXYZ(0,0,0);
+	  phoVertexCMSCenter1p3= posCluster-posVertexCMSCenter;
+
+
 	}else{
 	  TVector3 posCluster;
 	  posCluster.SetXYZ(pfSCx[i],pfSCy[i],pfSCz[i]);
 	  
 	  TVector3 posVertex;
-	  posVertex.SetXYZ(vertexx[0],vertexy[0],vertexz[0]);
+	  posVertex.SetXYZ(vertexTruex,vertexTruey,vertexTruez);
 	  
 	  pho2p3 = posCluster-posVertex;
 	  index2=i;
 	  gIndex2=iGen;
-	  //	  e2=pfSCe[i];
+
+
+	  TVector3 posVertex0;
+	  posVertex0.SetXYZ(vertexx[0],vertexy[0],vertexz[0]);
+	  phoVertexZero2p3= posCluster-posVertex0;
+
+//	  std::cout<<"pho: "<<pho2p3.X()<<" "<<phoVertexZero2p3.X()<<std::endl;
+//	  std::cout<<vertexTruex<<" "<<vertexx[0]<<" "<<posVertex.X()<<" "<<posVertex0.X()<<std::endl;
+
+
+	  TVector3 posVertexCMSCenter;
+	  posVertexCMSCenter.SetXYZ(0,0,0);
+	  phoVertexCMSCenter2p3= posCluster-posVertexCMSCenter;
+
+
 	}
       }
 
@@ -828,22 +889,39 @@ void createHistos::LoopPhotons(){
 	  posCluster.SetXYZ(pfSCbcX[i][0],pfSCbcY[i][0],pfSCbcZ[i][0]);
 	  
 	  TVector3 posVertex;
-	  posVertex.SetXYZ(vertexx[0],vertexy[0],vertexz[0]);
+	  posVertex.SetXYZ(vertexTruex,vertexTruey,vertexTruez);
 	  seed1p3 = posCluster-posVertex;
 	  indexSeed1=i;
 	  gIndexSeed1=iGen;
-	  //e1=pfSCe[i];
+
+	  TVector3 posVertex0;
+	  posVertex0.SetXYZ(vertexx[0],vertexy[0],vertexz[0]);
+	  seedVertexZero1p3= posCluster-posVertex0;
+
+	  TVector3 posVertexCMSCenter;
+	  posVertexCMSCenter.SetXYZ(0,0,0);
+	  seedVertexCMSCenter1p3= posCluster-posVertexCMSCenter;
+
+
 	}else{
 	  TVector3 posCluster;
 	  posCluster.SetXYZ(pfSCbcX[i][0],pfSCbcY[i][0],pfSCbcZ[i][0]);
 	  
 	  TVector3 posVertex;
-	  posVertex.SetXYZ(vertexx[0],vertexy[0],vertexz[0]);
+	  posVertex.SetXYZ(vertexTruex,vertexTruey,vertexTruez);
 	  
 	  seed2p3 = posCluster-posVertex;
 	  indexSeed2=i;
 	  gIndexSeed2=iGen;
-	  //	  e2=pfSCe[i];
+
+	  TVector3 posVertex0;
+	  posVertex0.SetXYZ(vertexx[0],vertexy[0],vertexz[0]);
+	  seedVertexZero2p3= posCluster-posVertex0;
+
+	  TVector3 posVertexCMSCenter;
+	  posVertexCMSCenter.SetXYZ(0,0,0);
+	  seedVertexCMSCenter2p3= posCluster-posVertexCMSCenter;
+
 	}
       }
       
@@ -900,20 +978,68 @@ void createHistos::LoopPhotons(){
       }//pfscn
 
     if(indexpfSC.size()==2){
-//      std::cout<<"pho1 pt"<<pho1p3.Pt()<<std::endl;
-//      std::cout<<"pho2 pt"<<pho2p3.Pt()<<std::endl;
       pho1p4.SetPtEtaPhiM(pfSCe[index1]/cosh(pho1p3.Eta()),pho1p3.Eta(),pho1p3.Phi(),0.);
       pho2p4.SetPtEtaPhiM(pfSCe[index2]/cosh(pho2p3.Eta()),pho2p3.Eta(),pho2p3.Phi(),0.);
       seed1p4.SetPtEtaPhiM(pfSCbcE[index1][0]/cosh(seed1p3.Eta()),seed1p3.Eta(),seed1p3.Phi(),0.);
       seed2p4.SetPtEtaPhiM(pfSCbcE[index2][0]/cosh(seed2p3.Eta()),seed2p3.Eta(),seed2p3.Phi(),0.);
 
+      phoVertexZero1p4.SetPtEtaPhiM(pfSCe[index1]/cosh(phoVertexZero1p3.Eta()),phoVertexZero1p3.Eta(),phoVertexZero1p3.Phi(),0.);
+      phoVertexZero2p4.SetPtEtaPhiM(pfSCe[index2]/cosh(phoVertexZero2p3.Eta()),phoVertexZero2p3.Eta(),phoVertexZero2p3.Phi(),0.);
+      seedVertexZero1p4.SetPtEtaPhiM(pfSCbcE[index1][0]/cosh(seedVertexZero1p3.Eta()),seedVertexZero1p3.Eta(),seedVertexZero1p3.Phi(),0.);
+      seedVertexZero2p4.SetPtEtaPhiM(pfSCbcE[index2][0]/cosh(seedVertexZero2p3.Eta()),seedVertexZero2p3.Eta(),seedVertexZero2p3.Phi(),0.);
+
+      phoVertexCMSCenter1p4.SetPtEtaPhiM(pfSCe[index1]/cosh(phoVertexCMSCenter1p3.Eta()),phoVertexCMSCenter1p3.Eta(),phoVertexCMSCenter1p3.Phi(),0.);
+      phoVertexCMSCenter2p4.SetPtEtaPhiM(pfSCe[index2]/cosh(phoVertexCMSCenter2p3.Eta()),phoVertexCMSCenter2p3.Eta(),phoVertexCMSCenter2p3.Phi(),0.);
+      seedVertexCMSCenter1p4.SetPtEtaPhiM(pfSCbcE[index1][0]/cosh(seedVertexCMSCenter1p3.Eta()),seedVertexCMSCenter1p3.Eta(),seedVertexCMSCenter1p3.Phi(),0.);
+      seedVertexCMSCenter2p4.SetPtEtaPhiM(pfSCbcE[index2][0]/cosh(seedVertexCMSCenter2p3.Eta()),seedVertexCMSCenter2p3.Eta(),seedVertexCMSCenter2p3.Phi(),0.);
+
+
+
       if(TMath::Abs(pho1p4.Eta())>1.6 && TMath::Abs(pho1p4.Eta())<2.7 && TMath::Abs(pho2p4.Eta())>1.6 && TMath::Abs(pho2p4.Eta())<2.7  ){
 	if(gphoisConverted[gIndex1]==0 && gphoisConverted[gIndex2]==0){
 	  massPFSCUnconv->Fill((pho1p4+pho2p4).M());
 	  massSeedUnconv->Fill((seed1p4+seed2p4).M());
+	  
+	  if(pho1p4.Pt()>40 && pho2p4.Pt()>40){
+	    massPFSCPt40Unconv->Fill((pho1p4+pho2p4).M());
+	    massSeedPt40Unconv->Fill((seed1p4+seed2p4).M());
+	  }
+
+	  //	  std::cout<<"mass:"<<(pho1p4+pho2p4).M()<<" "<<(phoVertexZero1p4+phoVertexZero2p4).M()<<std::endl;
+	  massPFSCVertexZeroUnconv->Fill((phoVertexZero1p4+phoVertexZero2p4).M());
+	  massSeedVertexZeroUnconv->Fill((seedVertexZero1p4+seedVertexZero2p4).M());
+
+	  massPFSCVertexCMSCenterUnconv->Fill((phoVertexCMSCenter1p4+phoVertexCMSCenter2p4).M());
+	  massSeedVertexCMSCenterUnconv->Fill((seedVertexCMSCenter1p4+seedVertexCMSCenter2p4).M());
+
+
+	  float distVertex = sqrt((vertexx[0]-vertexTruex)*(vertexx[0]-vertexTruex)+(vertexy[0]-vertexTruey)*(vertexy[0]-vertexTruey)+(vertexz[0]-vertexTruez)*(vertexz[0]-vertexTruez));
+	  if (distVertex<0.01)vertexRightChoiceUnconv->Fill(1);
+	  else vertexRightChoiceUnconv->Fill(0);
+	  
+//	  std::cout<<(pho1p4+pho2p4).M()<<std::endl;
+//	  std::cout<<(seed1p4+seed2p4).M()<<std::endl;
 	}else{
 	  massPFSCConv->Fill((pho1p4+pho2p4).M());
 	  massSeedConv->Fill((seed1p4+seed2p4).M());
+
+	  if(pho1p4.Pt()>40 && pho2p4.Pt()>40){
+	    massPFSCPt40Conv->Fill((pho1p4+pho2p4).M());
+	    massSeedPt40Conv->Fill((seed1p4+seed2p4).M());
+	  }
+
+	  massPFSCVertexZeroConv->Fill((phoVertexZero1p4+phoVertexZero2p4).M());
+	  massSeedVertexZeroConv->Fill((seedVertexZero1p4+seedVertexZero2p4).M());
+
+	  massPFSCVertexCMSCenterConv->Fill((phoVertexCMSCenter1p4+phoVertexCMSCenter2p4).M());
+	  massSeedVertexCMSCenterConv->Fill((seedVertexCMSCenter1p4+seedVertexCMSCenter2p4).M());
+
+
+
+	  float distVertex = sqrt((vertexx[0]-vertexTruex)*(vertexx[0]-vertexTruex)+(vertexy[0]-vertexTruey)*(vertexy[0]-vertexTruey)+(vertexz[0]-vertexTruez)*(vertexz[0]-vertexTruez));
+	  if (distVertex<0.01)vertexRightChoiceConv->Fill(1);
+	  else vertexRightChoiceConv->Fill(0);
+
 	}
 
       }
@@ -990,6 +1116,25 @@ void createHistos::LoopPhotons(){
   massSeedUnconv->Write();
   massPFSCConv->Write();
   massSeedConv->Write();
+
+  massPFSCPt40Unconv->Write();
+  massSeedPt40Unconv->Write();
+  massPFSCPt40Conv->Write();
+  massSeedPt40Conv->Write();
+
+  massPFSCVertexZeroUnconv->Write();
+  massSeedVertexZeroUnconv->Write();
+  massPFSCVertexZeroConv->Write();
+  massSeedVertexZeroConv->Write();
+
+  massPFSCVertexCMSCenterUnconv->Write();
+  massSeedVertexCMSCenterUnconv->Write();
+  massPFSCVertexCMSCenterConv->Write();
+  massSeedVertexCMSCenterConv->Write();
+
+  vertexRightChoiceUnconv->Write();
+  vertexRightChoiceConv->Write();
+
   //  massFile->Write();
   //  massFile->Close();
   std::cout<<"nConv:"<<nConv<<" "<<(float)100*nConv/(nConv+nUnConv)<<"%"<<std::endl;
@@ -1053,6 +1198,9 @@ void createHistos::Init(TTree *tree)
    fChain->SetBranchAddress("vertexx", vertexx, &b_vertexx);
    fChain->SetBranchAddress("vertexy", vertexy, &b_vertexy);
    fChain->SetBranchAddress("vertexz", vertexz, &b_vertexz);
+   fChain->SetBranchAddress("vertexTruex", &vertexTruex, &b_vertexTruex);
+   fChain->SetBranchAddress("vertexTruey", &vertexTruey, &b_vertexTruey);
+   fChain->SetBranchAddress("vertexTruez", &vertexTruez, &b_vertexTruez);
    fChain->SetBranchAddress("rho", &rho, &b_rho);
    fChain->SetBranchAddress("phon", &phon, &b_phon);
    fChain->SetBranchAddress("phopt", phopt, &b_phopt);

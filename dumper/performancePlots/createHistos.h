@@ -69,6 +69,9 @@ public :
    Float_t         vertexx[200];   //[nvtx]
    Float_t         vertexy[200];   //[nvtx]
    Float_t         vertexz[200];   //[nvtx]
+   Float_t         vertexTruex;
+   Float_t         vertexTruey;
+   Float_t         vertexTruez;
    Float_t         rho;
    Int_t           phon;
    Float_t         phopt[MAXPHOTONSTOSAVE];   //[phon]
@@ -278,6 +281,9 @@ public :
    TBranch        *b_vertexx;   //!
    TBranch        *b_vertexy;   //!
    TBranch        *b_vertexz;   //!
+   TBranch        *b_vertexTruex;   //!
+   TBranch        *b_vertexTruey;   //!
+   TBranch        *b_vertexTruez;   //!
    TBranch        *b_rho;   //!
    TBranch        *b_phon;   //!
    TBranch        *b_phopt;   //!
