@@ -129,7 +129,8 @@
 
 #include <string>
 #include <iostream>
-#define MAXPARTICLESTOSAVE 100
+#define MAXPARTICLESTOSAVE 300
+#define MAXPROMPTPARTICLESTOSAVE 100
 #define MAXPHOTONSTOSAVE 20
 #define MAXJETSTOSAVE 150
 #define MAXSCTOSAVE 200
@@ -173,15 +174,17 @@ private:
   const CaloTopology *topology;
   
   Float_t rho;
-  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n, multi5x5SC_n, hybridSC_n, pfcandPho_n, pfcandEle_n, rechit_n, pfSCRecHitsSeed_n[MAXSCTOSAVE],pfBC_n,ak4GenJet_n,ak4PFJetsCHS_n;
+  Int_t n, npf, gp_n, gpho_n, gele_n, pho_n,ele_n, pfSC_n, multi5x5SC_n, hybridSC_n, pfcandPho_n, pfcandEle_n, rechit_n, pfSCRecHitsSeed_n[MAXSCTOSAVE],pfBC_n,ak4GenJet_n,ak4PFJetsCHS_n,gp_nMoth;
 
-
+  std::vector<int> indexVector;
+  std::vector<int> indexMother;
   Float_t gp_pt[MAXPARTICLESTOSAVE];
   Float_t gp_eta[MAXPARTICLESTOSAVE];
   Float_t gp_phi[MAXPARTICLESTOSAVE];
   Int_t gp_idMC[MAXPARTICLESTOSAVE];
   Int_t gp_statusMC[MAXPARTICLESTOSAVE];
   Int_t gp_motherIdMC[MAXPARTICLESTOSAVE];
+  Int_t gp_motherIndexMC[MAXPARTICLESTOSAVE];
 
   Float_t gpho_pt[MAXPHOTONSTOSAVE];
   Float_t gpho_eta[MAXPHOTONSTOSAVE];
@@ -1626,22 +1629,53 @@ void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH,std::vector<El
   gp_n = 0;
   gpho_n = 0;
   gele_n = 0;
+  //   for(unsigned int i=0;i < indexVector.size();++i)
+     //     std::cout<<i<<"<-i  vector->"<<indexVector[i]<<" mother->"<<indexMother[i]<<" ";
+
+  indexVector.clear();
+  indexMother.clear();
+//  std::map<int,int> dummyCounter;
+//  int counter=0;
 
   for(size_t i = 0; i < gpH->size(); ++i) {
 
     const reco::GenParticleRef gp(gpH, i);
-    //    if(gp->status()==3)    std::cout<<gp->status()<<" "<<gp->pdgId()<<std::endl;    
-    //    if ((gp->status() >=20 and gp->status() <=29) and abs(gp->pdgId()) == 11) {
-    //    if ((gp->status() ==3) ){
-    if (gp->pt() > 3.) {//loose pt cut just to save space
-      if(gp_n<MAXPARTICLESTOSAVE){
-	gp_pt[gp_n]  = gp->pt();
-	gp_eta[gp_n] = gp->eta();
-	gp_phi[gp_n] = gp->phi();
-	gp_idMC [gp_n] = gp->pdgId();
-	gp_statusMC [gp_n] = gp->status();
-	if(gp->mother()!=0)	gp_motherIdMC [gp_n] = gp->mother()->pdgId();
-	gp_n++;
+    if((i<MAXPROMPTPARTICLESTOSAVE) || ((gp->pt()>1. && (MAXPROMPTPARTICLESTOSAVE-1+indexVector.size()) < MAXPARTICLESTOSAVE ) && ( (abs(gp->pdgId()) == 22 ||  abs(gp->pdgId()) == 11 ) && gp->status() == 1) ) ){//we save the first 100 particles + particles and mothers for photons and electrons of status one since they could be after the 100th particle
+      indexVector.push_back(i);
+      if(gp->mother()!=0){
+	if (gp->numberOfMothers() > 0) { 
+	  for(int ii=0;ii<(int)gp->numberOfMothers();++ii){
+	    int index = gp->motherRefVector()[ii].index();
+	    if(index>MAXPROMPTPARTICLESTOSAVE-1 && ( indexVector.size() < MAXPARTICLESTOSAVE)){
+	      //	      std::cout<<"filling after 100:"<<i<<std::endl;
+	      indexVector.push_back(index);
+	      //		  const reco::GenParticleRef moth(gpH, index);
+	      //		  indexMother.push_back( moth->motherRefVector()[ii].index());
+	      //		  dummyCounter[moth->motherRefVector()[ii].index()]=counter;
+	      //		  counter++;
+	    }else if(index<MAXPROMPTPARTICLESTOSAVE){
+
+	      //	      std::cout<<"filling before 100:"<<i<<std::endl;
+	      //	      indexMother.push_back(index);
+	      //	      dummyCounter[index]=counter;
+	      //	      counter++;
+	    }
+	  }
+	}
+      }
+    }
+  }
+    for( std::vector<int>::const_iterator ind = indexVector.begin(); ind != indexVector.end();ind++){
+      const reco::GenParticleRef gp(gpH, *ind);
+      gp_pt[gp_n]  = gp->pt();
+      gp_eta[gp_n] = gp->eta();
+      gp_phi[gp_n] = gp->phi();
+      gp_idMC [gp_n] = gp->pdgId();
+      gp_statusMC [gp_n] = gp->status();
+      if(gp->mother()>0)      gp_motherIdMC [gp_n] = gp->mother()->pdgId();
+      gp_motherIndexMC [gp_n] = 0;//FIXME
+      //      gp_motherIndexMC [gp_n] = dummyCounter[indexMother[gp_n]];//FIXME
+      gp_n++;
 
 	if((abs(gp->pdgId()) == 22)){
 	  if(gpho_n<MAXPHOTONSTOSAVE){
@@ -1726,12 +1760,8 @@ void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH,std::vector<El
 	  }
 	}
 	
-      }else{
-	continue;
-      }
 
     }
-  }
 
 }
 
@@ -2280,6 +2310,7 @@ void dumper::beginJob() {
     t->Branch("gpidMC", &gp_idMC, "gpidMC[gpn]/I");
     t->Branch("gpstatusMC", &gp_statusMC, "gpstatusMC[gpn]/I");
     t->Branch("gpmotherIdMC", &gp_motherIdMC, "gpmotherIdMC[gpn]/I");
+    t->Branch("gpmotherIndexMC", &gp_motherIndexMC, "gpmotherIndexMC[gpn]/I");
 
     t->Branch("gphon",   &gpho_n,   "gphon/I");
     t->Branch("gphopt",  &gpho_pt,  "gphopt[gphon]/F");
