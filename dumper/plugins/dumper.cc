@@ -1647,23 +1647,13 @@ void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH,std::vector<El
 	  for(int ii=0;ii<(int)gp->numberOfMothers();++ii){
 	    int index = gp->motherRefVector()[ii].index();
 	    if(index>MAXPROMPTPARTICLESTOSAVE-1 && ( indexVector.size() < MAXPARTICLESTOSAVE)){
-	      //	      std::cout<<"filling after 100:"<<i<<std::endl;
+	      //	      std::cout<<"filling after 100:"<<i<<" "<<ii<<" "<<gp->mother()->pdgId()<<" "<<index<<std::endl;
 	      indexVector.push_back(index);
-	      //		  const reco::GenParticleRef moth(gpH, index);
-	      //		  indexMother.push_back( moth->motherRefVector()[ii].index());
-	      //		  dummyCounter[moth->motherRefVector()[ii].index()]=counter;
-	      //		  counter++;
-	    }else if(index<MAXPROMPTPARTICLESTOSAVE){
-
-	      //	      std::cout<<"filling before 100:"<<i<<std::endl;
-	      //	      indexMother.push_back(index);
-	      //	      dummyCounter[index]=counter;
-	      //	      counter++;
-	    }
 	  }
 	}
       }
     }
+  }
   }
     for( std::vector<int>::const_iterator ind = indexVector.begin(); ind != indexVector.end();ind++){
       const reco::GenParticleRef gp(gpH, *ind);
@@ -1672,9 +1662,11 @@ void dumper::mcTruth(edm::Handle<reco::GenParticleCollection> gpH,std::vector<El
       gp_phi[gp_n] = gp->phi();
       gp_idMC [gp_n] = gp->pdgId();
       gp_statusMC [gp_n] = gp->status();
-      if(gp->mother()>0)      gp_motherIdMC [gp_n] = gp->mother()->pdgId();
-      gp_motherIndexMC [gp_n] = 0;//FIXME
-      //      gp_motherIndexMC [gp_n] = dummyCounter[indexMother[gp_n]];//FIXME
+      if(gp->mother()!=0) {
+	gp_motherIdMC [gp_n] = gp->mother()->pdgId();
+	gp_motherIndexMC [gp_n] = gp->motherRefVector()[0].index() < MAXPROMPTPARTICLESTOSAVE ? gp->motherRefVector()[0].index() : ( (abs(gp->pdgId()) == 22 ||  abs(gp->pdgId()) == 11 ) && gp->status() == 1)*(gp_n+1);
+      }
+
       gp_n++;
 
 	if((abs(gp->pdgId()) == 22)){
